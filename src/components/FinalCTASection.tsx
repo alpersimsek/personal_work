@@ -54,17 +54,17 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             </p>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 w-full max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full max-w-xl mx-auto">
               {/* Primary CTA button */}
               <motion.button
                 id="final-cta-booking-btn"
                 onClick={onOpenBooking}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="liquid-glass rounded-full px-7 py-3 sm:px-8 sm:py-3.5 bg-white text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white w-full sm:w-auto"
+                className="liquid-glass rounded-full px-7 sm:px-8 py-3.5 bg-white text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
               >
-                <span>Görüşme Planla</span>
-                <ArrowRight size={16} />
+                <span className="whitespace-nowrap">Görüşme Planla</span>
+                <ArrowRight size={16} className="shrink-0" />
               </motion.button>
 
               {/* Secondary text link */}
@@ -72,10 +72,10 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
                 id="final-cta-faq-btn"
                 type="button"
                 onClick={onOpenFAQ}
-                className="text-white/60 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 py-2 px-3 cursor-pointer underline underline-offset-4 decoration-white/20 hover:decoration-white"
+                className="text-white/60 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 py-2 px-3 cursor-pointer underline underline-offset-4 decoration-white/20 hover:decoration-white whitespace-nowrap"
               >
-                <HelpCircle size={15} className="text-white/40" />
-                <span>Önce merak ettiklerimi soracağım</span>
+                <HelpCircle size={15} className="text-white/40 shrink-0" />
+                <span className="whitespace-nowrap">Önce merak ettiklerimi soracağım</span>
               </button>
             </div>
           </div>
