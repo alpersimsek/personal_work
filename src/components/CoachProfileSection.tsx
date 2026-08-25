@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ShieldCheck, Award, HeartHandshake, BookOpen, Compass, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Award, HeartHandshake, Compass } from 'lucide-react';
+import coachPhotoDefault from '../assets/profil_test.jpg';
 
 export const CoachProfileSection: React.FC = () => {
   return (
@@ -12,17 +13,19 @@ export const CoachProfileSection: React.FC = () => {
           {/* Left Column: Portrait and credentials badge */}
           <div className="lg:col-span-5 relative">
             <div className="liquid-glass rounded-3xl overflow-hidden aspect-[4/5] max-w-md mx-auto lg:max-w-none border border-white/15 shadow-2xl relative group bg-neutral-950">
-              {/* Coach Portrait Image / Visual Representation */}
+              {/* Coach Portrait Image */}
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop"
-                alt="Shanti Yaşam Koçu"
-                className="w-full h-full object-cover object-center grayscale contrast-110 opacity-80 group-hover:scale-103 transition-transform duration-700"
+                src={coachPhotoDefault || '/profil_test.jpg'}
+                alt="ICF Akredite Yaşam Koçu"
+                className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 contrast-105 brightness-95"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+              
+              {/* Subtle ambient gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
               {/* Floating Credential Tag */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 liquid-glass rounded-2xl p-3.5 sm:p-4 border border-white/20 bg-black/60 backdrop-blur-md">
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 liquid-glass rounded-2xl p-3.5 sm:p-4 border border-white/20 bg-black/70 backdrop-blur-md z-10 pointer-events-none">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
                     <Award size={18} />

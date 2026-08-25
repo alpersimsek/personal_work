@@ -7,6 +7,7 @@ interface HeroSectionProps {
   onOpenBooking: () => void;
 }
 
+// Original Hero Video
 const HERO_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4';
 
@@ -121,12 +122,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
           muted
           autoPlay
           playsInline
+          loop
           preload="auto"
           className="w-full h-full object-cover object-bottom"
           style={{ opacity: 0 }}
         />
         {/* Subtle black overlay to guarantee readable text */}
-        <div className="absolute inset-0 bg-black/40 backdrop-brightness-95" />
+        <div className="absolute inset-0 bg-black/50 backdrop-brightness-90" />
       </div>
 
       {/* Atmospheric Background Glow Spots */}
