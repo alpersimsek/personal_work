@@ -1,0 +1,252 @@
+import React, { useRef, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
+import { Navbar } from './Navbar';
+
+interface HeroSectionProps {
+  onOpenBooking: () => void;
+}
+
+const HERO_VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4';
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const isFadingOutRef = useRef<boolean>(false);
+  const animFrameRef = useRef<number | null>(null);
+
+  const animateVideoOpacity = (
+    targetOpacity: number,
+    durationMs: number = 500,
+    onComplete?: () => void
+  ) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+    }
+
+    const startOpacity = parseFloat(video.style.opacity || '0');
+    const startTime = performance.now();
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      // Smooth linear or ease interpolation
+      const current = startOpacity + (targetOpacity - startOpacity) * progress;
+      if (video) {
+        video.style.opacity = current.toString();
+      }
+
+      if (progress < 1) {
+        animFrameRef.current = requestAnimationFrame(step);
+      } else {
+        if (onComplete) onComplete();
+      }
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Start with opacity 0
+    video.style.opacity = '0';
+
+    const handleCanPlay = () => {
+      video.play().catch(() => {});
+      isFadingOutRef.current = false;
+      animateVideoOpacity(1, 500);
+    };
+
+    const handleTimeUpdate = () => {
+      if (!video.duration || isNaN(video.duration)) return;
+      const remainingTime = video.duration - video.currentTime;
+
+      if (remainingTime <= 0.55 && !isFadingOutRef.current) {
+        isFadingOutRef.current = true;
+        animateVideoOpacity(0, 500);
+      }
+    };
+
+    const handleEnded = () => {
+      if (video) {
+        video.style.opacity = '0';
+      }
+      setTimeout(() => {
+        if (!video) return;
+        video.currentTime = 0;
+        video.play().then(() => {
+          isFadingOutRef.current = false;
+          animateVideoOpacity(1, 500);
+        }).catch(() => {});
+      }, 100);
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('ended', handleEnded);
+
+    // If already ready
+    if (video.readyState >= 3) {
+      handleCanPlay();
+    }
+
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, []);
+
+  const scrollToApproach = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.querySelector('#yaklasim');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <section className="min-h-screen relative overflow-hidden flex flex-col justify-between bg-black select-none">
+      {/* Background Video */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+        <video
+          ref={videoRef}
+          src={HERO_VIDEO_URL}
+          muted
+          autoPlay
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover object-bottom"
+          style={{ opacity: 0 }}
+        />
+        {/* Subtle black overlay to guarantee readable text */}
+        <div className="absolute inset-0 bg-black/40 backdrop-brightness-95" />
+      </div>
+
+      {/* Atmospheric Background Glow Spots */}
+      <div className="glow-spot -top-48 -left-48" />
+      <div className="glow-spot -bottom-48 -right-48" />
+
+      {/* Subtle Vignette */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+
+      {/* Top Navbar */}
+      <Navbar onOpenBooking={onOpenBooking} />
+
+      {/* Hero Center Content */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 py-10 sm:py-12 text-center -mt-4 sm:-mt-8 md:-mt-16 w-full max-w-4xl mx-auto">
+        {/* Main Heading */}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="serif-font text-5xl sm:text-7xl md:text-8xl lg:text-[100px] text-white tracking-tight leading-[0.95] sm:leading-[0.9] mb-6 sm:mb-8"
+        >
+          Kendine yeniden
+          <br />
+          <span className="italic text-white/80">yaklaş.</span>
+        </motion.h1>
+
+        {/* Hero Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="text-white/70 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed mb-8 sm:mb-12 font-normal px-2"
+        >
+          Hayatındaki gürültüyü biraz azaltıp ne istediğini gerçekten duymaya başladığında, değişim çok daha doğal bir yerden başlar.
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-sm px-2"
+        >
+          {/* Primary Consultation Pill */}
+          <div
+            id="hero-primary-cta"
+            onClick={onOpenBooking}
+            className="liquid-glass rounded-full pl-5 sm:pl-7 pr-2 py-2 flex items-center justify-between gap-3 w-full cta-pill cursor-pointer shadow-2xl transition-all border border-white/20 hover:border-white/40"
+          >
+            <span className="text-white text-xs sm:text-sm font-medium text-left truncate">
+              İlk görüşmeni planla
+            </span>
+            <div className="bg-white rounded-full p-2.5 sm:p-3 text-black transition-transform duration-300 arrow-move flex items-center justify-center shrink-0">
+              <ArrowRight size={16} />
+            </div>
+          </div>
+
+          {/* Secondary CTA */}
+          <a
+            id="hero-secondary-cta"
+            href="#yaklasim"
+            onClick={scrollToApproach}
+            className="text-white/50 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 cursor-pointer py-1"
+          >
+            <span>Nasıl çalışıyorum?</span>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+            </svg>
+          </a>
+        </motion.div>
+      </div>
+
+      {/* Social Icons Footer */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5 }}
+        className="relative z-10 px-12 pb-12 flex justify-center items-center gap-4"
+      >
+        <a
+          id="social-link-instagram"
+          href="https://instagram.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          aria-label="Instagram"
+        >
+          <Instagram size={20} className="opacity-70 group-hover:opacity-100" />
+        </a>
+        <a
+          id="social-link-linkedin"
+          href="https://linkedin.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          aria-label="LinkedIn"
+        >
+          <Linkedin size={20} className="opacity-70 group-hover:opacity-100" />
+        </a>
+        <a
+          id="social-link-email"
+          href="mailto:iletisim@shanticoaching.com"
+          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          aria-label="E-posta Gönder"
+        >
+          <Mail size={20} className="opacity-70 group-hover:opacity-100" />
+        </a>
+      </motion.div>
+
+      {/* Background texture overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] z-20" />
+    </section>
+  );
+};

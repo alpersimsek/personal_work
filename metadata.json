@@ -1,0 +1,7 @@
+{
+  "name": "Shanti - Yaşam Koçluğu",
+  "description": "Kendine yeniden yaklaş. Zihinsel netlik, içsel farkındalık ve sürdürülebilir dönüşüm için modern ve sakin yaşam koçluğu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
