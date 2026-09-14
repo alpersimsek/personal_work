@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-serif: 'Instrument Serif', Georgia, serif;
@@ -7,6 +7,7 @@
 }
 
 @layer utilities {
+
   .serif-font,
   .font-serif {
     font-family: 'Instrument Serif', Georgia, serif;
@@ -62,3 +63,193 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* ==========================================================================
+   Light Mode Theme Overrides (Beige, Brown & Soft Earth Tones / Toprak Tonları)
+   ========================================================================== */
+
+[data-theme="light"] {
+  color-scheme: light;
+  background-color: #f6f1ea;
+  color: #2c221e;
+}
+
+[data-theme="light"] body {
+  background-color: #f6f1ea;
+  color: #2c221e;
+}
+
+/* Main Container & Section Backgrounds */
+[data-theme="light"] .bg-black {
+  background-color: #f6f1ea !important;
+}
+
+[data-theme="light"] .bg-black\/20 {
+  background-color: rgba(240, 232, 222, 0.25) !important;
+}
+[data-theme="light"] .bg-black\/30 {
+  background-color: rgba(240, 232, 222, 0.4) !important;
+}
+[data-theme="light"] .bg-black\/40 {
+  background-color: rgba(242, 234, 224, 0.55) !important;
+}
+[data-theme="light"] .bg-black\/50 {
+  background-color: rgba(246, 241, 234, 0.78) !important;
+}
+[data-theme="light"] .bg-black\/60 {
+  background-color: rgba(246, 241, 234, 0.85) !important;
+}
+[data-theme="light"] .bg-black\/70 {
+  background-color: rgba(246, 241, 234, 0.92) !important;
+}
+[data-theme="light"] .bg-black\/80 {
+  background-color: rgba(54, 40, 30, 0.45) !important;
+}
+[data-theme="light"] .bg-black\/90 {
+  background-color: rgba(45, 34, 26, 0.6) !important;
+}
+
+/* White Translucent Overrides in Light Mode */
+[data-theme="light"] .bg-white\/5,
+[data-theme="light"] .bg-white\/\[0\.01\],
+[data-theme="light"] .bg-white\/\[0\.02\],
+[data-theme="light"] .bg-white\/\[0\.03\],
+[data-theme="light"] .bg-white\/\[0\.04\],
+[data-theme="light"] .bg-white\/\[0\.05\] {
+  background-color: rgba(130, 95, 70, 0.05) !important;
+}
+
+[data-theme="light"] .bg-white\/10 {
+  background-color: rgba(130, 95, 70, 0.1) !important;
+}
+
+[data-theme="light"] .bg-white\/15,
+[data-theme="light"] .bg-white\/20 {
+  background-color: rgba(130, 95, 70, 0.15) !important;
+}
+
+/* Typography Colors in Light Mode */
+[data-theme="light"] .text-white {
+  color: #2c221e !important;
+}
+
+[data-theme="light"] .text-white\/90 {
+  color: rgba(44, 34, 30, 0.9) !important;
+}
+
+[data-theme="light"] .text-white\/80 {
+  color: #4a3b32 !important;
+}
+
+[data-theme="light"] .text-white\/70,
+[data-theme="light"] .text-white\/60 {
+  color: #6b584c !important;
+}
+
+[data-theme="light"] .text-white\/50,
+[data-theme="light"] .text-white\/40 {
+  color: #8c786a !important;
+}
+
+[data-theme="light"] .text-black {
+  color: #fbf8f3 !important;
+}
+
+/* Primary Action Buttons (bg-white -> rich earth brown) */
+[data-theme="light"] .bg-white {
+  background-color: #3d2e24 !important;
+  color: #fbf8f3 !important;
+}
+
+[data-theme="light"] .bg-white:hover {
+  background-color: #2c2018 !important;
+}
+
+/* Liquid Glass Cards in Light Theme */
+[data-theme="light"] .liquid-glass {
+  background: rgba(245, 238, 228, 0.78) !important;
+  border-color: rgba(140, 105, 80, 0.18) !important;
+  box-shadow: 0 10px 30px -10px rgba(80, 55, 40, 0.07), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="light"] .liquid-glass-subtle {
+  background: rgba(240, 232, 220, 0.55) !important;
+  border-color: rgba(140, 105, 80, 0.14) !important;
+}
+
+/* Border Overrides */
+[data-theme="light"] .border-white\/5 {
+  border-color: rgba(140, 105, 80, 0.08) !important;
+}
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(140, 105, 80, 0.15) !important;
+}
+[data-theme="light"] .border-white\/15 {
+  border-color: rgba(140, 105, 80, 0.2) !important;
+}
+[data-theme="light"] .border-white\/20 {
+  border-color: rgba(140, 105, 80, 0.28) !important;
+}
+[data-theme="light"] .border-white\/30 {
+  border-color: rgba(140, 105, 80, 0.38) !important;
+}
+[data-theme="light"] .border-white\/40 {
+  border-color: rgba(140, 105, 80, 0.48) !important;
+}
+
+/* Radial Gradients & Glow Spots */
+[data-theme="light"] .glow-spot {
+  background: radial-gradient(circle, rgba(185, 140, 105, 0.25) 0%, transparent 70%) !important;
+}
+
+[data-theme="light"] .bg-\[radial-gradient\(ellipse_at_center\2c _rgba\(255\2c 255\2c 255\2c 0\.03\)_0\%\2c _transparent_60\%\)\] {
+  background: radial-gradient(ellipse at center, rgba(160, 120, 90, 0.1) 0%, transparent 60%) !important;
+}
+
+[data-theme="light"] .bg-\[radial-gradient\(ellipse_at_bottom\2c _rgba\(255\2c 255\2c 255\2c 0\.02\)_0\%\2c _transparent_70\%\)\] {
+  background: radial-gradient(ellipse at bottom, rgba(160, 120, 90, 0.08) 0%, transparent 70%) !important;
+}
+
+[data-theme="light"] .bg-\[radial-gradient\(circle_at_center\2c _rgba\(255\2c 255\2c 255\2c 0\.03\)_0\%\2c _transparent_70\%\)\] {
+  background: radial-gradient(circle at center, rgba(160, 120, 90, 0.1) 0%, transparent 70%) !important;
+}
+
+[data-theme="light"] .bg-\[radial-gradient\(ellipse_at_top\2c _rgba\(255\2c 255\2c 255\2c 0\.04\)_0\%\2c _transparent_70\%\)\] {
+  background: radial-gradient(ellipse at top, rgba(160, 120, 90, 0.12) 0%, transparent 70%) !important;
+}
+
+/* Modals */
+[data-theme="light"] .fixed.inset-0.bg-black\/80,
+[data-theme="light"] .fixed.inset-0.bg-black\/90 {
+  background-color: rgba(50, 38, 28, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* Form Controls & Inputs */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  color: #2c221e !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #8c786a !important;
+}
+
+/* Scrollbar in Light Theme */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #f6f1ea;
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(140, 105, 80, 0.28);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 105, 80, 0.45);
+}
+
+/* Selection Highlight */
+[data-theme="light"] ::selection {
+  background-color: rgba(140, 95, 65, 0.25);
+  color: #2c221e;
+}

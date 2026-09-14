@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Menu, X, ArrowUpRight } from 'lucide-react';
 import { NavItem } from '../types';
+import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -76,7 +77,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
         </div>
 
         {/* Right Section */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-5">
           <a
             id="nav-link-iletisim"
             href="#iletisim"
@@ -85,6 +86,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
           >
             İletişim
           </a>
+
+          <ThemeToggle showLabel={true} />
 
           <motion.button
             id="nav-btn-booking"
@@ -99,6 +102,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
 
         {/* Mobile Hamburger */}
         <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
           <button
             id="nav-btn-mobile-booking"
             onClick={onOpenBooking}
@@ -148,6 +152,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
                 <ArrowUpRight size={16} className="text-white/40" />
               </a>
 
+              <div className="flex items-center justify-between py-2 border-b border-white/5">
+                <span className="text-white/80 text-base font-medium">Görünüm Teması</span>
+                <ThemeToggle showLabel={true} />
+              </div>
+
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
@@ -164,3 +173,4 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     </header>
   );
 };
+
