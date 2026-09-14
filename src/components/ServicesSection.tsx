@@ -3,13 +3,14 @@ import { motion, useInView } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 
 interface ServicesSectionProps {
-  onSelectTopic: (topic: 'netlik' | 'donusum') => void;
+  onSelectTopic: (topic: 'netlik' | 'donusum' | 'diger') => void;
 }
 
 const CARDS_DATA = [
   {
     id: 'netlik' as const,
-    video: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4',
+    video:
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4',
     tag: 'NETLİK',
     title: 'Kendini ve Yönünü Keşfet',
     description:
@@ -17,11 +18,21 @@ const CARDS_DATA = [
   },
   {
     id: 'donusum' as const,
-    video: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4',
+    video:
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4',
     tag: 'DÖNÜŞÜM',
     title: 'Düşünceden Eyleme',
     description:
       'Seni aynı yerde tutan alışkanlıkları ve tekrar eden kalıpları fark eder, sana uygun gerçekçi adımlarla sürdürülebilir değişim oluştururuz.',
+  },
+  {
+    id: 'diger' as const,
+    video:
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4',
+    tag: 'DENGE',
+    title: 'Zihinsel Denge & Mindfulness',
+    description:
+      'Günlük hayatın yoğun telaşı içinde kendi merkezinde kalmayı, tükenmişliği önleyip sakin ve sürdürülebilir bir içsel denge kurmayı deneyimlersin.',
   },
 ];
 
@@ -36,7 +47,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
     <section
       id="programlar"
       ref={ref}
-      className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.03)_0%,_transparent_60%)] relative"
+      className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.03)_0%,_transparent_60%)] relative"
     >
       <div className="max-w-6xl mx-auto text-left">
         {/* Header */}
@@ -56,8 +67,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
           </div>
         </motion.div>
 
-        {/* Coaching Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        {/* Coaching Cards (3-Column Layout on Desktop) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {CARDS_DATA.map((card, idx) => (
             <motion.div
               key={card.tag}

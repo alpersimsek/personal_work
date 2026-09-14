@@ -33,7 +33,7 @@ export const IndexPage: React.FC = () => {
     setBookingModalOpen(true);
   };
 
-  const handleSelectServiceTopic = (topic: 'netlik' | 'donusum') => {
+  const handleSelectServiceTopic = (topic: 'netlik' | 'donusum' | 'diger') => {
     setSelectedTopic(topic);
     setBookingNote('');
     setBookingModalOpen(true);

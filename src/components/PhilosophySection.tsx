@@ -15,7 +15,7 @@ export const PhilosophySection: React.FC = () => {
     <section
       id="farkindalik-eylem"
       ref={ref}
-      className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden relative"
+      className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden relative"
     >
       <div className="max-w-6xl mx-auto text-left">
         {/* Main Section Heading */}

@@ -150,7 +150,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
         </div>
 
         {/* Card Container */}
-        <div className="liquid-glass rounded-3xl p-5 sm:p-8 md:p-12 border border-white/10 shadow-2xl relative bg-[#0d0d0d]/90 max-w-4xl">
+        <div className="liquid-glass rounded-3xl p-5 sm:p-8 md:p-12 border border-white/10 shadow-2xl relative bg-[#0d0d0d]/90 max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             {currentStep < QUESTIONS.length ? (
               <motion.div

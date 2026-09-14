@@ -138,7 +138,7 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
                   onClose();
                   onOpenBooking();
                 }}
-                className="liquid-glass bg-white text-black hover:bg-white/90 text-xs font-semibold px-6 py-2.5 rounded-full flex items-center gap-2 cursor-pointer transition-all shrink-0"
+                className="bg-white text-black hover:bg-white/90 text-xs font-semibold px-6 py-2.5 rounded-full flex items-center gap-2 cursor-pointer transition-all shrink-0 shadow-lg"
               >
                 <span>Görüşme Planla</span>
                 <ArrowRight size={14} />

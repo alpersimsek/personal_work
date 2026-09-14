@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, Instagram, Linkedin, Mail } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
   onOpenBooking: () => void;
@@ -21,15 +22,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-white/5">
           {/* Brand & Subtext */}
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-5 h-5 border border-white/40 rounded-full flex items-center justify-center">
-                <div className="w-2 h-2 bg-white rounded-full" />
-              </div>
-              <span className="serif-font text-2xl tracking-tight text-white font-semibold">
-                Shanti
-              </span>
+            <div className="mb-2">
+              <BrandLogo size="md" showSubtitle={true} isDark={true} />
             </div>
-            <p className="text-white/50 text-xs sm:text-sm font-light">
+            <p className="text-white/50 text-xs sm:text-sm font-light mt-1">
               Kendine daha yakın bir yaşam için.
             </p>
           </div>
@@ -78,7 +74,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
         {/* Bottom row */}
         <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
           <p className="text-white/40">
-            © 2026 Shanti. Tüm hakları saklıdır.
+            © 2026 Tuğba Ergüner. Tüm hakları saklıdır.
           </p>
 
           {/* Subtle Disclaimer */}

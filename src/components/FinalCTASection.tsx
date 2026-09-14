@@ -61,7 +61,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
                 onClick={onOpenBooking}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="liquid-glass rounded-full px-7 sm:px-8 py-3.5 bg-white text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+                className="rounded-full px-7 sm:px-8 py-3.5 bg-white text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
               >
                 <span className="whitespace-nowrap">Görüşme Planla</span>
                 <ArrowRight size={16} className="shrink-0" />

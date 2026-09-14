@@ -41,11 +41,11 @@ export const ReflectionsSection: React.FC = () => {
               <Quote size={14} className="text-white/60" />
               <span>DANIŞAN YANSIMALARI</span>
             </div>
-            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] max-w-2xl">
+            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.15] whitespace-nowrap">
               Yolculuğu birlikte yürüyenler ne hissetti?
             </h2>
           </div>
-          <p className="text-white/50 text-xs sm:text-sm max-w-xs font-light">
+          <p className="text-white/50 text-xs sm:text-sm max-w-xs font-light shrink-0">
             Gizlilik prensibi gereği isimler kısaltılmıştır. Süreç sonrasındaki gerçek içsel dönüşüm notları.
           </p>
         </div>

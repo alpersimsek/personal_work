@@ -1,14 +1,36 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, VolumeX, Play, Pause, Wind, Sparkles, RefreshCw, Activity, CheckCircle2, Timer } from 'lucide-react';
+import {
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
+  Wind,
+  Sparkles,
+  RefreshCw,
+  Activity,
+  CheckCircle2,
+  Timer,
+  Music,
+  Waves,
+  Bell,
+} from 'lucide-react';
 
 type BreathingPattern = 'box' | 'relax' | 'deep';
+type SoundscapeType = 'solfeggio' | 'ocean' | 'bowls';
 
 interface PatternConfig {
   name: string;
   subname: string;
   desc: string;
   phases: { name: string; duration: number; text: string }[];
+}
+
+interface SoundscapeConfig {
+  id: SoundscapeType;
+  name: string;
+  icon: React.ElementType;
+  desc: string;
 }
 
 const TOTAL_SESSION_SECONDS = 60; // 1-minute fixed countdown session
@@ -46,8 +68,30 @@ const PATTERNS: Record<BreathingPattern, PatternConfig> = {
   },
 };
 
+const SOUNDSCAPES: SoundscapeConfig[] = [
+  {
+    id: 'solfeggio',
+    name: '432Hz Meditasyon',
+    icon: Music,
+    desc: 'Organik 432Hz Solfeggio gevşeme frekansı & sıcak ortam pedleri',
+  },
+  {
+    id: 'ocean',
+    name: 'Okyanus Akışı',
+    icon: Waves,
+    desc: 'Nefes ritmine duyarlı yumuşak deniz dalgası & hafif rüzgar sesleri',
+  },
+  {
+    id: 'bowls',
+    name: 'Tibetan Çanları',
+    icon: Bell,
+    desc: 'Derin kase titreşimleri & şifa veren rezonans tonları',
+  },
+];
+
 export const MindfulPause: React.FC = () => {
   const [selectedPattern, setSelectedPattern] = useState<BreathingPattern>('box');
+  const [selectedSoundscape, setSelectedSoundscape] = useState<SoundscapeType>('solfeggio');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -63,65 +107,241 @@ export const MindfulPause: React.FC = () => {
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
-  const oscNodesRef = useRef<{ osc: OscillatorNode; gain: GainNode }[]>([]);
+  const filterNodeRef = useRef<BiquadFilterNode | null>(null);
+  const activeAudioNodesRef = useRef<(OscillatorNode | AudioBufferSourceNode | GainNode)[]>([]);
   const animFrameRef = useRef<number | null>(null);
 
   const currentPattern = PATTERNS[selectedPattern];
   const currentPhase = currentPattern.phases[phaseIndex] || currentPattern.phases[0];
 
-  // Ambient sound generator (432Hz ambient chord)
-  const startAmbientSound = () => {
-    try {
+  // Helper to ensure AudioContext is active
+  const getAudioContext = () => {
+    if (!audioCtxRef.current) {
       const AudioCtx =
         window.AudioContext ||
         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioCtx();
+      audioCtxRef.current = new AudioCtx();
+    }
+    if (audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume();
+    }
+    return audioCtxRef.current;
+  };
+
+  // Play gentle Tibetan Bowl / Crystal Bell chime on phase change
+  const playPhaseChime = (freq: number = 432) => {
+    if (isMuted) return;
+    try {
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+
+      const chimeOsc = ctx.createOscillator();
+      const chimeGain = ctx.createGain();
+      const chimeHarmonic = ctx.createOscillator();
+      const chimeHarmonicGain = ctx.createGain();
+
+      chimeOsc.type = 'sine';
+      chimeOsc.frequency.setValueAtTime(freq, now);
+
+      chimeHarmonic.type = 'sine';
+      chimeHarmonic.frequency.setValueAtTime(freq * 2.76, now); // Metallic overtone
+
+      // Soft envelope for chime
+      chimeGain.gain.setValueAtTime(0.0001, now);
+      chimeGain.gain.linearRampToValueAtTime(0.12, now + 0.04);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.2);
+
+      chimeHarmonicGain.gain.setValueAtTime(0.0001, now);
+      chimeHarmonicGain.gain.linearRampToValueAtTime(0.03, now + 0.04);
+      chimeHarmonicGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+
+      chimeOsc.connect(chimeGain);
+      chimeHarmonic.connect(chimeHarmonicGain);
+
+      if (masterGainRef.current) {
+        chimeGain.connect(masterGainRef.current);
+        chimeHarmonicGain.connect(masterGainRef.current);
+      } else {
+        chimeGain.connect(ctx.destination);
+        chimeHarmonicGain.connect(ctx.destination);
       }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
 
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      masterGain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + 2.5);
-      masterGain.connect(ctx.destination);
-      masterGainRef.current = masterGain;
+      chimeOsc.start(now);
+      chimeHarmonic.start(now);
 
-      const frequencies = [108, 216, 324, 432, 540];
-      const nodes: { osc: OscillatorNode; gain: GainNode }[] = [];
-
-      frequencies.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = idx === 0 ? 'sine' : 'triangle';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime);
-        osc.detune.setValueAtTime((idx - 2) * 2.5, ctx.currentTime);
-
-        const baseVol = 0.08 / (idx + 1);
-        g.gain.setValueAtTime(baseVol, ctx.currentTime);
-
-        osc.connect(g);
-        g.connect(masterGain);
-        osc.start();
-        nodes.push({ osc, gain: g });
-      });
-
-      oscNodesRef.current = nodes;
+      chimeOsc.stop(now + 2.3);
+      chimeHarmonic.stop(now + 1.3);
     } catch {
-      // Graceful fallback
+      // Ignore fallback
     }
   };
 
+  // Stop active soundscape generators
+  const stopAmbientNodes = () => {
+    activeAudioNodesRef.current.forEach((node) => {
+      try {
+        if ('stop' in node && typeof node.stop === 'function') {
+          node.stop();
+        }
+        node.disconnect();
+      } catch {
+        // Ignore
+      }
+    });
+    activeAudioNodesRef.current = [];
+  };
+
+  // Organic Web Audio Ambient Engine
+  const startAmbientSound = (soundType: SoundscapeType = selectedSoundscape) => {
+    try {
+      const ctx = getAudioContext();
+      stopAmbientNodes();
+
+      const now = ctx.currentTime;
+
+      // Master Gain setup with smooth fade-in
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.0001, now);
+      masterGain.gain.linearRampToValueAtTime(isMuted ? 0 : 0.22, now + 2.5);
+      masterGain.connect(ctx.destination);
+      masterGainRef.current = masterGain;
+
+      // Main Biquad Filter (Low-pass) to ensure warm, non-harsh soothing tone
+      const biquad = ctx.createBiquadFilter();
+      biquad.type = 'lowpass';
+      biquad.frequency.setValueAtTime(soundType === 'ocean' ? 350 : 280, now);
+      biquad.Q.setValueAtTime(1.2, now);
+      biquad.connect(masterGain);
+      filterNodeRef.current = biquad;
+
+      if (soundType === 'solfeggio') {
+        // 432Hz Solfeggio Harmonics (Sub Bass 54Hz, 108Hz, 216Hz, 432Hz, 648Hz)
+        const freqs = [54, 108, 216, 432, 648];
+        freqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+
+          osc.type = idx === 0 ? 'sine' : 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+
+          // Subtle detune for organic chorus width
+          osc.detune.setValueAtTime((idx - 2) * 3, now);
+
+          const vol = idx === 0 ? 0.25 : 0.12 / (idx + 0.5);
+          g.gain.setValueAtTime(vol, now);
+
+          osc.connect(g);
+          g.connect(biquad);
+          osc.start(now);
+
+          activeAudioNodesRef.current.push(osc, g);
+        });
+      } else if (soundType === 'ocean') {
+        // Ocean Waves Engine (Filtered Pink Noise + Sub Bass Grounding)
+        const bufferSize = 2 * ctx.sampleRate;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+
+        let b0 = 0,
+          b1 = 0,
+          b2 = 0,
+          b3 = 0,
+          b4 = 0,
+          b5 = 0,
+          b6 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.969 * b2 + white * 0.153852;
+          b3 = 0.8665 * b3 + white * 0.3104856;
+          b4 = 0.55 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.016898;
+          output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+          output[i] *= 0.11;
+          b6 = white * 0.115926;
+        }
+
+        const noiseSrc = ctx.createBufferSource();
+        noiseSrc.buffer = noiseBuffer;
+        noiseSrc.loop = true;
+
+        const noiseGain = ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.18, now);
+
+        noiseSrc.connect(noiseGain);
+        noiseGain.connect(biquad);
+        noiseSrc.start(now);
+
+        // Grounding sub drone (64Hz)
+        const subOsc = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        subOsc.frequency.setValueAtTime(64, now);
+        subGain.gain.setValueAtTime(0.12, now);
+        subOsc.connect(subGain);
+        subGain.connect(biquad);
+        subOsc.start(now);
+
+        activeAudioNodesRef.current.push(noiseSrc, noiseGain, subOsc, subGain);
+      } else if (soundType === 'bowls') {
+        // Singing Bowls & Resonant Chimes Drone
+        const bowlFreqs = [144, 216, 432, 528, 720];
+        bowlFreqs.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+
+          // Subtle LFO modulation for bowl beating effect
+          const lfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          lfo.frequency.setValueAtTime(0.15 + idx * 0.05, now);
+          lfoGain.gain.setValueAtTime(2.5, now);
+          lfo.connect(lfoGain);
+          lfoGain.connect(osc.frequency);
+          lfo.start(now);
+
+          const vol = 0.15 / (idx + 1);
+          g.gain.setValueAtTime(vol, now);
+
+          osc.connect(g);
+          g.connect(biquad);
+          osc.start(now);
+
+          activeAudioNodesRef.current.push(osc, g, lfo, lfoGain);
+        });
+      }
+    } catch {
+      // Graceful audio fallback
+    }
+  };
+
+  // Modulate filter cutoff & gain dynamically with breath phase (Inhale = gentle swell, Exhale = soft release)
   const modulateAmbientWithBreath = (isExpanding: boolean, duration: number) => {
-    if (!audioCtxRef.current || !masterGainRef.current || isMuted) return;
+    if (!audioCtxRef.current || !filterNodeRef.current || !masterGainRef.current || isMuted) return;
     try {
       const ctx = audioCtxRef.current;
-      const targetGain = isExpanding ? 0.16 : 0.08;
-      masterGainRef.current.gain.cancelScheduledValues(ctx.currentTime);
-      masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, ctx.currentTime);
-      masterGainRef.current.gain.linearRampToValueAtTime(targetGain, ctx.currentTime + duration);
+      const now = ctx.currentTime;
+
+      // Filter modulation: Inhale lifts filter cutoff to open up harmonic air; Exhale lowers filter cutoff
+      const targetCutoff = isExpanding
+        ? selectedSoundscape === 'ocean'
+          ? 620
+          : 450
+        : selectedSoundscape === 'ocean'
+        ? 220
+        : 240;
+
+      filterNodeRef.current.frequency.cancelScheduledValues(now);
+      filterNodeRef.current.frequency.setValueAtTime(filterNodeRef.current.frequency.value, now);
+      filterNodeRef.current.frequency.linearRampToValueAtTime(targetCutoff, now + duration);
+
+      // Soft Gain modulation
+      const targetGain = isExpanding ? 0.24 : 0.15;
+      masterGainRef.current.gain.cancelScheduledValues(now);
+      masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, now);
+      masterGainRef.current.gain.linearRampToValueAtTime(targetGain, now + duration);
     } catch {
       // Ignore
     }
@@ -131,25 +351,19 @@ export const MindfulPause: React.FC = () => {
     if (masterGainRef.current && audioCtxRef.current) {
       try {
         const ctx = audioCtxRef.current;
-        masterGainRef.current.gain.cancelScheduledValues(ctx.currentTime);
-        masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, ctx.currentTime);
-        masterGainRef.current.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 1.2);
+        const now = ctx.currentTime;
+        masterGainRef.current.gain.cancelScheduledValues(now);
+        masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, now);
+        masterGainRef.current.gain.linearRampToValueAtTime(0.00001, now + 1.2);
 
         setTimeout(() => {
-          oscNodesRef.current.forEach(({ osc, gain }) => {
-            try {
-              osc.stop();
-              osc.disconnect();
-              gain.disconnect();
-            } catch {
-              // Ignore
-            }
-          });
-          oscNodesRef.current = [];
+          stopAmbientNodes();
         }, 1300);
       } catch {
-        // Ignore
+        stopAmbientNodes();
       }
+    } else {
+      stopAmbientNodes();
     }
   };
 
@@ -160,7 +374,8 @@ export const MindfulPause: React.FC = () => {
     setPhaseIndex(0);
     setPhaseProgress(0);
     setCompletedCycles(0);
-    startAmbientSound();
+    startAmbientSound(selectedSoundscape);
+    playPhaseChime(432);
   };
 
   const pauseSession = () => {
@@ -195,16 +410,25 @@ export const MindfulPause: React.FC = () => {
   const toggleMute = () => {
     if (!masterGainRef.current || !audioCtxRef.current) return;
     const ctx = audioCtxRef.current;
+    const now = ctx.currentTime;
     if (isMuted) {
-      masterGainRef.current.gain.cancelScheduledValues(ctx.currentTime);
-      masterGainRef.current.gain.setValueAtTime(0.001, ctx.currentTime);
-      masterGainRef.current.gain.exponentialRampToValueAtTime(0.14, ctx.currentTime + 0.8);
+      masterGainRef.current.gain.cancelScheduledValues(now);
+      masterGainRef.current.gain.setValueAtTime(0.001, now);
+      masterGainRef.current.gain.linearRampToValueAtTime(0.2, now + 0.8);
       setIsMuted(false);
     } else {
-      masterGainRef.current.gain.cancelScheduledValues(ctx.currentTime);
-      masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, ctx.currentTime);
-      masterGainRef.current.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
+      masterGainRef.current.gain.cancelScheduledValues(now);
+      masterGainRef.current.gain.setValueAtTime(masterGainRef.current.gain.value, now);
+      masterGainRef.current.gain.linearRampToValueAtTime(0.00001, now + 0.4);
       setIsMuted(true);
+    }
+  };
+
+  const handleSoundscapeChange = (soundId: SoundscapeType) => {
+    setSelectedSoundscape(soundId);
+    if (isPlaying) {
+      startAmbientSound(soundId);
+      playPhaseChime(soundId === 'bowls' ? 528 : 432);
     }
   };
 
@@ -235,6 +459,7 @@ export const MindfulPause: React.FC = () => {
         setSecondsRemaining(0);
         setPhaseProgress(0);
         stopAmbientSound();
+        playPhaseChime(528); // Completion bell
         return;
       }
 
@@ -256,6 +481,9 @@ export const MindfulPause: React.FC = () => {
 
         const nextIsExpand = currentPattern.phases[nextIdx].name.includes('Al');
         modulateAmbientWithBreath(nextIsExpand, phaseDuration);
+
+        // Acoustic phase cue chime (Tibetan bell)
+        playPhaseChime(nextIsExpand ? 432 : 360);
       }
 
       animFrameRef.current = requestAnimationFrame(step);
@@ -268,7 +496,7 @@ export const MindfulPause: React.FC = () => {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [isPlaying, selectedPattern]);
+  }, [isPlaying, selectedPattern, selectedSoundscape]);
 
   // Clean audio on unmount
   useEffect(() => {
@@ -336,9 +564,9 @@ export const MindfulPause: React.FC = () => {
             </h3>
           </div>
 
-          {/* 1-Minute Live Prominent Countdown Display & Pattern Switcher stacked with matching width */}
+          {/* 1-Minute Live Prominent Countdown Display & Pattern Switcher */}
           <div className="flex flex-col gap-2.5 w-full sm:w-[320px] self-start md:self-end">
-            {/* Timer card spanning matching width */}
+            {/* Timer card */}
             <div className="liquid-glass rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 flex items-center justify-between gap-3 border border-white/20 bg-white/[0.05] shadow-xl w-full">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
@@ -358,7 +586,7 @@ export const MindfulPause: React.FC = () => {
               </span>
             </div>
 
-            {/* Pattern Switcher Pills spanning matching full width */}
+            {/* Pattern Switcher Pills */}
             <div className="grid grid-cols-3 gap-1 p-1 rounded-2xl liquid-glass border border-white/10 bg-black/40 w-full">
               {(Object.keys(PATTERNS) as BreathingPattern[]).map((patternKey) => (
                 <button
@@ -391,8 +619,39 @@ export const MindfulPause: React.FC = () => {
           />
         </div>
 
+        {/* Soundscape Music Selector Toolbar */}
+        <div className="relative z-10 mt-6 pt-2 pb-4 border-b border-white/5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-white/60 font-medium">
+              <Music size={14} className="text-white/80" />
+              <span>SES ORTAMI SEÇİMİ (MEDİTASYON MÜZİĞİ):</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
+              {SOUNDSCAPES.map((scape) => {
+                const IconComponent = scape.icon;
+                const isSelected = selectedSoundscape === scape.id;
+                return (
+                  <button
+                    key={scape.id}
+                    onClick={() => handleSoundscapeChange(scape.id)}
+                    title={scape.desc}
+                    className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
+                      isSelected
+                        ? 'bg-white/20 border-white/40 text-white shadow-lg backdrop-blur-md'
+                        : 'bg-white/[0.03] border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <IconComponent size={13} className={isSelected ? 'text-white' : 'text-white/70'} />
+                    <span>{scape.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Main Content: Interactive Visualizer & Instructions */}
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center pt-6 sm:pt-10">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center pt-6 sm:pt-8">
           
           {/* Left Column: Pattern Info, Guidance & Controls */}
           <div className="lg:col-span-6 flex flex-col space-y-5 sm:space-y-6 text-left">
@@ -459,7 +718,7 @@ export const MindfulPause: React.FC = () => {
                 <button
                   id="btn-mindful-pause-toggle"
                   onClick={togglePlay}
-                  className="liquid-glass bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
                 >
                   {isPlaying ? (
                     <>
@@ -476,7 +735,7 @@ export const MindfulPause: React.FC = () => {
               ) : (
                 <button
                   onClick={startSession}
-                  className="liquid-glass bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
                 >
                   <RefreshCw size={16} />
                   <span>Tekrar 1 Dakika Başlat</span>
@@ -487,8 +746,8 @@ export const MindfulPause: React.FC = () => {
                 <button
                   onClick={toggleMute}
                   className="p-2.5 sm:p-3 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors border border-white/15 cursor-pointer"
-                  aria-label={isMuted ? 'Sesi Aç (432Hz Ambient)' : 'Sesi Kapat'}
-                  title={isMuted ? 'Sesi Aç (432Hz Ambient)' : 'Sesi Kapat'}
+                  aria-label={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
+                  title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
                 >
                   {isMuted ? <VolumeX size={17} /> : <Volume2 size={17} />}
                 </button>
@@ -513,7 +772,7 @@ export const MindfulPause: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Redesigned Concentric Sacred Geometric Breathing Orb with Dual Rings */}
+          {/* Right Column: Concentric Sacred Geometric Breathing Orb with Dual Rings */}
           <div className="lg:col-span-6 flex items-center justify-center py-4 relative min-h-[300px] sm:min-h-[360px]">
             
             {/* Outer Fluid Radiant Rings */}

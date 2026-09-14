@@ -10,9 +10,9 @@ export const AboutSection: React.FC = () => {
 
   return (
     <section
-      id="hakkimda"
+      id="yolculuk-felsefesi"
       ref={ref}
-      className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.04)_0%,_transparent_70%)] relative"
+      className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.04)_0%,_transparent_70%)] relative"
     >
       <div className="max-w-6xl mx-auto text-left">
         {/* Sub-label */}

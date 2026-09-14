@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light' | 'adacayi' | 'lacivert' | 'kiremit';
 
 interface ThemeContextType {
   theme: Theme;
@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     const saved = localStorage.getItem('shanti-theme');
-    return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+    return (saved === 'light' || saved === 'dark' || saved === 'adacayi' || saved === 'lacivert' || saved === 'kiremit') ? saved : 'dark';
   });
 
   useEffect(() => {
@@ -22,7 +22,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    setThemeState((prev) => {
+      if (prev === 'dark') return 'light';
+      if (prev === 'light') return 'adacayi';
+      if (prev === 'adacayi') return 'lacivert';
+      if (prev === 'lacivert') return 'kiremit';
+      return 'dark';
+    });
   };
 
   const setTheme = (newTheme: Theme) => {

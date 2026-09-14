@@ -51,7 +51,7 @@ export const ProcessSection: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight font-serif mb-12 sm:mb-16 md:mb-20 max-w-3xl"
+          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight font-serif mb-12 sm:mb-16 md:mb-20 whitespace-nowrap max-w-none"
         >
           Her değişimin bir{' '}
           <em className="font-serif italic text-white/60 font-normal">

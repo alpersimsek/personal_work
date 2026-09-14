@@ -2,16 +2,24 @@ import React, { useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
 import { Navbar } from './Navbar';
+import { useTheme } from '../context/ThemeContext';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
 }
 
-// Original Hero Video
-const HERO_VIDEO_URL =
+const DARK_HERO_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4';
 
+const LIGHT_HERO_VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_124724_bc041163-d651-425f-aea3-2acc1efc2c96.mp4';
+
+const LIGHT_HERO_VIDEO_URL_2 =
+  'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/45567745-d826-44a2-a5ce-7ef670944e60.mp4'
+
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const videoRef = useRef<HTMLVideoElement>(null);
   const isFadingOutRef = useRef<boolean>(false);
   const animFrameRef = useRef<number | null>(null);
@@ -58,7 +66,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
     video.style.opacity = '0';
 
     const handleCanPlay = () => {
-      video.play().catch(() => {});
+      video.play().catch(() => { });
       isFadingOutRef.current = false;
       animateVideoOpacity(1, 500);
     };
@@ -83,7 +91,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
         video.play().then(() => {
           isFadingOutRef.current = false;
           animateVideoOpacity(1, 500);
-        }).catch(() => {});
+        }).catch(() => { });
       }, 100);
     };
 
@@ -102,7 +110,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       video.removeEventListener('ended', handleEnded);
     };
-  }, []);
+  }, [theme]);
 
   const scrollToApproach = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -113,33 +121,58 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
   };
 
   return (
-    <section className="min-h-screen relative overflow-hidden flex flex-col justify-between bg-black select-none">
-      {/* Background Video */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+    <section className="min-h-screen relative overflow-hidden flex flex-col justify-between bg-black select-none transition-colors duration-500">
+      {/* Background Video Layer */}
+      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
         <video
+          key={theme}
           ref={videoRef}
-          src={HERO_VIDEO_URL}
+          src={theme === 'dark' ? DARK_HERO_VIDEO_URL : LIGHT_HERO_VIDEO_URL}
           muted
           autoPlay
           playsInline
           loop
           preload="auto"
-          className="w-full h-full object-cover object-bottom"
+          className="w-full h-full object-cover object-center"
           style={{ opacity: 0 }}
         />
-        {/* Subtle black overlay to guarantee readable text */}
-        <div className="absolute inset-0 bg-black/50 backdrop-brightness-90" />
+        {/* Theme-specific Overlays */}
+        {theme === 'kiremit' ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#fffaf0]/80 via-[#f7ecd7]/50 to-[#fffaf0]/90 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,_rgba(199,126,102,0.22),_transparent_38%)] pointer-events-none" />
+          </>
+        ) : theme === 'lacivert' ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#fffdf9]/80 via-[#f8f5ef]/50 to-[#fffdf9]/90 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,_rgba(223,150,112,0.22),_transparent_38%),radial-gradient(circle_at_85%_80%,_rgba(196,154,58,0.15),_transparent_35%)] pointer-events-none" />
+          </>
+        ) : theme === 'adacayi' ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#fdfaf5]/80 via-[#f7f1e8]/50 to-[#fdfaf5]/90 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(253,250,245,0.65)_85%)] pointer-events-none" />
+          </>
+        ) : isLight ? (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-b from-[#F4EDE3]/75 via-[#F4EDE3]/45 to-[#F4EDE3]/90 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(244,237,227,0.6)_85%)] pointer-events-none" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-black/50 backdrop-brightness-90 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+          </>
+        )}
       </div>
 
       {/* Atmospheric Background Glow Spots */}
       <div className="glow-spot -top-48 -left-48" />
       <div className="glow-spot -bottom-48 -right-48" />
 
-      {/* Subtle Vignette */}
-      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)] pointer-events-none" />
-
       {/* Top Navbar */}
       <Navbar onOpenBooking={onOpenBooking} />
+
+
 
       {/* Hero Center Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 py-10 sm:py-12 text-center -mt-4 sm:-mt-8 md:-mt-16 w-full max-w-4xl mx-auto">

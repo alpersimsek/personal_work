@@ -1,41 +1,62 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ShieldCheck, Award, HeartHandshake, Compass } from 'lucide-react';
+import {
+  ShieldCheck,
+  Award,
+  HeartHandshake,
+  Compass,
+  Briefcase,
+  GraduationCap,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react';
 import coachPhotoDefault from '../assets/profil_test.jpg';
 
 export const CoachProfileSection: React.FC = () => {
   return (
-    <section id="hakkimda-koc" className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto">
-        {/* Main 2 Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
+    <section id="hakkimda" className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Section Header Title Badge */}
+        <div className="text-left mb-10 sm:mb-14">
+          <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-2 flex items-center gap-2">
+            <Compass size={16} className="text-white/70" />
+            <span>DANIŞMANLIK & YOL ARKADAŞLIĞI</span>
+          </div>
+          <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight">
+            Koçun Hikayesi & Yaklaşımı
+          </h2>
+        </div>
+
+        {/* Main 3-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           
-          {/* Left Column: Portrait and credentials badge */}
-          <div className="lg:col-span-5 relative">
-            <div className="liquid-glass rounded-3xl overflow-hidden aspect-[4/5] max-w-md mx-auto lg:max-w-none border border-white/15 shadow-2xl relative group bg-neutral-950">
+          {/* COLUMN 1: Portrait & Credentials */}
+          <div className="relative flex flex-col">
+            <div className="liquid-glass rounded-3xl overflow-hidden aspect-[4/5] sm:aspect-[4/4.8] lg:aspect-auto h-full min-h-[380px] border border-white/15 shadow-2xl relative group bg-neutral-950 flex flex-col justify-end">
               {/* Coach Portrait Image */}
               <img
                 src={coachPhotoDefault || '/profil_test.jpg'}
                 alt="ICF Akredite Yaşam Koçu"
-                className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 contrast-105 brightness-95"
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 contrast-105 brightness-95"
                 referrerPolicy="no-referrer"
               />
               
-              {/* Subtle ambient gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+              {/* Soft ambient gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
               {/* Floating Credential Tag */}
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 liquid-glass rounded-2xl p-3.5 sm:p-4 border border-white/20 bg-black/70 backdrop-blur-md z-10 pointer-events-none">
+              <div className="relative bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 liquid-glass rounded-2xl p-4 border border-white/20 bg-black/80 backdrop-blur-md z-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
-                    <Award size={18} />
+                  <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                    <Award size={20} />
                   </div>
-                  <div>
-                    <div className="text-[10px] sm:text-xs uppercase tracking-wider text-white/50 font-mono">
-                      PROFESYONEL AKREDİTASYON
+                  <div className="text-left">
+                    <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono">
+                      AKREDİTASYON
                     </div>
-                    <div className="text-xs sm:text-sm font-medium text-white">
-                      ICF Akredite Profesyonel Koç & Mindfulness Eğitmeni
+                    <div className="text-xs sm:text-sm font-semibold text-white">
+                      ICF Akredite Profesyonel Koç (PCC)
                     </div>
                   </div>
                 </div>
@@ -43,45 +64,115 @@ export const CoachProfileSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Bio & Core Ethics */}
-          <div className="lg:col-span-7 flex flex-col space-y-6 sm:space-y-8 text-left">
+          {/* COLUMN 2 (MIDDLE): Koçun Hikayesi & Kısa Özgeçmiş (Bio) */}
+          <div className="liquid-glass rounded-3xl p-6 sm:p-8 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6">
             <div>
-              <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3 flex items-center gap-2">
-                <Compass size={15} className="text-white/60" />
-                <span>KOÇUN HİKAYESİ & YAKLAŞIMI</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4">
+                <UserCheck size={14} className="text-white/80" />
+                <span>KOÇUN HİKAYESİ & ÖZGEÇMİŞİ</span>
               </div>
-              <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] mb-5 sm:mb-6">
-                "Cevapları sana vermek için değil, senin zaten bildiklerini hatırlatmak için buradayım."
-              </h2>
-              <p className="text-white/70 text-sm sm:text-base md:text-lg leading-relaxed font-light mb-4">
-                Kurumsal liderlik, derin mindfulness pratikleri ve ICF onaylı koçluk metodolojilerini harmanlayarak danışanlarıma güvenli, şeffaf ve telaşsız bir keşif alanı sunuyorum.
+
+              <h3 className="serif-font text-xl sm:text-2xl text-white mb-3 font-medium leading-snug">
+                Kurumsal Dünyadan İçsel Dönüşüme
+              </h3>
+
+              <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light mb-6">
+                Finans ve yönetim alanındaki 10+ yıllık kurumsal deneyimimin ardından, sürdürülebilir başarının dışsal hedeflerden önce içsel dinginlikle başladığını fark ettim. Bugün, danışanlarıma zihinsel berraklık ve özgün yaşam ritimleri kurma yolunda eşlik ediyorum.
               </p>
-              <p className="text-white/50 text-xs sm:text-sm sm:text-base leading-relaxed font-light">
-                Her seansı; yargılanma korkusunun olmadığı, kendi doğrularını korkmadan masaya yatırabileceğin ve düşünceden kalıcı eylemlere adım atabileceğin bir duraklama alanı olarak görüyorum.
-              </p>
+
+              {/* Resume / Bio Timeline Cards */}
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <Briefcase size={15} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                      10+ Yıl Kurumsal Deneyim
+                    </h4>
+                    <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
+                      Üst düzey yöneticilik, stratejik liderlik ve takım danışmanlığı birikimi.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <GraduationCap size={15} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                      ICF PCC & Mindfulness
+                    </h4>
+                    <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
+                      Uluslararası koçluk akreditasyonu, MBSR eğitmenliği ve 1000+ saat seans.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
+                    <Sparkles size={15} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                      Bütüncül Yaşam Metodu
+                    </h4>
+                    <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
+                      Farkındalık, zihinsel netlik ve eyleme dayalı sürdürülebilir gelişim.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Ethics & Principles Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-4 border-t border-white/10">
-              <div className="liquid-glass rounded-2xl p-4 sm:p-5 border border-white/10 bg-white/[0.01]">
-                <div className="flex items-center gap-2.5 text-white text-sm font-medium mb-1.5">
-                  <ShieldCheck size={18} className="text-white/80 shrink-0" />
-                  <span>%100 Gizlilik & Güven</span>
-                </div>
-                <p className="text-xs text-white/50 leading-relaxed font-light">
-                  Tüm seans içerikleri ve paylaşımlar ICF etik standartları kapsamında kesin gizlilik altındadır.
-                </p>
+            <div className="pt-4 border-t border-white/10 text-[11px] text-white/40 font-mono">
+              BİREBİR SEANSLAR • YÖNETİCİ KOÇLUĞU • MİNDFULNESS
+            </div>
+          </div>
+
+          {/* COLUMN 3: Koçun Yaklaşımı & Etik İlkeler */}
+          <div className="liquid-glass rounded-3xl p-6 sm:p-8 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4">
+                <Compass size={14} className="text-white/80" />
+                <span>KOÇLUK YAKLAŞIMI</span>
               </div>
 
-              <div className="liquid-glass rounded-2xl p-4 sm:p-5 border border-white/10 bg-white/[0.01]">
-                <div className="flex items-center gap-2.5 text-white text-sm font-medium mb-1.5">
-                  <HeartHandshake size={18} className="text-white/80 shrink-0" />
-                  <span>Yargısız & Eşlikçi Alan</span>
+              <blockquote className="serif-font text-lg sm:text-xl text-white italic leading-snug mb-4 border-l-2 border-white/30 pl-4">
+                "Cevapları sana vermek için değil, senin zaten bildiklerini hatırlatmak için buradayım."
+              </blockquote>
+
+              <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light mb-6">
+                Her seansı; yargılanma korkusunun olmadığı, kendi doğrularını masaya yatırabileceğin ve düşüncelerden kalıcı eylemlere adım atabileceğin güvenli bir duraklama alanı olarak tasarlıyorum.
+              </p>
+
+              {/* Ethics & Principles Grid */}
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex items-center gap-2 text-white text-xs font-medium mb-1">
+                    <ShieldCheck size={16} className="text-white/80 shrink-0" />
+                    <span>%100 Gizlilik & Etik Standartlar</span>
+                  </div>
+                  <p className="text-xs text-white/50 leading-relaxed font-light">
+                    Tüm seanslar ICF etik tüzüğü kapsamında tam gizlilik ve güven altındadır.
+                  </p>
                 </div>
-                <p className="text-xs text-white/50 leading-relaxed font-light">
-                  Tavsiye vermek yerine kendi sezgilerini güçlendiren derinlikli soru ve içgörü alanı.
-                </p>
+
+                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02]">
+                  <div className="flex items-center gap-2 text-white text-xs font-medium mb-1">
+                    <HeartHandshake size={16} className="text-white/80 shrink-0" />
+                    <span>Yargısız & Eşlikçi Alan</span>
+                  </div>
+                  <p className="text-xs text-white/50 leading-relaxed font-light">
+                    Tavsiye vermek yerine kendi sezgilerini güçlendiren derinlikli içgörü alanı.
+                  </p>
+                </div>
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-white/10 text-[11px] text-white/40 font-mono">
+              GÜVENLİ & AÇIK İLETİŞİM • YARGI ALANINDAN UZAK
             </div>
           </div>
 
@@ -90,3 +181,4 @@ export const CoachProfileSection: React.FC = () => {
     </section>
   );
 };
+
