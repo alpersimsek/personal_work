@@ -7,6 +7,8 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { ThemeProvider } from './context/ThemeContext';
 import { BlogPost } from './types';
 import { authService } from './services/authService';
+import './styles/blog.css';
+import './styles/admin.css';
 
 type CurrentView = 'home' | 'blog-list' | 'blog-detail' | 'blog-admin';
 

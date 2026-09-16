@@ -14,6 +14,7 @@ const NAV_LINKS: NavItem[] = [
   { label: 'Hakkımda', href: '#hakkimda' },
   { label: 'Yaklaşımım', href: '#yaklasim' },
   { label: 'Programlar', href: '#programlar' },
+  { label: 'Blog', href: '#blog' },
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {

@@ -91,10 +91,10 @@ export const IndexPage: React.FC<IndexPageProps> = ({
       {/* 11. Coaching Process Section */}
       <ProcessSection />
 
-      {/* 12. Personal Message Section */}
+      {/* 11. Personal Message Section */}
       <PersonalMessageSection onOpenBooking={() => handleOpenBooking('netlik')} />
 
-      {/* 13. Final CTA Section */}
+      {/* 12. Final CTA Section */}
       <FinalCTASection
         onOpenBooking={() => handleOpenBooking('netlik')}
         onOpenFAQ={() => setFaqModalOpen(true)}
@@ -103,7 +103,7 @@ export const IndexPage: React.FC<IndexPageProps> = ({
       {/* Footer */}
       <Footer onOpenBooking={() => handleOpenBooking('netlik')} />
 
-      {/* Consultation Modal */}
+      {/* Feature 4: Interactive Google Meet Consultation & Slot Selection Modal */}
       <ConsultationModal
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}

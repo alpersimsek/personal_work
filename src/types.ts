@@ -44,3 +44,44 @@ export interface TestimonialItem {
   theme: string;
   timeframe: string;
 }
+
+export type BlogCategory =
+  | 'Farkındalık'
+  | 'Dönüşüm'
+  | 'Kariyer & Liderlik'
+  | 'İlişkiler'
+  | 'İçsel Netlik';
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string;
+  category: BlogCategory | string;
+  tags: string[];
+  author: string;
+  readTime: string;
+  date: string;
+  coverImage: string;
+  published: boolean;
+  featured: boolean;
+  likes: number;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+  content: string;
+}
+
+export interface BlogFilterOptions {
+  category?: string;
+  searchQuery?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminSession {
+  username: string;
+  isLoggedIn: boolean;
+  loginTime?: string;
+}
+
