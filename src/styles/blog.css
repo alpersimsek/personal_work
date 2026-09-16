@@ -1,0 +1,69 @@
+/* ==========================================================================
+   Dedicated Blog Module Stylesheet (Isolated typography & card surfaces)
+   ========================================================================== */
+
+/* Blog Root Scope */
+.blog-scope {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #ffffff;
+}
+
+/* Blog Headings (Instrument Serif) */
+.blog-title,
+.blog-h1,
+.blog-h2,
+.blog-h3,
+.blog-scope h1,
+.blog-scope h2,
+.blog-scope h3 {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  color: #ffffff;
+}
+
+/* Blog Article Body Paragraphs (Plus Jakarta Sans) */
+.blog-body-p,
+.blog-scope p,
+.blog-scope li {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.8;
+}
+
+/* Dedicated Blog Blockquotes */
+.blog-quote,
+.blog-scope blockquote {
+  font-family: 'Instrument Serif', Georgia, serif !important;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 1.5rem;
+  border-radius: 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Dedicated Blog Card Surfaces */
+.blog-card {
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.blog-card:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Dedicated Category & Tag Badges */
+.blog-badge {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}

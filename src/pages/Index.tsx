@@ -10,12 +10,24 @@ import { ServicesSection } from '../components/ServicesSection';
 import { ReflectionsSection } from '../components/ReflectionsSection';
 import { ProcessSection } from '../components/ProcessSection';
 import { PersonalMessageSection } from '../components/PersonalMessageSection';
+import { BlogSectionHome } from '../components/BlogSectionHome';
 import { FinalCTASection } from '../components/FinalCTASection';
 import { Footer } from '../components/Footer';
 import { ConsultationModal } from '../components/ConsultationModal';
 import { FAQModal } from '../components/FAQModal';
+import { BlogPost } from '../types';
 
-export const IndexPage: React.FC = () => {
+interface IndexPageProps {
+  onNavigateBlog?: () => void;
+  onSelectPost?: (post: BlogPost) => void;
+  onOpenLogin?: () => void;
+}
+
+export const IndexPage: React.FC<IndexPageProps> = ({
+  onNavigateBlog,
+  onSelectPost,
+  onOpenLogin,
+}) => {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<'netlik' | 'donusum' | 'diger'>('netlik');
@@ -68,13 +80,21 @@ export const IndexPage: React.FC = () => {
       {/* 9. Feature 3: Danışan Dönüşüm Notları (Client Reflections) */}
       <ReflectionsSection />
 
-      {/* 10. Coaching Process Section */}
+      {/* 10. Blog Section Home */}
+      {onNavigateBlog && onSelectPost && (
+        <BlogSectionHome
+          onSelectPost={onSelectPost}
+          onNavigateToBlog={onNavigateBlog}
+        />
+      )}
+
+      {/* 11. Coaching Process Section */}
       <ProcessSection />
 
-      {/* 11. Personal Message Section */}
+      {/* 12. Personal Message Section */}
       <PersonalMessageSection onOpenBooking={() => handleOpenBooking('netlik')} />
 
-      {/* 12. Final CTA Section */}
+      {/* 13. Final CTA Section */}
       <FinalCTASection
         onOpenBooking={() => handleOpenBooking('netlik')}
         onOpenFAQ={() => setFaqModalOpen(true)}
@@ -83,7 +103,7 @@ export const IndexPage: React.FC = () => {
       {/* Footer */}
       <Footer onOpenBooking={() => handleOpenBooking('netlik')} />
 
-      {/* Feature 4: Interactive Google Meet Consultation & Slot Selection Modal */}
+      {/* Consultation Modal */}
       <ConsultationModal
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}
