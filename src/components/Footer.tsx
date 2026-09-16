@@ -74,7 +74,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
         {/* Bottom row */}
         <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
           <p className="text-white/40">
-            © 2026 Tuğba Şimşek. Tüm hakları saklıdır.
+            © 2026 Tuğba Ergüner Şimşek. Tüm hakları saklıdır.
           </p>
 
           {/* Subtle Disclaimer */}

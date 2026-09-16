@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
-  Sparkles,
   CheckCircle2,
   ArrowRight,
-  Calendar,
-  Clock,
   Video,
   ChevronLeft,
   ChevronRight,
@@ -16,7 +13,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { BookingFormData } from '../types';
-import { fetchAvailableSlots, createGoogleMeetBooking, generateWhatsAppLink } from '../services/calendarService';
+import { createGoogleMeetBooking, generateWhatsAppLink } from '../services/calendarService';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -39,9 +36,9 @@ interface WeekOption {
 }
 
 /**
- * Dynamically generates 4 consecutive week options starting from current date.
+ * Dynamically generates 4 consecutive week options starting from tomorrow (strictly future weekdays).
  * Excludes weekends (Saturday & Sunday).
- * Marks past weekdays in current week as disabled.
+ * Disables today and past weekdays.
  */
 export function generateDynamicWeeks(numWeeks: number = 4): WeekOption[] {
   const today = new Date();
@@ -91,14 +88,15 @@ export function generateDynamicWeeks(numWeeks: number = 4): WeekOption[] {
       if (d === 0) firstDateStr = dateDisplay;
       if (d === 4) lastDateStr = dateDisplay;
 
-      const isPast = targetDate.getTime() < today.getTime();
+      // Disables today and any earlier date (Must start from next available day!)
+      const isPastOrToday = targetDate.getTime() <= today.getTime();
 
       days.push({
         dayName,
         shortDay,
         date: dateDisplay,
         formatted,
-        isPast,
+        isPast: isPastOrToday,
       });
     }
 
@@ -116,8 +114,6 @@ export function generateDynamicWeeks(numWeeks: number = 4): WeekOption[] {
   return weeks;
 }
 
-const TIME_SLOTS = ['11:00', '13:00', '15:00', '17:00', '20:00'];
-
 export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   isOpen,
   onClose,
@@ -129,8 +125,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   const currentWeek = weeksData[selectedWeekIndex] || weeksData[0];
 
   const initialDate = React.useMemo(() => {
-    const firstValid = weeksData[0]?.days.find((d) => !d.isPast) || weeksData[0]?.days[0];
-    return firstValid ? firstValid.formatted : '1 Eyl Pazartesi';
+    // Find first non-past/non-today day across weeks
+    for (const wk of weeksData) {
+      const valid = wk.days.find((d) => !d.isPast);
+      if (valid) return valid.formatted;
+    }
+    return weeksData[0]?.days[0]?.formatted || '';
   }, [weeksData]);
 
   const [formData, setFormData] = useState<BookingFormData>({
@@ -140,56 +140,32 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     topic: initialTopic,
     message: initialNote,
     preferredDate: initialDate,
-    preferredTimeSlot: '15:00',
     sessionType: 'google-meet',
   });
 
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState('');
-  const [createdMeetUrl, setCreatedMeetUrl] = useState('');
   const [createdWhatsAppUrl, setCreatedWhatsAppUrl] = useState('');
-  const [liveSlots, setLiveSlots] = useState<string[]>(TIME_SLOTS);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Sync initial props when opened and select first non-past day
+  // Sync initial props when opened and select first available future day
   React.useEffect(() => {
     if (isOpen && weeksData.length > 0) {
-      const firstValidDay = weeksData[0].days.find((d) => !d.isPast) || weeksData[0].days[0];
+      let firstValidDay = undefined;
+      for (const wk of weeksData) {
+        firstValidDay = wk.days.find((d) => !d.isPast);
+        if (firstValidDay) break;
+      }
+      const selectedDay = firstValidDay || weeksData[0].days[0];
+
       setFormData((prev) => ({
         ...prev,
-        preferredDate: firstValidDay.formatted,
+        preferredDate: selectedDay.formatted,
         topic: initialTopic,
         message: initialNote || prev.message,
       }));
     }
   }, [isOpen, initialTopic, initialNote, weeksData]);
-
-  // Fetch live slot availability when selected date changes
-  React.useEffect(() => {
-    let isMounted = true;
-    if (isOpen && formData.preferredDate) {
-      setIsLoadingSlots(true);
-      fetchAvailableSlots(formData.preferredDate)
-        .then((res) => {
-          if (isMounted) {
-            if (res.slots && res.slots.length > 0) {
-              setLiveSlots(res.slots);
-              if (!res.slots.includes(formData.preferredTimeSlot)) {
-                setFormData((prev) => ({ ...prev, preferredTimeSlot: res.slots[0] }));
-              }
-            }
-            setIsLoadingSlots(false);
-          }
-        })
-        .catch(() => {
-          if (isMounted) setIsLoadingSlots(false);
-        });
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [isOpen, formData.preferredDate]);
 
   const handlePrevWeek = () => {
     if (selectedWeekIndex > 0) {
@@ -221,17 +197,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     try {
       const response = await createGoogleMeetBooking({ ...formData, honeypot });
       setIsSubmitting(false);
-      setCreatedMeetUrl(response.meetUrl || 'https://meet.google.com/shanti-demo-meet');
       if (response.whatsAppUrl) {
         setCreatedWhatsAppUrl(response.whatsAppUrl);
       }
       setSubmitted(true);
     } catch (err) {
       setIsSubmitting(false);
-      const demoMeetCode = Math.random().toString(36).substring(2, 5) + '-' + 
-                           Math.random().toString(36).substring(2, 6) + '-' + 
-                           Math.random().toString(36).substring(2, 5);
-      setCreatedMeetUrl(`https://meet.google.com/${demoMeetCode}`);
       setSubmitted(true);
     }
   };
@@ -240,9 +211,14 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     setSubmitted(false);
     setSelectedWeekIndex(0);
     setHoneypot('');
-    setCreatedMeetUrl('');
     setCreatedWhatsAppUrl('');
-    const firstValidDay = weeksData[0]?.days.find((d) => !d.isPast) || weeksData[0]?.days[0];
+
+    let firstValidDay = undefined;
+    for (const wk of weeksData) {
+      firstValidDay = wk.days.find((d) => !d.isPast);
+      if (firstValidDay) break;
+    }
+
     setFormData({
       fullName: '',
       email: '',
@@ -250,7 +226,6 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       topic: 'netlik',
       message: '',
       preferredDate: firstValidDay ? firstValidDay.formatted : '',
-      preferredTimeSlot: '15:00',
       sessionType: 'google-meet',
     });
     onClose();
@@ -304,7 +279,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     15 Dakikalık Ücretsiz Seans Talebi
                   </h3>
                   <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-5 font-light">
-                    Uygun olduğunuz tarih ve saati seçin, koçumuzla WhatsApp üzerinden anında karşılıklı teyitleşerek Google Meet davetiyeniz kesinleşsin.
+                    Uygun olduğunuz günü seçin, koçumuzla WhatsApp üzerinden anında karşılıklı saatleşerek Google Meet davetiyenizi kesinleştirin.
                   </p>
                 </div>
 
@@ -381,26 +356,26 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2 pt-1">
                       {currentWeek.days.map((d) => {
                         const isSelected = formData.preferredDate === d.formatted;
-                        const isPast = Boolean(d.isPast);
+                        const isPastOrToday = Boolean(d.isPast);
                         return (
                           <button
                             key={d.formatted}
                             type="button"
-                            disabled={isPast}
+                            disabled={isPastOrToday}
                             onClick={() => {
-                              if (!isPast) {
+                              if (!isPastOrToday) {
                                 setFormData({ ...formData, preferredDate: d.formatted });
                               }
                             }}
                             className={`py-2 px-1 rounded-xl text-center transition-all border ${
-                              isPast
+                              isPastOrToday
                                 ? 'opacity-30 cursor-not-allowed bg-white/[0.02] border-white/5 text-white/30'
                                 : isSelected
                                 ? 'bg-white text-black border-white font-semibold shadow-lg scale-[1.02] cursor-pointer'
                                 : 'bg-white/5 text-white/75 border-white/10 hover:border-white/25 hover:bg-white/[0.08] cursor-pointer'
                             }`}
                           >
-                            <div className={`text-[10px] uppercase font-mono tracking-wider ${isSelected && !isPast ? 'text-black/70 font-semibold' : 'text-white/50'}`}>
+                            <div className={`text-[10px] uppercase font-mono tracking-wider ${isSelected && !isPastOrToday ? 'text-black/70 font-semibold' : 'text-white/50'}`}>
                               {d.shortDay}
                             </div>
                             <div className="text-xs sm:text-sm font-medium mt-0.5 whitespace-nowrap">
@@ -409,36 +384,6 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                           </button>
                         );
                       })}
-                    </div>
-                  </div>
-
-                  {/* Step 2: Time Slots */}
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider text-white/70 mb-2 font-medium flex items-center justify-between">
-                      <span>2. Saat Dilimi Tercihi</span>
-                      {isLoadingSlots && (
-                        <span className="flex items-center gap-1 text-[10px] text-white/50 font-normal normal-case">
-                          <Loader2 size={10} className="animate-spin" /> Takvim kontrol ediliyor...
-                        </span>
-                      )}
-                    </label>
-                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                      {liveSlots.map((slot) => (
-                        <button
-                          key={slot}
-                          type="button"
-                          onClick={() => {
-                            setFormData({ ...formData, preferredTimeSlot: slot });
-                          }}
-                          className={`py-2 rounded-xl text-xs text-center transition-all cursor-pointer border ${
-                            formData.preferredTimeSlot === slot
-                              ? 'bg-white text-black border-white font-semibold shadow-md'
-                              : 'bg-white/5 text-white/70 border-white/10 hover:border-white/20 hover:text-white'
-                          }`}
-                        >
-                          {slot}
-                        </button>
-                      ))}
                     </div>
                   </div>
 
@@ -454,7 +399,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     />
                   </div>
 
-                  {/* Step 3: Contact Details */}
+                  {/* Step 2: Contact Details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div>
                       <label className="block text-xs uppercase tracking-wider text-white/70 mb-1 font-medium">
@@ -547,7 +492,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                         <>
                           <MessageCircle size={16} className="shrink-0" />
                           <span className="truncate">
-                            Talebi Gönder & WhatsApp'ta Görüş ({formData.preferredDate} - {formData.preferredTimeSlot})
+                            Talebi Gönder & WhatsApp'ta Görüş ({formData.preferredDate})
                           </span>
                           <ArrowRight size={16} className="shrink-0" />
                         </>
@@ -575,7 +520,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   WhatsApp Üzerinden Onaylaşın
                 </h3>
                 <p className="text-white/70 text-xs sm:text-sm leading-relaxed max-w-md mx-auto mb-6 font-light">
-                  Sayın <strong className="text-white">{formData.fullName}</strong>, <strong className="text-white">{formData.preferredDate} saat {formData.preferredTimeSlot}</strong> için talebiniz kayıt altına alındı.
+                  Sayın <strong className="text-white">{formData.fullName}</strong>, <strong className="text-white">{formData.preferredDate}</strong> günü için talebiniz kayıt altına alındı.
                   <br />
                   Koçumuzla WhatsApp üzerinden kısa bir sohbet başlatıp saatinizi teyit ettikten sonra Google Meet davetiyeniz e-posta adresinize (<strong className="text-white">{formData.email}</strong>) iletilecektir.
                 </p>
@@ -605,19 +550,6 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                   <p className="text-white/60 text-[11px] leading-relaxed">
                     • WhatsApp sohbeti sonrası karşılıklı onaylanan saat için resmi Google Meet davetiyesi <strong className="text-white">{formData.email}</strong> adresinize gönderilecektir.
                   </p>
-                  {createdMeetUrl && (
-                    <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px]">
-                      <span className="text-white/40">Demo Odası Bağlantısı:</span>
-                      <a
-                        href={createdMeetUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white/80 hover:text-white hover:underline flex items-center gap-1 font-mono"
-                      >
-                        Meet Odası <ExternalLink size={11} />
-                      </a>
-                    </div>
-                  )}
                 </div>
 
                 <button
@@ -635,5 +567,6 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     </AnimatePresence>
   );
 };
+
 
 
