@@ -46,7 +46,7 @@ export const AboutSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/10 text-white/60 text-sm md:text-base leading-relaxed"
+          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/10 text-white/70 text-base md:text-lg leading-relaxed"
         >
           <div>
             <h4 className="text-white text-xs uppercase tracking-wider mb-2 font-medium">01 / Sadeleşme</h4>

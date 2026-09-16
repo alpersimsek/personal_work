@@ -49,7 +49,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             </h2>
 
             {/* Supporting copy */}
-            <p className="text-white/60 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mx-auto mb-8 sm:mb-10 font-light px-2">
+            <p className="text-white/70 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-8 sm:mb-10 font-light px-2">
               İlk görüşme, birbirimizi tanımak ve birlikte çalışmanın sana uygun olup olmadığını görmek için.
             </p>
 

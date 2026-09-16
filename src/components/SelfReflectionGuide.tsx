@@ -144,7 +144,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
           <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight max-w-2xl">
             Şu an hangi aşamadasın?
           </h2>
-          <p className="text-white/60 text-sm sm:text-base max-w-xl mt-3 sm:mt-4 font-light">
+          <p className="text-white/70 text-base sm:text-lg max-w-2xl mt-3 sm:mt-4 font-light">
             Doğru ve yanlış yanıt yok. 3 kısa soruyla nerede olduğunu ve koçluğun sana en çok nerede alan açabileceğini gör.
           </p>
         </div>

@@ -33,7 +33,7 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
             <h2 className="serif-font text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
               Son Yazılar
             </h2>
-            <p className="text-white/60 text-sm sm:text-base mt-2 max-w-xl font-sans">
+            <p className="text-white/70 text-base sm:text-lg mt-2 max-w-2xl font-sans">
               İçsel netlik, farkındalık ve yaşam dönüşümü üzerine en güncel makaleler.
             </p>
           </div>
@@ -83,12 +83,12 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
                   {post.title}
                 </h3>
 
-                <p className="text-white/60 text-xs line-clamp-3 mb-6 flex-1 font-sans leading-relaxed">
+                <p className="text-white/70 text-sm line-clamp-3 mb-6 flex-1 font-sans leading-relaxed">
                   {post.summary}
                 </p>
 
                 <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-sans">
-                  <span className="text-white/40 text-[11px]">Tuğba Ergüner Şimşek</span>
+                  <span className="text-white/40 text-[11px]">Tuğba Şimşek</span>
                   <span className="text-white/90 font-medium group-hover:text-white transition-colors inline-flex items-center gap-1">
                     Devamını Oku
                     <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

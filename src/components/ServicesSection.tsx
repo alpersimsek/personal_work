@@ -113,7 +113,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
                   <h3 className="text-white text-xl sm:text-2xl mb-3 tracking-tight font-serif">
                     {card.title}
                   </h3>
-                  <p className="text-white/60 text-sm leading-relaxed font-light">
+                  <p className="text-white/70 text-base leading-relaxed font-light">
                     {card.description}
                   </p>
                 </div>

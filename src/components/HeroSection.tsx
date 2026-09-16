@@ -193,7 +193,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/70 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed mb-8 sm:mb-12 font-normal px-2"
+          className="text-white/75 text-base sm:text-lg md:text-xl max-w-xl leading-relaxed mb-8 sm:mb-12 font-normal px-2"
         >
           Hayatındaki gürültüyü biraz azaltıp ne istediğini gerçekten duymaya başladığında, değişim çok daha doğal bir yerden başlar.
         </motion.p>

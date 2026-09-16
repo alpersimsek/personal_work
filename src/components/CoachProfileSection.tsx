@@ -76,7 +76,7 @@ export const CoachProfileSection: React.FC = () => {
                 Kurumsal Dünyadan İçsel Dönüşüme
               </h3>
 
-              <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light mb-6">
+              <p className="text-white/75 text-sm sm:text-base leading-relaxed font-light mb-6">
                 Finans ve yönetim alanındaki 10+ yıllık kurumsal deneyimimin ardından, sürdürülebilir başarının dışsal hedeflerden önce içsel dinginlikle başladığını fark ettim. Bugün, danışanlarıma zihinsel berraklık ve özgün yaşam ritimleri kurma yolunda eşlik ediyorum.
               </p>
 
@@ -90,7 +90,7 @@ export const CoachProfileSection: React.FC = () => {
                     <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
                       10+ Yıl Kurumsal Deneyim
                     </h4>
-                    <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-white/60 font-light mt-0.5 leading-relaxed">
                       Üst düzey yöneticilik, stratejik liderlik ve takım danışmanlığı birikimi.
                     </p>
                   </div>
@@ -104,7 +104,7 @@ export const CoachProfileSection: React.FC = () => {
                     <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
                       ICF PCC & Mindfulness
                     </h4>
-                    <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-white/60 font-light mt-0.5 leading-relaxed">
                       Uluslararası koçluk akreditasyonu, MBSR eğitmenliği ve 1000+ saat seans.
                     </p>
                   </div>

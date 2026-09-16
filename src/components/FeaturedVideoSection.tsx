@@ -58,7 +58,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
               <div className="text-white/60 text-[11px] sm:text-xs tracking-widest uppercase mb-1.5 sm:mb-2.5 font-medium">
                 YAKLAŞIMIM
               </div>
-              <p className="text-white text-xs sm:text-sm md:text-base leading-relaxed font-light">
+              <p className="text-white text-sm sm:text-base md:text-lg leading-relaxed font-light">
                 Koçluk sana ne yapman gerektiğini söylemek değildir. Doğru sorularla kendi cevaplarını daha net görmeni, seni tekrar eden döngüleri fark etmeni ve sana gerçekten ait olan yönü bulmanı sağlar.
               </p>
             </div>

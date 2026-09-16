@@ -85,7 +85,7 @@ export const ProcessSection: React.FC = () => {
               </div>
 
               {/* Step Description */}
-              <div className="md:col-span-6 text-white/60 text-sm sm:text-base leading-relaxed font-light">
+              <div className="md:col-span-6 text-white/70 text-base sm:text-lg leading-relaxed font-light">
                 {step.description}
               </div>
             </motion.div>

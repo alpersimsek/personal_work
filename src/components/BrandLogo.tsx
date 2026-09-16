@@ -20,19 +20,19 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     sm: {
       emblem: 28,
       nameText: 'text-base sm:text-lg',
-      subText: 'text-[9px]',
+      subText: 'text-[10px] sm:text-[11px]',
       gap: 'gap-2.5',
     },
     md: {
       emblem: 36,
       nameText: 'text-lg sm:text-xl',
-      subText: 'text-[10px]',
+      subText: 'text-xs',
       gap: 'gap-3',
     },
     lg: {
       emblem: 48,
       nameText: 'text-2xl sm:text-3xl',
-      subText: 'text-xs',
+      subText: 'text-sm',
       gap: 'gap-4',
     },
   }[size];
