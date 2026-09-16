@@ -10,7 +10,7 @@ const REFLECTIONS: TestimonialItem[] = [
     author: 'E. K.',
     role: 'Yazılım Mühendisi & Girişimci',
     theme: 'Netlik & Zihinsel Dinginlik',
-    timeframe: '8 Seanslık Süreç',
+    timeframe: '8 Seans',
   },
   {
     quote:
@@ -18,7 +18,7 @@ const REFLECTIONS: TestimonialItem[] = [
     author: 'D. A.',
     role: 'Tasarım Direktörü',
     theme: 'Düşünceden Eyleme',
-    timeframe: '10 Seanslık Süreç',
+    timeframe: '10 Seans',
   },
   {
     quote:
@@ -26,7 +26,7 @@ const REFLECTIONS: TestimonialItem[] = [
     author: 'M. S.',
     role: 'Pazarlama Yöneticisi',
     theme: 'Kendi Ritmini Bulmak',
-    timeframe: '12 Seanslık Süreç',
+    timeframe: '12 Seans',
   },
 ];
 
@@ -63,11 +63,11 @@ export const ReflectionsSection: React.FC = () => {
             >
               <div>
                 {/* Theme Tag */}
-                <div className="flex items-center justify-between mb-6">
-                  <span className="text-xs sm:text-sm uppercase tracking-wider text-white/80 font-mono font-medium px-3.5 py-1 rounded-full bg-white/5 border border-white/15">
+                <div className="flex items-center justify-between gap-2 mb-6 min-h-[36px]">
+                  <span className="text-xs uppercase tracking-wider text-white/80 font-mono font-medium px-3 py-1 rounded-full bg-white/5 border border-white/15 whitespace-nowrap">
                     {item.theme}
                   </span>
-                  <span className="text-xs text-white/50 font-mono">
+                  <span className="text-xs text-white/50 font-mono shrink-0 whitespace-nowrap">
                     {item.timeframe}
                   </span>
                 </div>
@@ -79,7 +79,7 @@ export const ReflectionsSection: React.FC = () => {
               </div>
 
               {/* Author Info */}
-              <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="pt-4 border-t border-white/5 flex items-ceznter justify-between">
                 <div>
                   <div className="text-base sm:text-lg font-semibold text-white tracking-wide">
                     {item.author}

@@ -163,7 +163,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
 
 
       {/* Hero Center Content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 pt-28 sm:pt-36 pb-12 sm:pb-16 text-center w-full max-w-4xl mx-auto">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 pt-28 sm:pt-36 pb-12 sm:pb-16 text-center w-full max-w-6xl mx-auto">
         {/* Main Heading */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -181,7 +181,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/70 text-sm sm:text-base md:text-lg max-w-lg leading-relaxed mb-8 sm:mb-12 font-normal px-2"
+          className="text-white/95 text-lg sm:text-xl md:text-2xl lg:text-3xl max-w-5xl lg:max-w-6xl leading-relaxed mb-8 sm:mb-12 font-light px-2 tracking-tight"
         >
           Hayatındaki gürültüyü biraz azaltıp ne istediğini gerçekten duymaya başladığında, değişim çok daha doğal bir yerden başlar.
         </motion.p>
@@ -191,19 +191,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-sm px-2"
+          className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-md px-2"
         >
           {/* Primary Consultation Pill */}
           <div
             id="hero-primary-cta"
             onClick={onOpenBooking}
-            className="liquid-glass rounded-full pl-5 sm:pl-7 pr-2 py-2 flex items-center justify-between gap-3 w-full cta-pill cursor-pointer shadow-2xl transition-all border border-white/20 hover:border-white/40"
+            className="liquid-glass rounded-full pl-6 sm:pl-8 pr-2.5 py-2.5 sm:py-3 flex items-center justify-between gap-4 w-full cta-pill cursor-pointer shadow-2xl transition-all border border-white/20 hover:border-white/40"
           >
-            <span className="text-white text-xs sm:text-sm font-medium text-left truncate">
+            <span className="text-white text-sm sm:text-base md:text-lg font-semibold text-left truncate">
               İlk görüşmeni planla
             </span>
             <div className="bg-white rounded-full p-2.5 sm:p-3 text-black transition-transform duration-300 arrow-move flex items-center justify-center shrink-0">
-              <ArrowRight size={16} />
+              <ArrowRight size={18} />
             </div>
           </div>
 
@@ -212,12 +212,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
             id="hero-secondary-cta"
             href="#yaklasim"
             onClick={scrollToApproach}
-            className="text-white/50 text-sm font-medium hover:text-white transition-colors flex items-center gap-2 cursor-pointer py-1"
+            className="text-white/70 text-sm sm:text-base font-semibold hover:text-white transition-colors flex items-center gap-2 cursor-pointer py-1"
           >
             <span>Nasıl çalışıyorum?</span>
             <svg
-              width="14"
-              height="14"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
