@@ -16,7 +16,7 @@ const FAQS: FAQItem[] = [
   },
   {
     question: 'Görüşmeler nasıl ve nerede gerçekleşir?',
-    answer: 'Görüşmeler çoğunlukla Google Meet / Zoom üzerinden çevrim içi veya karşılıklı mutabakata göre yüz yüze yapılır. Her seans yaklaşık 50 dakika sürer ve tamamen güvenli, gizli bir alanda gerçekleşir.',
+    answer: 'Görüşmeler çevrim içi (online) veya karşılıklı mutabakata göre yüz yüze yapılır. Her seans yaklaşık 50 dakika sürer ve tamamen güvenli, gizli bir alanda gerçekleşir.',
   },
   {
     question: 'Bir koçluk süreci genellikle ne kadar sürer?',

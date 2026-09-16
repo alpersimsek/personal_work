@@ -15,22 +15,16 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
 
   const themes: { id: Theme; label: string; subLabel: string; icon: React.ReactNode }[] = [
     {
-      id: 'dark',
-      label: 'Karanlık',
-      subLabel: 'Gece Teması',
-      icon: <Moon size={14} className="text-amber-200" />
+      id: 'adacayi',
+      label: 'Adaçayı',
+      subLabel: 'Doğal Yeşil',
+      icon: <Leaf size={14} className="text-[#31574b]" />
     },
     {
       id: 'light',
       label: 'Toprak Beji',
       subLabel: 'Sıcak Krem',
       icon: <Sun size={14} className="text-[#8A5A44]" />
-    },
-    {
-      id: 'adacayi',
-      label: 'Adaçayı',
-      subLabel: 'Doğal Yeşil',
-      icon: <Leaf size={14} className="text-[#31574b]" />
     },
     {
       id: 'lacivert',

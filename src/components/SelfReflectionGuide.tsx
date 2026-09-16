@@ -138,13 +138,13 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
         {/* Section Header - Left-aligned to unify with the rest of the site */}
         <div className="text-left mb-10 sm:mb-14">
           <div className="flex items-center justify-start gap-2 text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3">
-            <Compass size={15} className="text-white/70" />
+            <Compass size={16} className="text-white/70" />
             <span>3 DAKİKALIK İÇSEL FARKINDALIK</span>
           </div>
           <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight max-w-2xl">
             Şu an hangi aşamadasın?
           </h2>
-          <p className="text-white/60 text-sm sm:text-base max-w-xl mt-3 sm:mt-4 font-light">
+          <p className="text-white/80 text-base sm:text-lg md:text-xl max-w-none mt-3 sm:mt-4 font-light leading-relaxed">
             Doğru ve yanlış yanıt yok. 3 kısa soruyla nerede olduğunu ve koçluğun sana en çok nerede alan açabileceğini gör.
           </p>
         </div>
@@ -162,15 +162,14 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 className="space-y-8"
               >
                 {/* Progress bar & Step indicator */}
-                <div className="flex items-center justify-between text-xs text-white/40 pb-4 border-b border-white/10 font-mono">
+                <div className="flex items-center justify-between text-sm sm:text-base md:text-lg text-white/90 pb-4 border-b border-white/10 font-mono font-bold tracking-wider">
                   <span>SORU {currentStep + 1} / 3</span>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     {[0, 1, 2].map((i) => (
                       <div
                         key={i}
-                        className={`h-1.5 w-8 rounded-full transition-colors ${
-                          i <= currentStep ? 'bg-white' : 'bg-white/15'
-                        }`}
+                        className={`h-2 w-9 sm:w-12 rounded-full transition-all ${i <= currentStep ? 'bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]' : 'bg-white/20'
+                          }`}
                       />
                     ))}
                   </div>
@@ -178,32 +177,32 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
 
                 {/* Question */}
                 <div>
-                  <h3 className="serif-font text-2xl sm:text-3xl text-white tracking-tight mb-2">
+                  <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white tracking-tight mb-2.5">
                     {QUESTIONS[currentStep].question}
                   </h3>
-                  <p className="text-white/50 text-xs sm:text-sm">
+                  <p className="text-white/80 text-base sm:text-lg md:text-xl font-light mt-1">
                     {QUESTIONS[currentStep].subtitle}
                   </p>
                 </div>
 
                 {/* Options */}
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {QUESTIONS[currentStep].options.map((opt, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSelectOption(opt.focus)}
-                      className="w-full text-left p-4 sm:p-5 rounded-2xl liquid-glass border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group cursor-pointer flex items-start justify-between gap-4"
+                      className="w-full text-left p-4 sm:p-6 rounded-2xl liquid-glass border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group cursor-pointer flex items-start justify-between gap-4"
                     >
                       <div>
-                        <div className="text-white text-sm sm:text-base font-medium mb-1 group-hover:text-white transition-colors">
+                        <div className="text-white text-base sm:text-lg md:text-xl font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
                           {opt.label}
                         </div>
-                        <div className="text-white/50 text-xs sm:text-sm font-light">
+                        <div className="text-white/80 text-base sm:text-lg font-light leading-relaxed mt-1">
                           {opt.description}
                         </div>
                       </div>
-                      <div className="p-2 rounded-full border border-white/20 group-hover:bg-white group-hover:text-black transition-colors shrink-0 mt-1">
-                        <ArrowRight size={14} />
+                      <div className="p-2.5 rounded-full border border-white/20 group-hover:bg-white group-hover:text-black transition-colors shrink-0 mt-1">
+                        <ArrowRight size={16} />
                       </div>
                     </button>
                   ))}
@@ -218,27 +217,27 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 className="text-center py-4 space-y-6"
               >
                 <div className="inline-flex p-3 rounded-full bg-white/10 border border-white/20 text-white mb-2">
-                  <Sparkles size={24} />
+                  <Sparkles size={26} />
                 </div>
 
-                <div className="text-xs uppercase tracking-widest text-white/50 font-medium">
+                <div className="text-xs sm:text-sm uppercase tracking-widest text-white/60 font-medium">
                   SENİN İÇSEL PUSULAN
                 </div>
 
-                <h3 className="serif-font text-3xl sm:text-4xl text-white tracking-tight">
+                <h3 className="serif-font text-3xl sm:text-4xl md:text-5xl text-white tracking-tight">
                   {result.title}
                 </h3>
 
-                <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-light">
+                <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl mx-auto font-light">
                   {result.insight}
                 </p>
 
                 {/* Reflective prompt quote box */}
-                <div className="liquid-glass rounded-2xl p-5 sm:p-6 max-w-lg mx-auto text-left border border-white/15 bg-white/[0.02]">
-                  <div className="text-white/40 text-xs uppercase tracking-wider mb-2 font-mono">
+                <div className="liquid-glass rounded-2xl p-5 sm:p-7 max-w-lg mx-auto text-left border border-white/15 bg-white/[0.02]">
+                  <div className="text-white/50 text-xs sm:text-sm uppercase tracking-wider mb-2 font-mono font-medium">
                     DÜŞÜNMEK İÇİN BİR BAŞLANGIÇ SORUSU:
                   </div>
-                  <p className="serif-font text-lg sm:text-xl text-white/90 italic">
+                  <p className="serif-font text-xl sm:text-2xl text-white/90 italic">
                     "{result.promptQuestion}"
                   </p>
                 </div>
@@ -253,17 +252,17 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                         `İçsel netlik aracından gelen odak: ${result.title}`
                       )
                     }
-                    className="liquid-glass bg-white text-black hover:bg-white/90 px-8 py-3.5 rounded-full text-sm font-medium flex items-center gap-2 cursor-pointer shadow-xl transition-all w-full sm:w-auto justify-center"
+                    className="liquid-glass bg-white text-black hover:bg-white/90 px-8 sm:px-10 py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2.5 cursor-pointer shadow-xl transition-all w-full sm:w-auto justify-center"
                   >
                     <span>Bu Odakla Ön Görüşme Planla</span>
-                    <ArrowRight size={16} />
+                    <ArrowRight size={18} />
                   </button>
 
                   <button
                     onClick={handleReset}
-                    className="text-white/50 hover:text-white text-xs flex items-center gap-1.5 py-2 px-4 cursor-pointer transition-colors"
+                    className="text-white/60 hover:text-white text-xs sm:text-sm flex items-center gap-1.5 py-2 px-4 cursor-pointer transition-colors font-medium"
                   >
-                    <RotateCcw size={14} />
+                    <RotateCcw size={15} />
                     <span>Yeniden Başlat</span>
                   </button>
                 </div>

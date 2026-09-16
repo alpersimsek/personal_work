@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BlogPost, BlogCategory } from '../types';
+import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
 import { authService } from '../services/authService';
 
@@ -70,17 +70,17 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs text-white/70 mb-4">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs sm:text-sm text-white/80 font-semibold uppercase tracking-wider mb-4">
+              <svg className="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               <span>DÜŞÜNCE & FARKINDALIK</span>
             </div>
 
-            <h2 className="serif-font text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
+            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl font-normal text-white tracking-tight">
               Yazılar & Keşifler
             </h2>
-            <p className="text-white/60 text-sm sm:text-base mt-2 max-w-xl font-sans">
+            <p className="text-white/80 text-base sm:text-lg md:text-xl mt-3 max-w-xl font-light leading-relaxed">
               İçsel netlik, farkındalık ve yaşam dönüşümü üzerine kaleme alınan rehber yazılar.
             </p>
           </div>

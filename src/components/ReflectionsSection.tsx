@@ -37,16 +37,16 @@ export const ReflectionsSection: React.FC = () => {
         {/* Label & Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-14 gap-3 sm:gap-4">
           <div>
-            <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-2.5 sm:mb-3 flex items-center gap-2">
-              <Quote size={14} className="text-white/60" />
+            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+              <Quote size={15} className="text-white/70" />
               <span>DANIŞAN YANSIMALARI</span>
             </div>
-            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1.15] whitespace-nowrap">
+            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15]">
               Yolculuğu birlikte yürüyenler ne hissetti?
             </h2>
           </div>
-          <p className="text-white/50 text-xs sm:text-sm max-w-xs font-light shrink-0">
-            Gizlilik prensibi gereği isimler kısaltılmıştır. Süreç sonrasındaki gerçek içsel dönüşüm notları.
+          <p className="text-white/70 text-sm sm:text-base max-w-md font-light shrink-0 leading-relaxed">
+            Gizlilik prensibi gereği isimler kısaltılmıştır.
           </p>
         </div>
 
@@ -64,16 +64,16 @@ export const ReflectionsSection: React.FC = () => {
               <div>
                 {/* Theme Tag */}
                 <div className="flex items-center justify-between mb-6">
-                  <span className="text-[11px] uppercase tracking-wider text-white/70 font-mono px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                  <span className="text-xs sm:text-sm uppercase tracking-wider text-white/80 font-mono font-medium px-3.5 py-1 rounded-full bg-white/5 border border-white/15">
                     {item.theme}
                   </span>
-                  <span className="text-[11px] text-white/40 font-mono">
+                  <span className="text-xs text-white/50 font-mono">
                     {item.timeframe}
                   </span>
                 </div>
 
                 {/* Quote */}
-                <p className="serif-font text-lg sm:text-xl text-white/90 leading-relaxed italic mb-8">
+                <p className="serif-font text-xl sm:text-2xl md:text-2xl text-white/95 leading-relaxed italic mb-8 font-serif">
                   "{item.quote}"
                 </p>
               </div>
@@ -81,15 +81,15 @@ export const ReflectionsSection: React.FC = () => {
               {/* Author Info */}
               <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-white tracking-wide">
+                  <div className="text-base sm:text-lg font-semibold text-white tracking-wide">
                     {item.author}
                   </div>
-                  <div className="text-xs text-white/40 font-light">
+                  <div className="text-xs sm:text-sm text-white/60 font-light mt-0.5">
                     {item.role}
                   </div>
                 </div>
-                <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60">
-                  <Heart size={13} />
+                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70">
+                  <Heart size={14} />
                 </div>
               </div>
             </motion.div>

@@ -41,7 +41,7 @@ export const ProcessSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/40 text-xs sm:text-sm tracking-[0.2em] uppercase font-medium mb-3 sm:mb-4"
+          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold"
         >
           SÜREÇ
         </motion.div>
@@ -51,7 +51,7 @@ export const ProcessSection: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white tracking-tight font-serif mb-12 sm:mb-16 md:mb-20 whitespace-nowrap max-w-none"
+          className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] font-serif mb-12 sm:mb-16 md:mb-20 max-w-none"
         >
           Her değişimin bir{' '}
           <em className="font-serif italic text-white/60 font-normal">
@@ -75,17 +75,17 @@ export const ProcessSection: React.FC = () => {
               className="border-t border-white/10 py-6 sm:py-10 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-8 items-baseline group hover:bg-white/[0.01] transition-colors"
             >
               {/* Step Number */}
-              <div className="md:col-span-2 text-white/30 group-hover:text-white/60 transition-colors font-mono text-xs sm:text-sm tracking-wider">
+              <div className="md:col-span-2 text-white/50 group-hover:text-white/80 transition-colors font-mono text-sm sm:text-base font-semibold tracking-wider">
                 {step.number}
               </div>
 
               {/* Step Title */}
-              <div className="md:col-span-4 text-xl sm:text-2xl md:text-3xl text-white font-serif tracking-tight">
+              <div className="md:col-span-4 text-2xl sm:text-3xl md:text-4xl text-white font-serif tracking-tight">
                 {step.title}
               </div>
 
               {/* Step Description */}
-              <div className="md:col-span-6 text-white/60 text-sm sm:text-base leading-relaxed font-light">
+              <div className="md:col-span-6 text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light">
                 {step.description}
               </div>
             </motion.div>

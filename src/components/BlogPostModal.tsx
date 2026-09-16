@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BlogPost } from '../types';
+import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 
 interface BlogPostModalProps {
@@ -225,7 +225,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                 Bu konuda zihninizi berraklaştırmak ister misiniz?
               </h4>
               <p className="text-xs text-white/60 max-w-md mx-auto mb-4 font-sans">
-                Tuğba Ergüner Şimşek ile 15 dakikalık ücretsiz tanışma seansında hedeflerinizi konuşalım.
+                Tuğba Ergüner Şimşek ile 15 dakikalık tanışma seansında hedeflerinizi konuşalım.
               </p>
               <button
                 onClick={() => {
@@ -234,7 +234,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                 }}
                 className="px-6 py-3 rounded-xl bg-white text-black hover:bg-neutral-200 font-medium text-xs tracking-wider uppercase transition-all shadow-lg hover:shadow-white/10"
               >
-                Ücretsiz Ön Görüşme Alın
+                Ön Görüşme Randevusu Alın
               </button>
             </div>
           </div>

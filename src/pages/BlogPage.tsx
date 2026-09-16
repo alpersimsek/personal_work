@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BlogPost, BlogCategory } from '../types';
+import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
 import { authService } from '../services/authService';
 import { Navbar } from '../components/Navbar';
@@ -71,7 +71,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
       <Navbar onOpenBooking={onOpenBooking} />
 
       {/* Main Container */}
-      <main className="flex-1 py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 pt-28 sm:pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         {/* Back Link & Header */}
         <div className="mb-8">
           <button

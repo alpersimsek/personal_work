@@ -85,7 +85,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
           </p>
 
           {/* Subtle Disclaimer */}
-          <p className="text-white/25 text-[11px] sm:text-xs max-w-xl text-left md:text-right font-light">
+          <p className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
             Yaşam koçluğu; psikoterapi, psikolojik danışmanlık veya tıbbi tedavinin yerine geçmez.
           </p>
         </div>

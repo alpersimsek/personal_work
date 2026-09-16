@@ -18,12 +18,22 @@ export const PhilosophySection: React.FC = () => {
       className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden relative"
     >
       <div className="max-w-6xl mx-auto text-left">
+        {/* Sub-label Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold"
+        >
+          FELSEFEM
+        </motion.div>
+
         {/* Main Section Heading */}
         <motion.h2
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white tracking-tight mb-10 sm:mb-16 md:mb-20 font-serif"
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white tracking-tight mb-8 sm:mb-12 md:mb-16 font-serif"
         >
           <span className="italic">Farkındalık</span>{' '}
           <span className="font-serif italic text-white/40 px-1 sm:px-2 font-normal">×</span>{' '}
@@ -59,11 +69,11 @@ export const PhilosophySection: React.FC = () => {
             className="flex flex-col space-y-6 sm:space-y-8 md:space-y-10 text-left"
           >
             {/* Block 1 */}
-            <div className="space-y-2.5 sm:space-y-3">
-              <div className="text-white/45 text-xs sm:text-sm tracking-[0.2em] uppercase font-medium">
+            <div className="space-y-3">
+              <div className="text-white/60 text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase font-semibold">
                 NEREDESİN?
               </div>
-              <p className="text-white/75 text-sm sm:text-base md:text-lg leading-relaxed font-light">
+              <p className="text-white/85 text-base sm:text-lg md:text-xl leading-relaxed font-light">
                 Değişim, bulunduğun yeri dürüstçe görebildiğinde başlar. Nelerin seni beslediğini, nelerin tükettiğini ve hangi düşüncelerin artık sana hizmet etmediğini birlikte görünür hâle getiririz.
               </p>
             </div>
@@ -72,11 +82,11 @@ export const PhilosophySection: React.FC = () => {
             <div className="w-full h-px bg-white/10" />
 
             {/* Block 2 */}
-            <div className="space-y-2.5 sm:space-y-3">
-              <div className="text-white/45 text-xs sm:text-sm tracking-[0.2em] uppercase font-medium">
+            <div className="space-y-3">
+              <div className="text-white/60 text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase font-semibold">
                 NEREYE GİTMEK İSTİYORSUN?
               </div>
-              <p className="text-white/75 text-sm sm:text-base md:text-lg leading-relaxed font-light">
+              <p className="text-white/85 text-base sm:text-lg md:text-xl leading-relaxed font-light">
                 Farkındalık tek başına yeterli değildir. Sana ait hedefleri netleştirir, büyük değişimleri sürdürülebilir küçük adımlara böler ve düşünceden harekete geçen bir yapı oluştururuz.
               </p>
             </div>

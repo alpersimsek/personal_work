@@ -1,5 +1,5 @@
 import React from 'react';
-import { BlogPost } from '../types';
+import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 
 interface BlogSectionHomeProps {
@@ -23,24 +23,24 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs text-white/70 mb-4">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs sm:text-sm text-white/80 font-semibold uppercase tracking-wider mb-4">
+              <svg className="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
               <span>DÜŞÜNCE & FARKINDALIK</span>
             </div>
 
-            <h2 className="serif-font text-3xl sm:text-4xl lg:text-5xl font-light text-white tracking-tight">
+            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl font-normal text-white tracking-tight">
               Son Yazılar
             </h2>
-            <p className="text-white/60 text-sm sm:text-base mt-2 max-w-xl font-sans">
+            <p className="text-white/80 text-base sm:text-lg md:text-xl mt-3 max-w-xl font-light leading-relaxed">
               İçsel netlik, farkındalık ve yaşam dönüşümü üzerine en güncel makaleler.
             </p>
           </div>
 
           <button
             onClick={onNavigateToBlog}
-            className="self-start md:self-end px-5 py-2.5 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs font-medium transition-all duration-300 flex items-center gap-2 group cursor-pointer shadow-md"
+            className="self-start md:self-end px-6 py-3 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-2 group cursor-pointer shadow-md"
           >
             <span>Tüm Yazıları İncele</span>
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,24 +66,24 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
-                <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
+                <span className="absolute top-3 left-3 px-3.5 py-1 rounded-full text-xs font-semibold bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                   {post.category}
                 </span>
               </div>
 
               {/* Card Body */}
               <div className="p-6 flex flex-col flex-1">
-                <div className="flex items-center gap-2 text-[11px] text-white/50 mb-3 font-sans">
+                <div className="flex items-center gap-2 text-xs text-white/50 mb-3 font-sans">
                   <span>{post.date}</span>
                   <span>•</span>
                   <span>{post.readTime}</span>
                 </div>
 
-                <h3 className="serif-font text-lg font-light text-white group-hover:text-white/90 transition-colors line-clamp-2 mb-3 leading-snug">
+                <h3 className="serif-font text-xl sm:text-2xl font-medium text-white group-hover:text-white/90 transition-colors line-clamp-2 mb-3 leading-snug">
                   {post.title}
                 </h3>
 
-                <p className="text-white/60 text-xs line-clamp-3 mb-6 flex-1 font-sans leading-relaxed">
+                <p className="text-white/80 text-sm sm:text-base line-clamp-3 mb-6 flex-1 font-sans leading-relaxed">
                   {post.summary}
                 </p>
 

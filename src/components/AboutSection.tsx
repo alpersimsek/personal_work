@@ -20,7 +20,7 @@ export const AboutSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase mb-4 sm:mb-6 font-medium"
+          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold"
         >
           YOLCULUK
         </motion.div>
@@ -46,18 +46,18 @@ export const AboutSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 pt-8 border-t border-white/10 text-white/60 text-sm md:text-base leading-relaxed"
+          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 pt-8 border-t border-white/10 text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light"
         >
           <div>
-            <h4 className="text-white text-xs uppercase tracking-wider mb-2 font-medium">01 / Sadeleşme</h4>
+            <h4 className="text-white text-xs sm:text-sm uppercase tracking-wider mb-2.5 font-semibold">01 / Sadeleşme</h4>
             <p>Sürekli bir şeylere yetişme telaşı yerine, enerjini gerçekten tüketen yükleri fark edip bırakmayı deneyimle.</p>
           </div>
           <div>
-            <h4 className="text-white text-xs uppercase tracking-wider mb-2 font-medium">02 / Kendi Ritmin</h4>
+            <h4 className="text-white text-xs sm:text-sm uppercase tracking-wider mb-2.5 font-semibold">02 / Kendi Ritmin</h4>
             <p>Başkalarının başarı tanımlarını değil, kendi yaşam ritmini ve iç sesini merkeze alan bir yol haritası kur.</p>
           </div>
           <div>
-            <h4 className="text-white text-xs uppercase tracking-wider mb-2 font-medium">03 / Gerçek Eylem</h4>
+            <h4 className="text-white text-xs sm:text-sm uppercase tracking-wider mb-2.5 font-semibold">03 / Gerçek Eylem</h4>
             <p>Büyük ve yorucu kararlar yerine, her gün hayatında kalıcı izler bırakan zarif ve sürdürülebilir adımlar at.</p>
           </div>
         </motion.div>

@@ -598,10 +598,10 @@ export const MindfulPause: React.FC = () => {
                       setPhaseProgress(0);
                     }
                   }}
-                  className={`py-2 px-2 rounded-xl text-xs font-medium transition-all text-center cursor-pointer ${
+                  className={`py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all text-center cursor-pointer ${
                     selectedPattern === patternKey
                       ? 'bg-white text-black font-semibold shadow-md'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                      : 'text-white/70 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {PATTERNS[patternKey].name.split(' ')[0]}
@@ -622,8 +622,8 @@ export const MindfulPause: React.FC = () => {
         {/* Soundscape Music Selector Toolbar */}
         <div className="relative z-10 mt-6 pt-2 pb-4 border-b border-white/5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs text-white/60 font-medium">
-              <Music size={14} className="text-white/80" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-white/75 font-medium">
+              <Music size={15} className="text-white/80" />
               <span>SES ORTAMI SEÇİMİ (MEDİTASYON MÜZİĞİ):</span>
             </div>
             <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
@@ -635,10 +635,10 @@ export const MindfulPause: React.FC = () => {
                     key={scape.id}
                     onClick={() => handleSoundscapeChange(scape.id)}
                     title={scape.desc}
-                    className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer border ${
+                    className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer border ${
                       isSelected
-                        ? 'bg-white/20 border-white/40 text-white shadow-lg backdrop-blur-md'
-                        : 'bg-white/[0.03] border-white/10 text-white/60 hover:text-white hover:bg-white/10'
+                        ? 'bg-white/20 border-white/40 text-white shadow-lg backdrop-blur-md font-semibold'
+                        : 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/10'
                     }`}
                   >
                     <IconComponent size={13} className={isSelected ? 'text-white' : 'text-white/70'} />
@@ -663,22 +663,22 @@ export const MindfulPause: React.FC = () => {
 
               {!isCompleted ? (
                 <>
-                  <h4 className="serif-font text-2xl sm:text-3xl text-white mb-2">
+                  <h4 className="serif-font text-3xl sm:text-4xl md:text-5xl text-white font-normal mb-3">
                     {isPlaying ? currentPhase.name : currentPattern.name}
                   </h4>
-                  <p className="text-white/60 text-sm sm:text-base leading-relaxed font-light min-h-[44px]">
+                  <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light min-h-[56px]">
                     {isPlaying ? currentPhase.text : currentPattern.desc}
                   </p>
                 </>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-start gap-2 text-white">
-                    <CheckCircle2 size={20} className="text-white" />
-                    <h4 className="serif-font text-2xl sm:text-3xl text-white">
+                    <CheckCircle2 size={22} className="text-white shrink-0" />
+                    <h4 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white">
                       1 Dakikalık Duraklama Tamamlandı
                     </h4>
                   </div>
-                  <p className="text-white/70 text-sm sm:text-base leading-relaxed font-light">
+                  <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light">
                     Zihnini dinlendirdin. Şimdi sayfayı daha açık bir dikkat ve dinginlikle keşfetmeye hazırsın.
                   </p>
                 </div>
@@ -701,10 +701,10 @@ export const MindfulPause: React.FC = () => {
                         : 'bg-white/[0.01] border-white/5 opacity-40'
                     }`}
                   >
-                    <div className="text-[9px] sm:text-[10px] uppercase font-mono tracking-wider text-white/60 mb-0.5">
+                    <div className="text-[10px] sm:text-xs uppercase font-mono tracking-wider text-white/70 mb-0.5 font-medium">
                       {ph.duration}s
                     </div>
-                    <div className="text-[11px] sm:text-xs text-white font-medium truncate">
+                    <div className="text-xs sm:text-sm md:text-base text-white font-semibold truncate">
                       {ph.name}
                     </div>
                   </div>
@@ -718,16 +718,16 @@ export const MindfulPause: React.FC = () => {
                 <button
                   id="btn-mindful-pause-toggle"
                   onClick={togglePlay}
-                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
                 >
                   {isPlaying ? (
                     <>
-                      <Pause size={16} />
+                      <Pause size={18} />
                       <span>Duraklat ({secondsRemaining}s kaldı)</span>
                     </>
                   ) : (
                     <>
-                      <Play size={16} className="fill-black" />
+                      <Play size={18} className="fill-black" />
                       <span>1 Dakikalık Döngüyü Başlat</span>
                     </>
                   )}
@@ -735,9 +735,9 @@ export const MindfulPause: React.FC = () => {
               ) : (
                 <button
                   onClick={startSession}
-                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
                 >
-                  <RefreshCw size={16} />
+                  <RefreshCw size={18} />
                   <span>Tekrar 1 Dakika Başlat</span>
                 </button>
               )}
@@ -867,7 +867,7 @@ export const MindfulPause: React.FC = () => {
                 }`}
               />
 
-              <div className="serif-font text-lg sm:text-xl text-white font-medium tracking-tight">
+              <div className="serif-font text-xl sm:text-2xl md:text-3xl text-white font-semibold tracking-tight">
                 {isPlaying ? currentPhase.name : isCompleted ? 'Tamamlandı' : 'Dinginlik'}
               </div>
 

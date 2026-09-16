@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type Theme = 'dark' | 'light' | 'adacayi' | 'lacivert' | 'kiremit';
+export type Theme = 'adacayi' | 'light' | 'lacivert' | 'kiremit';
 
 interface ThemeContextType {
   theme: Theme;
@@ -12,22 +12,21 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('shanti-theme');
-    return (saved === 'light' || saved === 'dark' || saved === 'adacayi' || saved === 'lacivert' || saved === 'kiremit') ? saved : 'dark';
+    const saved = localStorage.getItem('tugba-theme');
+    return (saved === 'light' || saved === 'adacayi' || saved === 'lacivert' || saved === 'kiremit') ? (saved as Theme) : 'adacayi';
   });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('shanti-theme', theme);
+    localStorage.setItem('tugba-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
     setThemeState((prev) => {
-      if (prev === 'dark') return 'light';
-      if (prev === 'light') return 'adacayi';
-      if (prev === 'adacayi') return 'lacivert';
+      if (prev === 'adacayi') return 'light';
+      if (prev === 'light') return 'lacivert';
       if (prev === 'lacivert') return 'kiremit';
-      return 'dark';
+      return 'adacayi';
     });
   };
 
@@ -49,3 +48,4 @@ export const useTheme = (): ThemeContextType => {
   }
   return context;
 };
+

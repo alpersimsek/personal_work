@@ -26,9 +26,9 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-6 sm:mb-8 flex items-center justify-center gap-2"
+          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-6 sm:mb-8 flex items-center justify-center gap-2 font-semibold"
         >
-          <Sparkles size={14} className="text-white/50" />
+          <Sparkles size={15} className="text-white/70" />
           <span>KENDİNE DÖNMEK</span>
         </motion.div>
 
@@ -51,7 +51,7 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/60 text-sm sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed font-light mb-8 sm:mb-12 px-2"
+          className="text-white/80 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light mb-8 sm:mb-12 px-2"
         >
           Bazen tek bir doğru soru, uzun süredir baktığın bir şeyi tamamen farklı görmene yeter.
         </motion.p>
@@ -68,11 +68,11 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
             onClick={onOpenBooking}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="liquid-glass rounded-full pl-6 sm:pl-8 pr-2.5 sm:pr-3 py-2.5 sm:py-3 flex items-center justify-between gap-4 text-white text-xs sm:text-sm md:text-base font-medium hover:bg-white/10 transition-all cursor-pointer border border-white/20 shadow-2xl group w-full max-w-sm"
+            className="liquid-glass rounded-full pl-7 sm:pl-9 pr-3 py-3.5 sm:py-4 flex items-center justify-between gap-4 text-white text-sm sm:text-base md:text-lg font-semibold hover:bg-white/10 transition-all cursor-pointer border border-white/25 shadow-2xl group w-full max-w-md"
           >
-            <span className="text-white/90 font-medium truncate">Tanışma Görüşmesi Planla</span>
-            <div className="bg-white rounded-full p-2 sm:p-2.5 text-black flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-1 shrink-0">
-              <ArrowRight size={16} />
+            <span className="text-white/95 font-semibold truncate">Tanışma Görüşmesi Planla</span>
+            <div className="bg-white rounded-full p-2.5 sm:p-3 text-black flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-1 shrink-0">
+              <ArrowRight size={18} />
             </div>
           </motion.button>
         </motion.div>

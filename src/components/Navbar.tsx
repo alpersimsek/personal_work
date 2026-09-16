@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { NavItem } from '../types';
 import { ThemeToggle } from './ThemeToggle';
-
 import { BrandLogo } from './BrandLogo';
+import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -18,27 +18,37 @@ const NAV_LINKS: NavItem[] = [
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
+  const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
+
     const target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Mobile menu background derived from theme
+  const getMobileMenuBg = () => {
+    switch (theme) {
+      case 'adacayi':
+        return 'bg-[#fdfaf5]/95 border-[#ddd5ca] text-[#26332e]';
+      case 'light':
+        return 'bg-[#F4EDE3]/95 border-[#D7C5B3] text-[#33261F]';
+      case 'lacivert':
+        return 'bg-[#fffdf9]/95 border-[#e2ddd4] text-[#172536]';
+      case 'kiremit':
+        return 'bg-[#fffaf0]/95 border-[#ead8b8] text-[#33261F]';
+      default:
+        return 'bg-[#0c0c0c]/95 border-white/10 text-white';
     }
   };
 
@@ -48,39 +58,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
         id="navbar-container"
         className="liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-6 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 shadow-xl relative z-50"
       >
-        {/* Left Brand & Desktop Links */}
-        <div className="flex items-center gap-3">
-          <a
-            id="nav-brand-logo"
-            href="#"
-            className="cursor-pointer flex items-center"
-          >
-            <BrandLogo size="sm" showSubtitle={true} isDark={true} />
-          </a>
+        {/* Left: Brand Logo & Monogram */}
+        <a
+          id="nav-brand-logo"
+          href="#"
+          onClick={handleLogoClick}
+          className="cursor-pointer flex items-center shrink-0 transition-opacity hover:opacity-90"
+        >
+          <BrandLogo size="sm" showSubtitle={true} />
+        </a>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8 ml-8 text-sm font-medium text-white/70">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.label}
-                id={`nav-link-${link.label.toLowerCase()}`}
-                href={link.href}
-                onClick={(e) => handleLinkClick(e, link.href)}
-                className="hover:text-white transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
+        {/* Center: Desktop Navigation Links */}
+        <div className="hidden md:flex items-center gap-7 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              id={`nav-link-${link.label.toLowerCase()}`}
+              href={link.href}
+              onClick={(e) => handleLinkClick(e, link.href)}
+              className="text-white/75 hover:text-white transition-colors py-1 cursor-pointer"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
 
-        {/* Right Section */}
-        <div className="hidden md:flex items-center gap-5">
+        {/* Right: Contact Link, Theme Selector & Booking CTA */}
+        <div className="hidden md:flex items-center gap-4 sm:gap-5">
           <a
             id="nav-link-iletisim"
             href="#iletisim"
             onClick={(e) => handleLinkClick(e, '#iletisim')}
-            className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+            className="text-xs sm:text-sm font-medium text-white/75 hover:text-white transition-colors py-1 cursor-pointer"
           >
             İletişim
           </a>
@@ -92,34 +101,36 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={onOpenBooking}
-            className="bg-white text-black px-6 py-2 rounded-full text-sm font-medium hover:bg-white/90 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
           >
-            <span>Görüşme Planla</span>
+            Görüşme Planla
           </motion.button>
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile View Controls */}
         <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle />
+          <ThemeToggle showLabel={false} />
+
           <button
             id="nav-btn-mobile-booking"
             onClick={onOpenBooking}
-            className="bg-white text-black rounded-full px-3.5 py-1.5 text-xs font-medium"
+            className="bg-white text-black rounded-full px-3.5 py-1.5 text-xs font-semibold shadow-xs"
           >
             Görüşme
           </button>
+
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-            aria-label="Menüyü aç"
+            aria-label="Menüyü aç/kapat"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Drawer Menu */}
+      {/* Mobile Navigation Drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -127,31 +138,32 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="md:hidden mt-3 max-w-5xl mx-auto liquid-glass rounded-2xl p-6 bg-[#0c0c0c]/95 border border-white/10 shadow-2xl"
+            className={`md:hidden mt-3 max-w-5xl mx-auto rounded-2xl p-6 shadow-2xl backdrop-blur-xl border ${getMobileMenuBg()}`}
           >
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-col space-y-3.5">
               {NAV_LINKS.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={(e) => handleLinkClick(e, link.href)}
-                  className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors flex items-center justify-between"
+                  className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
                 >
                   <span>{link.label}</span>
-                  <ArrowUpRight size={16} className="text-white/40" />
+                  <ArrowUpRight size={16} className="opacity-40" />
                 </a>
               ))}
+
               <a
                 href="#iletisim"
                 onClick={(e) => handleLinkClick(e, '#iletisim')}
-                className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors flex items-center justify-between"
+                className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
               >
                 <span>İletişim</span>
-                <ArrowUpRight size={16} className="text-white/40" />
+                <ArrowUpRight size={16} className="opacity-40" />
               </a>
 
-              <div className="flex items-center justify-between py-2 border-b border-white/5">
-                <span className="text-white/80 text-base font-medium">Görünüm Teması</span>
+              <div className="flex items-center justify-between py-2 border-b border-current/10">
+                <span className="text-sm font-medium">Görünüm Teması</span>
                 <ThemeToggle showLabel={true} />
               </div>
 
@@ -160,7 +172,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
                   setMobileMenuOpen(false);
                   onOpenBooking();
                 }}
-                className="w-full liquid-glass bg-white text-black font-medium py-3 rounded-full text-sm mt-2 text-center"
+                className="w-full bg-white text-black font-semibold py-3 rounded-full text-sm mt-2 text-center shadow-md cursor-pointer"
               >
                 Görüşme Planla
               </button>
@@ -171,4 +183,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     </header>
   );
 };
+
+
 

@@ -35,7 +35,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
 
           <div className="relative z-10 max-w-3xl mx-auto">
             {/* Label */}
-            <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-4 sm:mb-6">
+            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold mb-4 sm:mb-6">
               HAZIRSAN
             </div>
 
@@ -49,7 +49,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             </h2>
 
             {/* Supporting copy */}
-            <p className="text-white/60 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mx-auto mb-8 sm:mb-10 font-light px-2">
+            <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-8 sm:mb-10 font-light px-2">
               İlk görüşme, birbirimizi tanımak ve birlikte çalışmanın sana uygun olup olmadığını görmek için.
             </p>
 
@@ -61,10 +61,10 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
                 onClick={onOpenBooking}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-full px-7 sm:px-8 py-3.5 bg-white text-black font-medium text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+                className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
               >
                 <span className="whitespace-nowrap">Görüşme Planla</span>
-                <ArrowRight size={16} className="shrink-0" />
+                <ArrowRight size={18} className="shrink-0" />
               </motion.button>
 
               {/* Secondary text link */}
@@ -72,9 +72,9 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
                 id="final-cta-faq-btn"
                 type="button"
                 onClick={onOpenFAQ}
-                className="text-white/60 hover:text-white text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1.5 py-2 px-3 cursor-pointer underline underline-offset-4 decoration-white/20 hover:decoration-white whitespace-nowrap"
+                className="text-white/70 hover:text-white text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-2 py-2 px-3 cursor-pointer underline underline-offset-4 decoration-white/20 hover:decoration-white whitespace-nowrap"
               >
-                <HelpCircle size={15} className="text-white/40 shrink-0" />
+                <HelpCircle size={16} className="text-white/50 shrink-0" />
                 <span className="whitespace-nowrap">Önce merak ettiklerimi soracağım</span>
               </button>
             </div>

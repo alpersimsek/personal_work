@@ -58,10 +58,10 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
           className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-14 gap-3 sm:gap-4"
         >
           <div>
-            <div className="text-white/40 text-xs sm:text-sm tracking-widest font-medium uppercase mb-2 sm:mb-3">
+            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
               KOÇLUK ALANLARI
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl text-white tracking-tight max-w-2xl font-serif">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
               Birlikte neyin üzerinde çalışabiliriz?
             </h2>
           </div>
@@ -102,7 +102,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
               <div className="p-6 md:p-8 flex-1 flex flex-col justify-between bg-black/30">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-white/60 text-xs uppercase tracking-widest font-semibold px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                    <span className="text-white/80 text-xs sm:text-sm uppercase tracking-widest font-semibold px-3.5 py-1 rounded-full bg-white/5 border border-white/15">
                       {card.tag}
                     </span>
                     <div className="liquid-glass rounded-full p-2 text-white border border-white/20 group-hover:bg-white group-hover:text-black transition-colors">
@@ -110,15 +110,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
                     </div>
                   </div>
 
-                  <h3 className="text-white text-xl sm:text-2xl mb-3 tracking-tight font-serif">
+                  <h3 className="text-white text-2xl sm:text-3xl mb-3 tracking-tight font-serif">
                     {card.title}
                   </h3>
-                  <p className="text-white/60 text-sm leading-relaxed font-light">
+                  <p className="text-white/80 text-base sm:text-lg leading-relaxed font-light">
                     {card.description}
                   </p>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-white/5 flex items-center text-xs text-white/40 group-hover:text-white/80 transition-colors">
+                <div className="pt-6 mt-6 border-t border-white/5 flex items-center text-xs sm:text-sm text-white/60 group-hover:text-white/90 transition-colors font-medium">
                   <span>Bu alanda görüşme başlat</span>
                   <span className="ml-2 font-serif">→</span>
                 </div>

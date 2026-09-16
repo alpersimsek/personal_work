@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 interface BrandLogoProps {
   className?: string;
@@ -13,29 +14,40 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   size = 'md',
   showSubtitle = true,
   variant = 'inline',
-  isDark = true,
+  isDark: isDarkProp,
 }) => {
+  const { theme } = useTheme();
+  const isDark = isDarkProp !== undefined ? isDarkProp : false;
+
   // Dimension definitions
   const dimensions = {
     sm: {
-      emblem: 28,
-      nameText: 'text-base sm:text-lg',
-      subText: 'text-[9px]',
-      gap: 'gap-2.5',
-    },
-    md: {
-      emblem: 36,
-      nameText: 'text-lg sm:text-xl',
-      subText: 'text-[10px]',
+      emblem: 35,
+      nameText: 'text-sm sm:text-base',
+      subText: 'text-[8.5px]',
       gap: 'gap-3',
     },
+    md: {
+      emblem: 45,
+      nameText: 'text-lg sm:text-xl',
+      subText: 'text-[10px]',
+      gap: 'gap-3.5',
+    },
     lg: {
-      emblem: 48,
+      emblem: 56,
       nameText: 'text-2xl sm:text-3xl',
       subText: 'text-xs',
       gap: 'gap-4',
     },
   }[size];
+
+  // Dynamic colors for SVG gradients
+  const strokeStart = isDark ? '#FFFFFF' : '#19382F';
+  const strokeMid = isDark ? '#E4E4E7' : '#31574B';
+  const strokeEnd = isDark ? '#A1A1AA' : '#69785F';
+  const ringStart = isDark ? '#FFFFFF' : '#31574B';
+  const ringEnd = isDark ? '#52525B' : '#91A184';
+  const dotFill = isDark ? '#FFFFFF' : '#19382F';
 
   return (
     <div
@@ -55,89 +67,122 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
           className="transition-transform duration-500 group-hover:scale-105"
         >
           <defs>
-            {/* Subtle luminous metallic gradient */}
-            <linearGradient id="ts-grad" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-              <stop offset="50%" stopColor="#D4D4D8" stopOpacity="0.75" />
-              <stop offset="100%" stopColor="#A1A1AA" stopOpacity="0.5" />
+            <linearGradient id="te-grad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor={strokeStart} stopOpacity="0.98" />
+              <stop offset="45%" stopColor={strokeMid} stopOpacity="0.85" />
+              <stop offset="100%" stopColor={strokeEnd} stopOpacity="0.75" />
             </linearGradient>
 
-            <linearGradient id="ts-ring-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.8" />
-              <stop offset="40%" stopColor="#A1A1AA" stopOpacity="0.3" />
-              <stop offset="80%" stopColor="#52525B" stopOpacity="0.1" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.5" />
+            <linearGradient id="te-ring-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor={ringStart} stopOpacity="0.85" />
+              <stop offset="40%" stopColor={strokeMid} stopOpacity="0.4" />
+              <stop offset="75%" stopColor={ringEnd} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={ringStart} stopOpacity="0.6" />
             </linearGradient>
 
-            <radialGradient id="ts-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
+            <radialGradient id="te-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor={strokeStart} stopOpacity="0.18" />
+              <stop offset="100%" stopColor={strokeStart} stopOpacity="0" />
             </radialGradient>
           </defs>
 
           {/* Background Ambient Glow on Hover */}
-          <circle cx="24" cy="24" r="22" fill="url(#ts-glow)" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <circle cx="24" cy="24" r="22" fill="url(#te-glow)" className="opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-          {/* Outer Harmonious Zen Ring with elegant subtle gap for openness */}
+          {/* Double Luxury Frame: Outer Harmonious Precision Ring */}
           <circle
             cx="24"
             cy="24"
-            r="21"
-            stroke="url(#ts-ring-grad)"
+            r="21.5"
+            stroke="url(#te-ring-grad)"
             strokeWidth="1.25"
             strokeLinecap="round"
-            strokeDasharray="115 15"
+            strokeDasharray="122 10"
             className="transition-all duration-700 group-hover:rotate-45 origin-center"
           />
-
-          {/* Inner Minimal Monogram: T + Ş architectural synthesis */}
-          {/* Top crossbar for T */}
-          <line
-            x1="15"
-            y1="15"
-            x2="33"
-            y2="15"
-            stroke="url(#ts-grad)"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-
-          {/* Vertical central stem for T */}
-          <line
-            x1="24"
-            y1="15"
-            x2="24"
-            y2="33"
-            stroke="url(#ts-grad)"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-
-          {/* Flowing harmonic S curve intersecting with T */}
-          <path
-            d="M 30 19 C 29 16.5 21 16.5 21 21.5 C 21 25.5 28 25.2 28 29.5 C 28 33.2 21 33.5 18 31.5"
-            stroke="url(#ts-grad)"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            fill="none"
-          />
-
-          {/* Jewel-like cedilla accent dot for 'Ş' beneath stem */}
           <circle
             cx="24"
-            cy="37.5"
-            r="1.4"
-            fill="#FFFFFF"
-            className="opacity-80 group-hover:opacity-100 transition-opacity"
+            cy="24"
+            r="18.5"
+            stroke={isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(25, 56, 47, 0.15)"}
+            strokeWidth="0.75"
+            strokeDasharray="2 4"
           />
 
-          {/* Subtle balanced mindful focal dot on the left symbolizing awareness */}
+          {/* Charismatic Interlocking Monogram: T + E Synthesis */}
+          {/* Top Roof Bar for T */}
+          <line
+            x1="13"
+            y1="14.5"
+            x2="35"
+            y2="14.5"
+            stroke="url(#te-grad)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+
+          {/* Left Serif accent on T top bar */}
+          <line
+            x1="13"
+            y1="14.5"
+            x2="13"
+            y2="18"
+            stroke="url(#te-grad)"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+
+          {/* Main Central Vertical Spine (Shared for T & E) */}
+          <line
+            x1="21"
+            y1="14.5"
+            x2="21"
+            y2="33.5"
+            stroke="url(#te-grad)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+
+          {/* Middle Wing for E */}
+          <line
+            x1="21"
+            y1="24"
+            x2="31"
+            y2="24"
+            stroke="url(#te-grad)"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+
+          {/* Bottom Base for E */}
+          <line
+            x1="21"
+            y1="33.5"
+            x2="34"
+            y2="33.5"
+            stroke="url(#te-grad)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
+
+          {/* Upward Right Serif accent on E bottom base */}
+          <line
+            x1="34"
+            y1="33.5"
+            x2="34"
+            y2="30"
+            stroke="url(#te-grad)"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+          />
+
+          {/* Luminous Mindful Focal Accent Dot beneath TE monogram */}
           <circle
-            cx="16"
-            cy="24"
-            r="1.2"
-            fill="#FFFFFF"
-            className="opacity-50 group-hover:opacity-100 transition-opacity"
+            cx="21"
+            cy="37.5"
+            r="1.3"
+            fill={dotFill}
+            className="opacity-85 group-hover:opacity-100 transition-opacity"
           />
         </svg>
       </div>
@@ -149,7 +194,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
             isDark ? 'text-white group-hover:text-white/90' : 'text-neutral-900 group-hover:text-neutral-800'
           } ${dimensions.nameText}`}
         >
-          Tuğba Şimşek
+          Tuğba Ergüner Şimşek
         </span>
 
         {showSubtitle && (
@@ -165,3 +210,4 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     </div>
   );
 };
+

@@ -8,18 +8,11 @@ interface HeroSectionProps {
   onOpenBooking: () => void;
 }
 
-const DARK_HERO_VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_074625_a81f018a-956b-43fb-9aee-4d1508e30e6a.mp4';
-
 const LIGHT_HERO_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_124724_bc041163-d651-425f-aea3-2acc1efc2c96.mp4';
 
-const LIGHT_HERO_VIDEO_URL_2 =
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/45567745-d826-44a2-a5ce-7ef670944e60.mp4'
-
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
   const { theme } = useTheme();
-  const isLight = theme === 'light';
   const videoRef = useRef<HTMLVideoElement>(null);
   const isFadingOutRef = useRef<boolean>(false);
   const animFrameRef = useRef<number | null>(null);
@@ -127,7 +120,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
         <video
           key={theme}
           ref={videoRef}
-          src={theme === 'dark' ? DARK_HERO_VIDEO_URL : LIGHT_HERO_VIDEO_URL}
+          src={LIGHT_HERO_VIDEO_URL}
           muted
           autoPlay
           playsInline
@@ -152,15 +145,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
             <div className="absolute inset-0 bg-gradient-to-b from-[#fdfaf5]/80 via-[#f7f1e8]/50 to-[#fdfaf5]/90 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(253,250,245,0.65)_85%)] pointer-events-none" />
           </>
-        ) : isLight ? (
+        ) : (
           <>
             <div className="absolute inset-0 bg-gradient-to-b from-[#F4EDE3]/75 via-[#F4EDE3]/45 to-[#F4EDE3]/90 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(244,237,227,0.6)_85%)] pointer-events-none" />
-          </>
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-black/50 backdrop-brightness-90 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_rgba(0,0,0,0.6)_100%)] pointer-events-none" />
           </>
         )}
       </div>
@@ -175,7 +163,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
 
 
       {/* Hero Center Content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 py-10 sm:py-12 text-center -mt-4 sm:-mt-8 md:-mt-16 w-full max-w-4xl mx-auto">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 pt-28 sm:pt-36 pb-12 sm:pb-16 text-center w-full max-w-4xl mx-auto">
         {/* Main Heading */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -272,7 +260,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
         </a>
         <a
           id="social-link-email"
-          href="mailto:iletisim@shanticoaching.com"
+          href="mailto:iletisim@tugbaergunersimsek.com"
           className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
           aria-label="E-posta Gönder"
         >

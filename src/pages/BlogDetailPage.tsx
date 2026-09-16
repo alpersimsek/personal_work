@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BlogPost } from '../types';
+import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
@@ -129,7 +129,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
     <div className="bg-black text-white min-h-screen flex flex-col w-full selection:bg-white/20 font-sans blog-scope">
       <Navbar onOpenBooking={onOpenBooking} />
 
-      <main className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
+      <main className="flex-1 pt-28 sm:pt-32 pb-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
         {/* Back Link */}
         <button
           onClick={onNavigateBack}
