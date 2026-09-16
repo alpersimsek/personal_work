@@ -24,7 +24,7 @@ const FAQS: FAQItem[] = [
   },
   {
     question: 'İlk tanışma görüşmesinde ne konuşuyoruz?',
-    answer: '25 dakikalık ücretsiz tanışma görüşmesinde nerede hissettiğinizi, koçluktan beklentilerinizi ve birlikte çalışmanın aramızdaki enerji ve yöntem açısından uygun olup olmadığını sakin bir şekilde konuşuruz.',
+    answer: '15 dakikalık ücretsiz tanışma görüşmesinde nerede hissettiğinizi, koçluktan beklentilerinizi ve birlikte çalışmanın aramızdaki enerji ve yöntem açısından uygun olup olmadığını sakin bir şekilde konuşuruz.',
   },
   {
     question: 'Koçluk seanslarında bana ne yapmam gerektiği söylenecek mi?',

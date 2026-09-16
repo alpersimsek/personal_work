@@ -110,7 +110,7 @@ export default async function handler(req, res) {
       // Filter slots that overlap with busy times
       const freeSlots = standardSlots.filter(slot => {
         const slotStart = new Date(`${date}T${slot}:00Z`).getTime();
-        const slotEnd = slotStart + 25 * 60 * 1000;
+        const slotEnd = slotStart + 15 * 60 * 1000;
 
         return !busyList.some(busy => {
           const busyStart = new Date(busy.start).getTime();
@@ -185,7 +185,7 @@ export default async function handler(req, res) {
       const calendarId = process.env.GOOGLE_CALENDAR_ID || 'primary';
 
       const startTime = new Date(`${date}T${timeSlot}:00Z`);
-      const endTime = new Date(startTime.getTime() + 25 * 60 * 1000); // 25-minute consultation
+      const endTime = new Date(startTime.getTime() + 15 * 60 * 1000); // 15-minute consultation
 
       const event = {
         summary: `Shanti Tanışma Görüşmesi - ${cleanName}`,
