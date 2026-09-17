@@ -6,12 +6,14 @@ import { useTheme } from '../context/ThemeContext';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
+  onNavigateHome?: (sectionHref?: string) => void;
+  onNavigateBlog?: () => void;
 }
 
 const LIGHT_HERO_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_124724_bc041163-d651-425f-aea3-2acc1efc2c96.mp4';
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();
   const videoRef = useRef<HTMLVideoElement>(null);
   const isFadingOutRef = useRef<boolean>(false);
@@ -156,11 +158,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking }) => {
       {/* Atmospheric Background Glow Spots */}
       <div className="glow-spot -top-48 -left-48" />
       <div className="glow-spot -bottom-48 -right-48" />
-
-      {/* Top Navbar */}
-      <Navbar onOpenBooking={onOpenBooking} />
-
-
 
       {/* Hero Center Content */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-8 md:px-12 pt-28 sm:pt-36 pb-12 sm:pb-16 text-center w-full max-w-6xl mx-auto">

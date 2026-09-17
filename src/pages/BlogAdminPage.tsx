@@ -206,7 +206,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   if (!isLoggedIn) {
     return (
-      <div className="bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col justify-center items-center p-4">
+      <div className="admin-scope bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col justify-center items-center p-4">
         <AdminLoginModal
           isOpen={true}
           onClose={onNavigateHome}
@@ -220,13 +220,13 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   }
 
   return (
-    <div className="bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col w-full selection:bg-neutral-900 selection:text-white font-sans">
+    <div className="admin-scope bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col w-full selection:bg-neutral-900 selection:text-white font-sans">
       {/* Pristine Light Luxury Top Navigation Header */}
       <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-5">
           <button
             onClick={onNavigateHome}
-            className="p-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+            className="p-2 rounded-xl bg-neutral-100 text-neutral-700 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
             title="Ana Sayfaya Dön"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,7 +247,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onNavigateBlog}
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-xs font-semibold text-neutral-800 hover:text-neutral-900 border border-neutral-200 transition-colors cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 cursor-pointer"
           >
             Blog Sayfası
           </button>
@@ -255,7 +255,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           <button
             onClick={handleExportJSON}
             title="Tüm makaleleri JSON yedeği olarak indir"
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-xs font-semibold text-neutral-800 hover:text-neutral-900 border border-neutral-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 flex items-center gap-1.5 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -265,7 +265,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
           <label
             title="Yedek dosyasından yükle"
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-xs font-semibold text-neutral-800 hover:text-neutral-900 border border-neutral-200 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 cursor-pointer flex items-center gap-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -276,7 +276,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-semibold text-rose-700 hover:text-rose-900 transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 flex items-center gap-1.5 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -293,20 +293,20 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('list')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
                 activeTab === 'list'
                   ? 'bg-stone-200 text-stone-900 border border-stone-300 shadow-xs'
-                  : 'bg-white text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-stone-200 font-semibold'
+                  : 'bg-white text-stone-600 border border-stone-200 font-semibold'
               }`}
             >
               Makale Arşivi ({posts.length})
             </button>
             <button
               onClick={() => setActiveTab('editor')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
                 activeTab === 'editor'
                   ? 'bg-stone-200 text-stone-900 border border-stone-300 shadow-xs'
-                  : 'bg-white text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-stone-200 font-semibold'
+                  : 'bg-white text-stone-600 border border-stone-200 font-semibold'
               }`}
             >
               {editingPost ? 'Makaleyi Düzenle' : 'Yeni Makale Yaz'}
@@ -316,7 +316,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           {activeTab === 'list' && (
             <button
               onClick={handleStartNewPost}
-              className="px-5 py-2.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-900 text-xs font-bold border border-stone-300 transition-all flex items-center gap-2 shadow-xs cursor-pointer"
+              className="px-5 py-2.5 rounded-xl bg-stone-200 text-stone-900 text-xs font-bold border border-stone-300 flex items-center gap-2 shadow-xs cursor-pointer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -338,7 +338,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 {posts.map((post) => (
                   <div
                     key={post.id}
-                    className="p-5 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xs transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="p-5 rounded-2xl bg-white border border-neutral-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
                     <div className="flex items-start gap-4 flex-1">
                       <img
@@ -383,10 +383,10 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     <div className="flex items-center gap-2.5 self-end md:self-center shrink-0">
                       <button
                         onClick={() => handleTogglePublish(post.id)}
-                        className={`px-3.5 py-2 rounded-xl text-xs transition-colors font-semibold cursor-pointer ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
                           post.published
-                            ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
-                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                            ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                            : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                         }`}
                       >
                         {post.published ? 'Taslağa Al' : 'Yayınla'}
@@ -394,14 +394,14 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
                       <button
                         onClick={() => handleStartEdit(post)}
-                        className="px-3.5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 hover:text-neutral-900 text-xs border border-neutral-200 transition-colors font-semibold cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-neutral-100 text-neutral-800 text-xs border border-neutral-200 font-semibold cursor-pointer"
                       >
                         Düzenle
                       </button>
 
                       <button
                         onClick={() => handleDelete(post.id, post.title)}
-                        className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-800 border border-rose-200 transition-colors cursor-pointer"
+                        className="p-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 cursor-pointer"
                         title="Sil"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -440,7 +440,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   onChange={(e) => setTitle(e.target.value)}
                   required
                   placeholder="Örn: Bulanıklıktan Netliğe: Karar Alma Süreçleri"
-                  className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm sm:text-base font-medium focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                  className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm sm:text-base font-medium focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
                 />
               </div>
 
@@ -451,7 +451,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as BlogCategory)}
-                  className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 text-sm font-medium focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                  className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 text-sm font-medium focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
                 >
                   {CATEGORIES.map((cat) => (
                     <option key={cat} value={cat} className="bg-white text-neutral-900">
@@ -471,7 +471,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 value={summary}
                 onChange={(e) => setSummary(e.target.value)}
                 placeholder="Makalenizin 1-2 cümlelik dikkat çekici özeti..."
-                className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 resize-none transition-all"
+                className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 resize-none transition-all"
               />
             </div>
 
@@ -484,7 +484,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="text-[11px] font-semibold text-stone-600 hover:text-stone-900 underline cursor-pointer"
+                  className="text-[11px] font-semibold text-stone-600 underline cursor-pointer"
                 >
                   {showUrlInput ? 'Dosya Yükleme Moduna Dön' : 'veya Görsel Bağlantısı (URL) Gir'}
                 </button>
@@ -497,7 +497,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     value={coverImage}
                     onChange={(e) => setCoverImage(e.target.value)}
                     placeholder="https://images.unsplash.com/..."
-                    className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                    className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
                   />
                   <p className="text-[11px] text-neutral-500 mt-1">
                     Harici web adresi girildiğinde otomatik kırpma uygulanmaz.
@@ -534,7 +534,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                         </p>
 
                         <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-                          <label className="px-3.5 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-900 text-xs font-bold border border-stone-300 transition-all cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
+                          <label className="px-3.5 py-1.5 rounded-xl bg-stone-200 text-stone-900 text-xs font-bold border border-stone-300 cursor-pointer inline-flex items-center gap-1.5 shadow-xs">
                             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
@@ -550,7 +550,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                           <button
                             type="button"
                             onClick={() => setCoverImage('')}
-                            className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 transition-colors cursor-pointer"
+                            className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200 cursor-pointer"
                           >
                             Görseli Kaldır
                           </button>
@@ -558,7 +558,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <label className="relative border-2 border-dashed border-stone-300 hover:border-stone-400 bg-stone-50/60 hover:bg-stone-100/80 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all text-center group">
+                    <label className="relative border-2 border-dashed border-stone-300 bg-stone-50/60 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all text-center">
                       <input
                         type="file"
                         accept="image/png, image/jpeg, image/jpg, image/webp"
@@ -576,7 +576,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                         </div>
                       ) : (
                         <>
-                          <div className="w-12 h-12 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-700 mb-3 shadow-xs group-hover:scale-105 transition-transform">
+                          <div className="w-12 h-12 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-stone-700 mb-3 shadow-xs">
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
@@ -605,7 +605,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   value={readTime}
                   onChange={(e) => setReadTime(e.target.value)}
                   placeholder="Örn: 5 dk okuma"
-                  className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                  className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
                 />
               </div>
 
@@ -618,7 +618,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
                   placeholder="Karar Alma, Farkındalık, Koçluk"
-                  className="w-full px-4 py-3 bg-[#F8F8F9] hover:bg-white border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                  className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
                 />
               </div>
             </div>
@@ -638,7 +638,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="# Başlık 1&#10;&#10;Paragraf metninizi buraya rahatça yazabilirsiniz...&#10;&#10;## Alt Başlık&#10;> İlham veren alıntı cümlesi..."
-                className="w-full p-6 bg-[#FAFAFA] hover:bg-white border border-neutral-300 rounded-2xl text-neutral-900 placeholder-neutral-400 text-base leading-relaxed font-sans focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-inner"
+                className="w-full p-6 bg-[#FAFAFA] border border-neutral-300 rounded-2xl text-neutral-900 placeholder-neutral-400 text-base leading-relaxed font-sans focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-inner"
               />
             </div>
 
@@ -670,13 +670,13 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab('list')}
-                className="px-6 py-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 hover:text-neutral-900 text-xs font-semibold transition-colors cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-semibold cursor-pointer"
               >
                 İptal
               </button>
               <button
                 type="submit"
-                className="px-8 py-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-900 font-bold border border-stone-300 text-xs transition-all shadow-xs cursor-pointer"
+                className="px-8 py-3 rounded-xl bg-stone-200 text-stone-900 font-bold border border-stone-300 text-xs shadow-xs cursor-pointer"
               >
                 {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}
               </button>

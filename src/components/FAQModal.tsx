@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronDown, HelpCircle, ArrowRight } from 'lucide-react';
 import { FAQItem } from '../types';
@@ -39,37 +40,40 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
-  return (
+  if (!isOpen) return null;
+
+  const modalJSX = (
     <AnimatePresence>
       {isOpen && (
-        <div id="faq-modal-root" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div id="faq-modal-root" className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-0"
           />
 
-          {/* Modal Container */}
+          {/* Modal Container - 100% Viewport Centered via Portal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-2xl liquid-glass rounded-3xl p-6 sm:p-10 text-white z-10 my-8 shadow-2xl bg-[#0a0a0a]/95 border border-white/10 max-h-[85vh] flex flex-col"
+            className="relative w-full max-w-2xl liquid-glass rounded-3xl p-5 sm:p-8 md:p-10 text-white z-10 my-auto shadow-2xl bg-[#0a0a0a]/98 border border-white/15 max-h-[90vh] flex flex-col overflow-hidden text-left"
           >
             {/* Header */}
             <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <div className="flex items-center gap-2 text-white/50 text-xs tracking-widest uppercase">
+              <div className="flex items-center gap-2 text-white/50 text-xs tracking-widest uppercase font-mono">
                 <HelpCircle size={16} className="text-white/70" />
                 <span>MERAK EDİLENLER</span>
               </div>
               <button
                 id="btn-close-faq"
                 onClick={onClose}
-                className="p-2 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-20 border border-white/10 bg-black/40"
                 aria-label="Kapat"
               >
                 <X size={20} />
@@ -77,22 +81,22 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
             </div>
 
             <div className="py-4">
-              <h3 className="text-2xl sm:text-3xl font-serif tracking-tight text-white mb-1">
+              <h3 className="text-2xl sm:text-3xl serif-font tracking-tight text-white mb-1">
                 Sıkça Sorulan Sorular
               </h3>
-              <p className="text-white/60 text-sm">
+              <p className="text-white/60 text-sm font-sans">
                 Sürece başlamadan önce aklınıza takılabilecek temel noktalar.
               </p>
             </div>
 
             {/* Accordion List */}
-            <div className="overflow-y-auto space-y-3 pr-2 py-2 flex-1">
+            <div className="overflow-y-auto space-y-3 pr-2 py-2 flex-1 font-sans">
               {FAQS.map((faq, idx) => {
                 const isOpenItem = openIndex === idx;
                 return (
                   <div
                     key={idx}
-                    className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.02] transition-colors"
+                    className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.03] transition-colors"
                   >
                     <button
                       type="button"
@@ -116,7 +120,7 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
                           transition={{ duration: 0.25 }}
                           className="overflow-hidden"
                         >
-                          <div className="px-5 pb-4 text-sm text-white/60 leading-relaxed border-t border-white/5 pt-3">
+                          <div className="px-5 pb-4 text-sm text-white/70 leading-relaxed border-t border-white/5 pt-3 font-sans">
                             {faq.answer}
                           </div>
                         </motion.div>
@@ -128,9 +132,9 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
             </div>
 
             {/* Bottom CTA within FAQ */}
-            <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
+            <div className="pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 mt-2 font-sans">
               <p className="text-xs text-white/50 text-center sm:text-left">
-                Başka bir sorun mu var? Tanışma görüşmesinde doğrudan konuşabiliriz.
+                Başka bir sorunuz mu var? Tanışma görüşmesinde doğrudan konuşabiliriz.
               </p>
               <button
                 id="btn-faq-to-booking"
@@ -149,4 +153,6 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
       )}
     </AnimatePresence>
   );
+
+  return createPortal(modalJSX, document.body);
 };

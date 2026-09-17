@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeroSection } from '../components/HeroSection';
 import { MindfulPause } from '../components/MindfulPause';
 import { SelfReflectionGuide } from '../components/SelfReflectionGuide';
@@ -21,17 +21,33 @@ interface IndexPageProps {
   onNavigateBlog?: () => void;
   onSelectPost?: (post: BlogPost) => void;
   onOpenLogin?: () => void;
+  onNavigateHome?: (sectionHref?: string) => void;
+  targetSection?: string | null;
 }
 
 export const IndexPage: React.FC<IndexPageProps> = ({
   onNavigateBlog,
   onSelectPost,
   onOpenLogin,
+  onNavigateHome,
+  targetSection,
 }) => {
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState<'netlik' | 'donusum' | 'diger'>('netlik');
   const [bookingNote, setBookingNote] = useState<string>('');
+
+  useEffect(() => {
+    if (targetSection) {
+      const timer = setTimeout(() => {
+        const el = document.querySelector(targetSection);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [targetSection]);
 
   const handleOpenBooking = (topic?: 'netlik' | 'donusum' | 'diger', note?: string) => {
     if (topic) {
@@ -54,7 +70,7 @@ export const IndexPage: React.FC<IndexPageProps> = ({
   return (
     <div className="bg-black text-white min-h-screen selection:bg-white/20 selection:text-white flex flex-col w-full overflow-x-hidden">
       {/* 1. Hero Section */}
-      <HeroSection onOpenBooking={() => handleOpenBooking('netlik')} />
+      <HeroSection onOpenBooking={() => handleOpenBooking('netlik')} onNavigateHome={onNavigateHome} onNavigateBlog={onNavigateBlog} />
 
       {/* 2. Feature 2: "Bir Dakikalık Duraklama" (Mindful Ambient Pause) */}
       <MindfulPause />
@@ -101,12 +117,13 @@ export const IndexPage: React.FC<IndexPageProps> = ({
       />
 
       {/* Footer */}
-      <Footer onOpenBooking={() => handleOpenBooking('netlik')} />
+      <Footer onOpenBooking={() => handleOpenBooking('netlik')} onNavigateHome={onNavigateHome} onNavigateBlog={onNavigateBlog} />
 
       {/* Feature 4: Interactive Google Meet Consultation & Slot Selection Modal */}
       <ConsultationModal
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}
+        onOpenFAQ={() => setFaqModalOpen(true)}
         initialTopic={selectedTopic}
         initialNote={bookingNote}
       />

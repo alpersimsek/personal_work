@@ -8,6 +8,8 @@ import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenBooking: () => void;
+  onNavigateHome?: (sectionHref?: string) => void;
+  onNavigateBlog?: () => void;
 }
 
 const NAV_LINKS: NavItem[] = [
@@ -17,7 +19,7 @@ const NAV_LINKS: NavItem[] = [
   { label: 'Blog', href: '#blog' },
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -28,11 +30,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
     const target = document.querySelector(href);
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    if (href === '#blog' && onNavigateBlog) {
+      onNavigateBlog();
+      return;
+    }
+
+    if (onNavigateHome) {
+      onNavigateHome(href);
     }
   };
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    if (onNavigateHome) {
+      onNavigateHome();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -53,10 +68,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
   };
 
   return (
-    <header className="relative z-50 px-4 sm:px-12 pt-6 sm:pt-10 w-full">
+    <header className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-12 pt-4 sm:pt-6 w-full pointer-events-none transition-all duration-300">
       <nav
         id="navbar-container"
-        className="liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-6 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 shadow-xl relative z-50"
+        className="pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-6 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 shadow-xl relative z-50"
       >
         {/* Left: Brand Logo & Monogram */}
         <a
@@ -138,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className={`md:hidden mt-3 max-w-5xl mx-auto rounded-2xl p-6 shadow-2xl backdrop-blur-xl border ${getMobileMenuBg()}`}
+            className={`pointer-events-auto md:hidden mt-3 max-w-5xl mx-auto rounded-2xl p-6 shadow-2xl backdrop-blur-xl border ${getMobileMenuBg()}`}
           >
             <div className="flex flex-col space-y-3.5">
               {NAV_LINKS.map((link) => (

@@ -4,15 +4,36 @@ import { BrandLogo } from './BrandLogo';
 
 interface FooterProps {
   onOpenBooking: () => void;
+  onNavigateHome?: (sectionHref?: string) => void;
+  onNavigateBlog?: () => void;
+  onOpenLogin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const handleScrollTo = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
     const el = document.querySelector(href);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
+      return;
     }
+
+    if (href === '#blog' && onNavigateBlog) {
+      onNavigateBlog();
+      return;
+    }
+
+    if (onNavigateHome) {
+      onNavigateHome(href);
+    }
+  };
+
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (onNavigateHome) {
+      onNavigateHome();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -23,7 +44,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking }) => {
           {/* Brand & Subtext */}
           <div>
             <div className="mb-2">
-              <BrandLogo size="md" showSubtitle={true} isDark={true} />
+              <a
+                href="#"
+                onClick={handleLogoClick}
+                className="cursor-pointer inline-block transition-opacity hover:opacity-90"
+              >
+                <BrandLogo size="md" showSubtitle={true} isDark={true} />
+              </a>
             </div>
             <p className="text-white/50 text-xs sm:text-sm font-light mt-1">
               Kendine daha yakın bir yaşam için.

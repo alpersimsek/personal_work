@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -8,6 +9,7 @@ import {
   ExternalLink,
   Loader2,
   MessageCircle,
+  HelpCircle,
 } from 'lucide-react';
 import { BookingFormData } from '../types';
 import { submitManualBooking, generateWhatsAppLink } from '../services/calendarService';
@@ -15,6 +17,7 @@ import { submitManualBooking, generateWhatsAppLink } from '../services/calendarS
 interface ConsultationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenFAQ?: () => void;
   initialTopic?: 'netlik' | 'donusum' | 'diger';
   initialNote?: string;
 }
@@ -22,6 +25,7 @@ interface ConsultationModalProps {
 export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   isOpen,
   onClose,
+  onOpenFAQ,
   initialTopic = 'netlik',
   initialNote = '',
 }) => {
@@ -64,7 +68,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
         setCreatedWhatsAppUrl(response.whatsAppUrl);
       }
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setIsSubmitting(false);
       setSubmitted(true);
     }
@@ -85,30 +89,32 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     onClose();
   };
 
-  return (
+  if (!isOpen) return null;
+
+  const modalJSX = (
     <AnimatePresence>
       {isOpen && (
         <div
           id="consultation-modal-root"
-          className="fixed inset-0 z-50 overflow-y-auto overflow-x-hidden p-3 sm:p-6 flex items-start justify-center"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6"
         >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/90 backdrop-blur-md"
+            className="fixed inset-0 bg-black/90 backdrop-blur-md z-0"
           />
 
-          {/* Modal Card */}
+          {/* Modal Card - 100% Viewport Centered via Portal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: 15 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 15 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-xl liquid-glass rounded-3xl p-5 sm:p-8 md:p-10 text-white z-10 my-6 sm:my-10 shadow-2xl bg-[#0c0c0c]/98 border border-white/15 text-left"
+            className="relative w-full max-w-xl liquid-glass rounded-3xl p-5 sm:p-8 md:p-10 text-white z-10 shadow-2xl bg-[#0c0c0c]/98 border border-white/15 text-left my-auto max-h-[90vh] overflow-y-auto"
           >
             {/* Close Button */}
             <button
@@ -152,6 +158,28 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     </div>
                   </div>
                 </div>
+
+                {/* FAQ Quick Link Banner */}
+                {onOpenFAQ && (
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10 mb-5">
+                    <div className="flex items-center gap-2 text-xs text-white/80">
+                      <HelpCircle size={15} className="text-white/70 shrink-0" />
+                      <span>Aklınıza takılan sorular mı var?</span>
+                    </div>
+                    <button
+                      type="button"
+                      id="btn-modal-open-faq"
+                      onClick={() => {
+                        onClose();
+                        onOpenFAQ();
+                      }}
+                      className="text-[11px] sm:text-xs font-semibold text-white hover:text-white/90 bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                    >
+                      <span>Sıkça Sorulan Sorular</span>
+                      <ArrowRight size={12} />
+                    </button>
+                  </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Anti-bot Honeypot Input */}
@@ -322,6 +350,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalJSX, document.body)
+    : null;
 };
 
 

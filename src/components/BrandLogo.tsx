@@ -7,6 +7,7 @@ interface BrandLogoProps {
   showSubtitle?: boolean;
   variant?: 'inline' | 'stacked';
   isDark?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export const BrandLogo: React.FC<BrandLogoProps> = ({
@@ -15,6 +16,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   showSubtitle = true,
   variant = 'inline',
   isDark: isDarkProp,
+  onClick,
 }) => {
   const { theme } = useTheme();
   const isDark = isDarkProp !== undefined ? isDarkProp : false;
@@ -52,9 +54,10 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div
       id="brand-logo-tugba-simsek"
+      onClick={onClick}
       className={`group inline-flex ${
         variant === 'stacked' ? 'flex-col items-center text-center' : 'items-center'
-      } ${dimensions.gap} ${className} select-none`}
+      } ${dimensions.gap} ${className} ${onClick ? 'cursor-pointer' : ''} select-none`}
     >
       {/* Emblem / Monogram Icon */}
       <div className="relative shrink-0 flex items-center justify-center">
