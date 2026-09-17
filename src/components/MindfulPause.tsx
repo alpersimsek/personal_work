@@ -104,6 +104,16 @@ export const MindfulPause: React.FC = () => {
   const [phaseProgress, setPhaseProgress] = useState(0); // 0 to 1 inside current phase
   const [phaseTimeLeft, setPhaseTimeLeft] = useState(4);
   const [completedCycles, setCompletedCycles] = useState(0);
+  const [isMobileScreen, setIsMobileScreen] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileScreen(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
@@ -513,18 +523,20 @@ export const MindfulPause: React.FC = () => {
   const isHoldingPhase = currentPhase.name.includes('Tut');
   const isExhalingPhase = currentPhase.name.includes('Ver') || currentPhase.name.includes('Dingin');
 
+  const scaleDelta = isMobileScreen ? 0.20 : 0.45;
+
   let currentScale = 1;
   let glowOpacity = 0.2;
 
   if (isPlaying) {
     if (isExpandingPhase) {
-      currentScale = 1 + phaseProgress * 0.45;
+      currentScale = 1 + phaseProgress * scaleDelta;
       glowOpacity = 0.2 + phaseProgress * 0.45;
     } else if (isHoldingPhase) {
-      currentScale = 1.45;
+      currentScale = 1 + scaleDelta;
       glowOpacity = 0.65;
     } else if (isExhalingPhase) {
-      currentScale = 1.45 - phaseProgress * 0.45;
+      currentScale = (1 + scaleDelta) - phaseProgress * scaleDelta;
       glowOpacity = 0.65 - phaseProgress * 0.45;
     }
   }
@@ -538,9 +550,16 @@ export const MindfulPause: React.FC = () => {
 
   const totalProgressFraction = (TOTAL_SESSION_SECONDS - secondsRemaining) / TOTAL_SESSION_SECONDS;
 
+  const gridColsClass =
+    currentPattern.phases.length === 2
+      ? 'grid-cols-2'
+      : currentPattern.phases.length === 3
+      ? 'grid-cols-3'
+      : 'grid-cols-4';
+
   return (
     <div id="mindful-pause-section" className="w-full max-w-6xl mx-auto my-8 sm:my-14 md:my-16 px-4 sm:px-6">
-      <div className="liquid-glass rounded-3xl p-5 sm:p-8 md:p-12 border border-white/15 bg-gradient-to-b from-white/[0.04] via-black/60 to-black/90 relative overflow-hidden shadow-2xl">
+      <div className="liquid-glass rounded-3xl p-4 sm:p-8 md:p-12 border border-white/15 bg-gradient-to-b from-white/[0.04] via-black/60 to-black/90 relative overflow-hidden shadow-2xl">
         {/* Soft Ambient Radiance in Background */}
         <div
           className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-white/[0.03] filter blur-3xl pointer-events-none transition-opacity duration-1000"
@@ -552,11 +571,11 @@ export const MindfulPause: React.FC = () => {
         />
 
         {/* Top Header Row with High-Visibility Countdown Badge */}
-        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 sm:pb-8 border-b border-white/10 text-left">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2.5 text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3">
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-              <Wind size={15} className="text-white/80" />
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 sm:pb-8 border-b border-white/10 text-center md:text-left">
+          <div className="max-w-xl flex flex-col items-center md:items-start mx-auto md:mx-0">
+            <div className="flex items-center justify-center md:justify-start gap-2.5 text-white/50 text-[11px] sm:text-sm tracking-[0.2em] sm:tracking-[0.25em] uppercase font-medium mb-2 sm:mb-3">
+              <div className="w-2 h-2 rounded-full bg-white animate-pulse shrink-0" />
+              <Wind size={15} className="text-white/80 shrink-0" />
               <span>BİR DAKİKALIK DİNGİNLİK REHBERİ</span>
             </div>
             <h3 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight">
@@ -567,21 +586,21 @@ export const MindfulPause: React.FC = () => {
           {/* 1-Minute Live Prominent Countdown Display & Pattern Switcher */}
           <div className="flex flex-col gap-2.5 w-full sm:w-[320px] self-start md:self-end">
             {/* Timer card */}
-            <div className="liquid-glass rounded-2xl px-4 py-2.5 sm:px-5 sm:py-2.5 flex items-center justify-between gap-3 border border-white/20 bg-white/[0.05] shadow-xl w-full">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
-                  <Timer size={16} className={isPlaying ? 'animate-pulse text-white' : 'text-white/70'} />
+            <div className="liquid-glass rounded-2xl px-3.5 py-2 sm:px-5 sm:py-2.5 flex items-center justify-between gap-3 border border-white/20 bg-white/[0.05] shadow-xl w-full">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/10 flex items-center justify-center text-white shrink-0">
+                  <Timer size={15} className={isPlaying ? 'animate-pulse text-white' : 'text-white/70'} />
                 </div>
                 <div className="text-left font-mono">
-                  <span className="text-[10px] text-white/50 block leading-none uppercase tracking-widest font-sans font-medium mb-1">
+                  <span className="text-[9px] sm:text-[10px] text-white/50 block leading-none uppercase tracking-widest font-sans font-medium mb-0.5 sm:mb-1">
                     1 DAKİKA SAYAÇ
                   </span>
-                  <span className="text-base sm:text-lg font-bold text-white tracking-widest">
+                  <span className="text-sm sm:text-lg font-bold text-white tracking-widest">
                     {formatCountdown(secondsRemaining)}
                   </span>
                 </div>
               </div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-white/40 border border-white/10 px-2 py-0.5 rounded-full">
+              <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-white/40 border border-white/10 px-2 py-0.5 rounded-full">
                 {isPlaying ? 'AKTİF' : 'BEKLEMEDE'}
               </span>
             </div>
@@ -598,7 +617,7 @@ export const MindfulPause: React.FC = () => {
                       setPhaseProgress(0);
                     }
                   }}
-                  className={`py-2 px-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all text-center cursor-pointer ${
+                  className={`py-1.5 sm:py-2 px-1.5 sm:px-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all text-center cursor-pointer ${
                     selectedPattern === patternKey
                       ? 'bg-white text-black font-semibold shadow-md'
                       : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -620,13 +639,13 @@ export const MindfulPause: React.FC = () => {
         </div>
 
         {/* Soundscape Music Selector Toolbar */}
-        <div className="relative z-10 mt-6 pt-2 pb-4 border-b border-white/5">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="relative z-10 mt-5 sm:mt-6 pt-2 pb-4 border-b border-white/5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3">
             <div className="flex items-center gap-2 text-xs sm:text-sm text-white/75 font-medium">
-              <Music size={15} className="text-white/80" />
+              <Music size={14} className="text-white/80 shrink-0" />
               <span>SES ORTAMI SEÇİMİ (MEDİTASYON MÜZİĞİ):</span>
             </div>
-            <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 w-full sm:w-auto">
               {SOUNDSCAPES.map((scape) => {
                 const IconComponent = scape.icon;
                 const isSelected = selectedSoundscape === scape.id;
@@ -635,14 +654,14 @@ export const MindfulPause: React.FC = () => {
                     key={scape.id}
                     onClick={() => handleSoundscapeChange(scape.id)}
                     title={scape.desc}
-                    className={`flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer border ${
+                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-medium transition-all cursor-pointer border ${
                       isSelected
                         ? 'bg-white/20 border-white/40 text-white shadow-lg backdrop-blur-md font-semibold'
                         : 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/10'
                     }`}
                   >
-                    <IconComponent size={13} className={isSelected ? 'text-white' : 'text-white/70'} />
-                    <span>{scape.name}</span>
+                    <IconComponent size={13} className={isSelected ? 'text-white shrink-0' : 'text-white/70 shrink-0'} />
+                    <span className="truncate">{scape.name}</span>
                   </button>
                 );
               })}
@@ -663,10 +682,10 @@ export const MindfulPause: React.FC = () => {
 
               {!isCompleted ? (
                 <>
-                  <h4 className="serif-font text-3xl sm:text-4xl md:text-5xl text-white font-normal mb-3">
+                  <h4 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white font-normal mb-3">
                     {isPlaying ? currentPhase.name : currentPattern.name}
                   </h4>
-                  <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light min-h-[56px]">
+                  <p className="text-white/80 text-sm sm:text-lg md:text-xl leading-relaxed font-light min-h-[48px] sm:min-h-[56px]">
                     {isPlaying ? currentPhase.text : currentPattern.desc}
                   </p>
                 </>
@@ -678,7 +697,7 @@ export const MindfulPause: React.FC = () => {
                       1 Dakikalık Duraklama Tamamlandı
                     </h4>
                   </div>
-                  <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light">
+                  <p className="text-white/80 text-sm sm:text-lg md:text-xl leading-relaxed font-light">
                     Zihnini dinlendirdin. Şimdi sayfayı daha açık bir dikkat ve dinginlikle keşfetmeye hazırsın.
                   </p>
                 </div>
@@ -686,14 +705,14 @@ export const MindfulPause: React.FC = () => {
             </div>
 
             {/* Phase steps progress tracker */}
-            <div className="grid grid-cols-4 gap-1.5 sm:gap-2 pt-1">
+            <div className={`grid ${gridColsClass} gap-1.5 sm:gap-2 pt-1`}>
               {currentPattern.phases.map((ph, idx) => {
                 const isActive = isPlaying && phaseIndex === idx;
                 const isPassed = isPlaying && phaseIndex > idx;
                 return (
                   <div
                     key={ph.name}
-                    className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all text-center ${
+                    className={`p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl border transition-all text-center ${
                       isActive
                         ? 'bg-white/10 border-white/40 shadow-lg'
                         : isPassed
@@ -701,10 +720,10 @@ export const MindfulPause: React.FC = () => {
                         : 'bg-white/[0.01] border-white/5 opacity-40'
                     }`}
                   >
-                    <div className="text-[10px] sm:text-xs uppercase font-mono tracking-wider text-white/70 mb-0.5 font-medium">
+                    <div className="text-[9px] sm:text-xs uppercase font-mono tracking-wider text-white/70 mb-0.5 font-medium">
                       {ph.duration}s
                     </div>
-                    <div className="text-xs sm:text-sm md:text-base text-white font-semibold truncate">
+                    <div className="text-[11px] sm:text-sm md:text-base text-white font-semibold truncate">
                       {ph.name}
                     </div>
                   </div>
@@ -713,21 +732,21 @@ export const MindfulPause: React.FC = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2 w-full">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3 pt-2 w-full">
               {!isCompleted ? (
                 <button
                   id="btn-mindful-pause-toggle"
                   onClick={togglePlay}
-                  className="bg-white text-black hover:bg-white/90 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-9 py-3 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer shadow-2xl w-full sm:w-auto"
                 >
                   {isPlaying ? (
                     <>
-                      <Pause size={18} />
+                      <Pause size={17} />
                       <span>Duraklat ({secondsRemaining}s kaldı)</span>
                     </>
                   ) : (
                     <>
-                      <Play size={18} className="fill-black" />
+                      <Play size={17} className="fill-black" />
                       <span>1 Dakikalık Döngüyü Başlat</span>
                     </>
                   )}
@@ -735,9 +754,9 @@ export const MindfulPause: React.FC = () => {
               ) : (
                 <button
                   onClick={startSession}
-                  className="bg-white text-black hover:bg-white/90 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2.5 sm:gap-3 cursor-pointer shadow-2xl"
+                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-9 py-3 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer shadow-2xl w-full sm:w-auto"
                 >
-                  <RefreshCw size={18} />
+                  <RefreshCw size={17} />
                   <span>Tekrar 1 Dakika Başlat</span>
                 </button>
               )}
@@ -773,11 +792,11 @@ export const MindfulPause: React.FC = () => {
           </div>
 
           {/* Right Column: Concentric Sacred Geometric Breathing Orb with Dual Rings */}
-          <div className="lg:col-span-6 flex items-center justify-center py-4 relative min-h-[300px] sm:min-h-[360px]">
+          <div className="lg:col-span-6 flex items-center justify-center py-6 sm:py-4 relative min-h-[250px] xs:min-h-[280px] sm:min-h-[360px] overflow-visible">
             
             {/* Outer Fluid Radiant Rings */}
             <div
-              className="absolute w-64 h-64 sm:w-80 sm:h-80 rounded-full border border-white/10 transition-transform duration-300 ease-out"
+              className="absolute w-44 h-44 xs:w-52 xs:h-52 sm:w-80 sm:h-80 rounded-full border border-white/10 transition-transform duration-300 ease-out"
               style={{
                 transform: `scale(${currentScale * 1.15})`,
                 opacity: glowOpacity * 0.4,
@@ -785,7 +804,7 @@ export const MindfulPause: React.FC = () => {
             />
 
             <div
-              className="absolute w-52 h-52 sm:w-64 sm:h-64 rounded-full border border-white/20 transition-transform duration-300 ease-out"
+              className="absolute w-36 h-36 xs:w-44 xs:h-44 sm:w-64 sm:h-64 rounded-full border border-white/20 transition-transform duration-300 ease-out"
               style={{
                 transform: `scale(${currentScale * 1.08})`,
                 opacity: glowOpacity * 0.7,
@@ -794,7 +813,7 @@ export const MindfulPause: React.FC = () => {
 
             {/* Ambient Radial Soft Glow */}
             <div
-              className="absolute w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-white transition-all duration-300 ease-out filter blur-2xl pointer-events-none"
+              className="absolute w-32 h-32 xs:w-40 xs:h-40 sm:w-56 sm:h-56 rounded-full bg-white transition-all duration-300 ease-out filter blur-2xl pointer-events-none"
               style={{
                 transform: `scale(${currentScale})`,
                 opacity: glowOpacity * 0.25,
@@ -803,7 +822,7 @@ export const MindfulPause: React.FC = () => {
 
             {/* Central High-Craft Breathing Sphere */}
             <div
-              className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full liquid-glass flex flex-col items-center justify-center text-center p-4 border border-white/30 shadow-[0_0_50px_rgba(255,255,255,0.15)] bg-neutral-950/80 backdrop-blur-xl transition-transform duration-200 ease-out z-10"
+              className="relative w-32 h-32 xs:w-38 xs:h-38 sm:w-52 sm:h-52 rounded-full liquid-glass flex flex-col items-center justify-center text-center p-2.5 sm:p-4 border border-white/30 shadow-[0_0_50px_rgba(255,255,255,0.15)] bg-neutral-950/80 backdrop-blur-xl transition-transform duration-200 ease-out z-10"
               style={{
                 transform: `scale(${currentScale})`,
               }}
@@ -835,7 +854,7 @@ export const MindfulPause: React.FC = () => {
               </svg>
 
               {/* Inner Circular SVG Phase Progress Ring */}
-              <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none p-3" viewBox="0 0 100 100">
+              <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none p-2.5 sm:p-3" viewBox="0 0 100 100">
                 <circle
                   cx="50"
                   cy="50"
@@ -861,18 +880,18 @@ export const MindfulPause: React.FC = () => {
               </svg>
 
               <Sparkles
-                size={18}
-                className={`text-white transition-opacity duration-300 mb-1 ${
+                size={16}
+                className={`text-white transition-opacity duration-300 mb-0.5 sm:mb-1 ${
                   isPlaying ? 'opacity-90' : 'opacity-40'
                 }`}
               />
 
-              <div className="serif-font text-xl sm:text-2xl md:text-3xl text-white font-semibold tracking-tight">
+              <div className="serif-font text-base sm:text-2xl md:text-3xl text-white font-semibold tracking-tight px-1 leading-tight">
                 {isPlaying ? currentPhase.name : isCompleted ? 'Tamamlandı' : 'Dinginlik'}
               </div>
 
               {/* Countdown / Phase Timer Display */}
-              <div className="text-[11px] text-white/70 tracking-wider uppercase font-mono mt-1 flex items-center gap-1.5">
+              <div className="text-[10px] sm:text-[11px] text-white/70 tracking-wider uppercase font-mono mt-0.5 sm:mt-1 flex items-center gap-1 sm:gap-1.5">
                 {isPlaying ? (
                   <>
                     <span className="text-white font-semibold">{phaseTimeLeft}s</span>

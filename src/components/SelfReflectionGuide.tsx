@@ -135,9 +135,9 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
   return (
     <section id="ic-kesif" className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        {/* Section Header - Left-aligned to unify with the rest of the site */}
-        <div className="text-left mb-10 sm:mb-14">
-          <div className="flex items-center justify-start gap-2 text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3">
+        {/* Section Header */}
+        <div className="text-center sm:text-left mb-10 sm:mb-14">
+          <div className="flex items-center justify-center sm:justify-start gap-2 text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3">
             <Compass size={16} className="text-white/70" />
             <span>3 DAKİKALIK İÇSEL FARKINDALIK</span>
           </div>
@@ -176,7 +176,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 </div>
 
                 {/* Question */}
-                <div>
+                <div className="text-center sm:text-left">
                   <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white tracking-tight mb-2.5">
                     {QUESTIONS[currentStep].question}
                   </h3>

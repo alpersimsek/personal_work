@@ -129,34 +129,18 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
             {!submitted ? (
               <div>
                 {/* Modal Header */}
-                <div className="pr-8">
-                  <div className="flex items-center gap-2 text-white/50 text-[11px] sm:text-xs tracking-[0.2em] uppercase font-medium mb-2">
+                <div className="pr-0 sm:pr-8 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-white/50 text-[11px] sm:text-xs tracking-[0.2em] uppercase font-medium mb-2">
                     <MessageCircle size={14} className="text-white/80 shrink-0" />
                     <span>TANIŞMA SEANSI RANDEVU TALEBİ</span>
                   </div>
 
                   <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl tracking-tight text-white mb-2">
-                    15 Dakikalık Tanışma Seansı Talebi
+                    30 Dakikalık Tanışma Seansı Talebi
                   </h3>
                   <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-5 font-light">
                     Bilgilerinizi doldurun, randevu talebiniz koçumuza doğrudan iletilsin.
                   </p>
-                </div>
-
-                {/* Info Badge */}
-                <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 mb-5">
-                  <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
-                    <MessageCircle size={16} />
-                  </div>
-                  <div className="text-xs">
-                    <div className="text-white font-medium flex items-center gap-1.5">
-                      <span>Birebir İletişim & Manuel Teyit</span>
-                      <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/70 text-[10px] font-normal">Esnek Planlama</span>
-                    </div>
-                    <div className="text-white/40 text-[11px] mt-0.5 leading-relaxed">
-                      Talebiniz alındıktan sonra koçumuz sizinle WhatsApp veya e-posta üzerinden iletişime geçerek uygun gün ve saat detaylarını netleştirecektir.
-                    </div>
-                  </div>
                 </div>
 
                 {/* FAQ Quick Link Banner */}

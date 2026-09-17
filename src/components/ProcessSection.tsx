@@ -35,13 +35,13 @@ export const ProcessSection: React.FC = () => {
       ref={ref}
       className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden relative"
     >
-      <div className="max-w-6xl mx-auto text-left">
+      <div className="max-w-6xl mx-auto text-center sm:text-left">
         {/* Label */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold"
+          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold text-center sm:text-left"
         >
           SÜREÇ
         </motion.div>
@@ -51,7 +51,7 @@ export const ProcessSection: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] font-serif mb-12 sm:mb-16 md:mb-20 max-w-none"
+          className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] font-serif mb-12 sm:mb-16 md:mb-20 max-w-none text-center sm:text-left"
         >
           Her değişimin bir{' '}
           <em className="font-serif italic text-white/60 font-normal">

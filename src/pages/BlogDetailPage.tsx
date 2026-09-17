@@ -93,10 +93,15 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
       if (!trimmed) return <div key={idx} className="h-5" />;
 
       if (trimmed.startsWith('# ')) {
+        const headingText = trimmed.slice(2).trim();
+        // Skip duplicate main title if it matches post.title or appears as the first line of content
+        if (idx === 0 || headingText.toLowerCase() === post?.title?.trim().toLowerCase()) {
+          return null;
+        }
         return (
-          <h1 key={idx} className="blog-title text-4xl sm:text-5xl font-light text-white my-8 border-b border-white/10 pb-4 tracking-tight">
-            {trimmed.slice(2)}
-          </h1>
+          <h2 key={idx} className="blog-title text-3xl sm:text-4xl font-light text-white my-6 tracking-tight">
+            {headingText}
+          </h2>
         );
       }
       if (trimmed.startsWith('## ')) {
@@ -159,8 +164,8 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
             {post.title}
           </h1>
 
-          {/* Author & Metadata Bar */}
-          <div className="px-6 sm:px-8 py-4 bg-white/[0.04] border border-white/10 rounded-2xl flex flex-wrap items-center justify-between gap-4 text-sm text-white/60 font-medium mb-6 shadow-sm font-sans backdrop-blur-md">
+          {/* Author & Metadata Bar (Desktop view: Top position) */}
+          <div className="hidden md:flex px-6 sm:px-8 py-4 bg-white/[0.04] border border-white/10 rounded-2xl flex-wrap items-center justify-between gap-4 text-sm text-white/60 font-medium mb-6 shadow-sm font-sans backdrop-blur-md">
             <div className="flex items-center gap-3.5">
               <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-white/90 border border-white/15 backdrop-blur-md shadow-xs shrink-0">
                 {post.category}
@@ -199,6 +204,34 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
             {renderFormattedContent(post.content)}
           </div>
 
+          {/* Author & Metadata Bar (Mobile view: Positioned below article text) */}
+          <div className="md:hidden mt-8 pt-6 border-t border-white/10">
+            <div className="px-4 py-3.5 bg-white/[0.04] border border-white/10 rounded-2xl flex flex-col gap-3 text-xs text-white/60 font-medium font-sans backdrop-blur-md">
+              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    TÊ
+                  </div>
+                  <div>
+                    <span className="text-white font-semibold block text-sm">{post.author}</span>
+                    <span className="text-[11px] text-white/50 font-normal">ICF Unvanlı Profesyonel Koç</span>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white/10 text-white/90 border border-white/15 shrink-0">
+                  {post.category}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] font-medium text-white/50 pt-0.5">
+                <span>{post.date}</span>
+                <span>•</span>
+                <span>{post.readTime}</span>
+                <span>•</span>
+                <span>{post.views || 0} Görüntülenme</span>
+              </div>
+            </div>
+          </div>
+
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap items-center gap-2 font-sans">
@@ -215,17 +248,17 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
           )}
 
           {/* Like & Share Action Bar */}
-          <div className="mt-8 p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between font-sans">
+          <div className="mt-8 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-sans">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer w-full sm:w-auto ${
                 hasLiked
                   ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40 shadow-sm'
                   : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
               }`}
             >
               <svg
-                className={`w-4 h-4 ${hasLiked ? 'fill-rose-400 text-rose-400' : 'none'}`}
+                className={`w-4 h-4 shrink-0 ${hasLiked ? 'fill-rose-400 text-rose-400' : 'none'}`}
                 fill={hasLiked ? 'currentColor' : 'none'}
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -237,17 +270,17 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
-              <span>{hasLiked ? 'Beğenildi!' : 'Faydalı Buldum'} ({likesCount})</span>
+              <span className="truncate">{hasLiked ? 'Beğenildi!' : 'Faydalı Buldum'} ({likesCount})</span>
             </button>
 
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs sm:text-sm font-semibold transition-all cursor-pointer w-full sm:w-auto"
             >
-              <svg className="w-4 h-4 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-white/60 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
-              <span>{copied ? 'Bağlantı Kopyalandı!' : 'Makaleyi Paylaş'}</span>
+              <span className="truncate">{copied ? 'Bağlantı Kopyalandı!' : 'Makaleyi Paylaş'}</span>
             </button>
           </div>
 

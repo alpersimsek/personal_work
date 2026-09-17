@@ -80,7 +80,7 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
               </button>
             </div>
 
-            <div className="py-4">
+            <div className="py-4 text-center sm:text-left">
               <h3 className="text-2xl sm:text-3xl serif-font tracking-tight text-white mb-1">
                 Sıkça Sorulan Sorular
               </h3>

@@ -38,7 +38,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 sm:pb-8 border-b border-white/10"
         >
-          <div className="flex-1 max-w-none">
+          <div className="flex-1 max-w-none text-center md:text-left">
             <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
               YAKLAŞIMIM
             </div>

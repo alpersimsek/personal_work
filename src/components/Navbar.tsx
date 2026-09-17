@@ -68,23 +68,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-12 pt-4 sm:pt-6 w-full pointer-events-none transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-[100] px-2.5 sm:px-12 pt-2.5 sm:pt-6 w-full pointer-events-none transition-all duration-300">
       <nav
         id="navbar-container"
-        className="pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-6 sm:px-8 py-3 flex items-center justify-between transition-all duration-300 shadow-xl relative z-50"
+        className="pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-3.5 sm:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0"
       >
         {/* Left: Brand Logo & Monogram */}
         <a
           id="nav-brand-logo"
           href="#"
           onClick={handleLogoClick}
-          className="cursor-pointer flex items-center shrink-0 transition-opacity hover:opacity-90"
+          className="cursor-pointer flex items-center shrink transition-opacity hover:opacity-90 min-w-0 overflow-hidden"
         >
           <BrandLogo size="sm" showSubtitle={true} />
         </a>
 
         {/* Center: Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-7 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide">
+        <div className="hidden md:flex items-center gap-7 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide shrink-0">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
         </div>
 
         {/* Right: Contact Link, Theme Selector & Booking CTA */}
-        <div className="hidden md:flex items-center gap-4 sm:gap-5">
+        <div className="hidden md:flex items-center gap-4 sm:gap-5 shrink-0">
           <a
             id="nav-link-iletisim"
             href="#iletisim"
@@ -116,28 +116,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={onOpenBooking}
-            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
+            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0"
           >
             Görüşme Planla
           </motion.button>
         </div>
 
         {/* Mobile View Controls */}
-        <div className="flex items-center gap-2 md:hidden">
-          <ThemeToggle showLabel={false} />
-
+        <div className="flex items-center gap-1.5 sm:gap-2 md:hidden shrink-0">
           <button
             id="nav-btn-mobile-booking"
             onClick={onOpenBooking}
-            className="bg-white text-black rounded-full px-3.5 py-1.5 text-xs font-semibold shadow-xs"
+            className="bg-white text-black rounded-full px-3 py-1.5 text-xs font-semibold shadow-xs shrink-0 whitespace-nowrap"
           >
-            Görüşme
+            Randevu Al
           </button>
 
           <button
             id="btn-mobile-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors shrink-0"
             aria-label="Menüyü aç/kapat"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}

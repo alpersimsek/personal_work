@@ -18,8 +18,8 @@ export const CoachProfileSection: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header Title Badge */}
-        <div className="text-left mb-10 sm:mb-14">
-          <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-2 flex items-center gap-2">
+        <div className="text-center sm:text-left mb-10 sm:mb-14">
+          <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-2 flex items-center justify-center sm:justify-start gap-2">
             <Compass size={16} className="text-white/70" />
             <span>DANIŞMANLIK & YOL ARKADAŞLIĞI</span>
           </div>

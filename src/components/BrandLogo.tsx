@@ -24,10 +24,10 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   // Dimension definitions
   const dimensions = {
     sm: {
-      emblem: 35,
-      nameText: 'text-sm sm:text-base',
-      subText: 'text-[8.5px]',
-      gap: 'gap-3',
+      emblem: 32,
+      nameText: 'text-xs xs:text-sm sm:text-base',
+      subText: 'text-[8px] xs:text-[8.5px]',
+      gap: 'gap-2 sm:gap-3',
     },
     md: {
       emblem: 45,
@@ -57,7 +57,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       onClick={onClick}
       className={`group inline-flex ${
         variant === 'stacked' ? 'flex-col items-center text-center' : 'items-center'
-      } ${dimensions.gap} ${className} ${onClick ? 'cursor-pointer' : ''} select-none`}
+      } ${dimensions.gap} ${className} ${onClick ? 'cursor-pointer' : ''} select-none min-w-0`}
     >
       {/* Emblem / Monogram Icon */}
       <div className="relative shrink-0 flex items-center justify-center">
@@ -191,9 +191,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
       </div>
 
       {/* Brand Typography */}
-      <div className={`flex flex-col ${variant === 'stacked' ? 'items-center' : 'items-start'} leading-tight`}>
+      <div className={`flex flex-col ${variant === 'stacked' ? 'items-center' : 'items-start'} leading-tight min-w-0`}>
         <span
-          className={`serif-font font-medium tracking-tight transition-colors duration-300 ${
+          className={`serif-font font-medium tracking-tight transition-colors duration-300 truncate ${
             isDark ? 'text-white group-hover:text-white/90' : 'text-neutral-900 group-hover:text-neutral-800'
           } ${dimensions.nameText}`}
         >
@@ -202,7 +202,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
 
         {showSubtitle && (
           <span
-            className={`font-sans tracking-[0.28em] uppercase font-medium mt-0.5 transition-colors duration-300 ${
+            className={`font-sans tracking-[0.2em] uppercase font-medium mt-0.5 transition-colors duration-300 hidden xs:block truncate ${
               isDark ? 'text-white/50 group-hover:text-white/70' : 'text-neutral-500'
             } ${dimensions.subText}`}
           >

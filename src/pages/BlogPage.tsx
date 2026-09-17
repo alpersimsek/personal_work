@@ -89,18 +89,18 @@ export const BlogPage: React.FC<BlogPageProps> = ({
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/10">
             <div>
-              <span className="text-base uppercase tracking-widest text-white/50 font-medium block mb-2">
+              <span className="text-xs sm:text-base uppercase tracking-widest text-white/50 font-medium block mb-2">
                 Tuğba Ergüner Şimşek • Yayın Arşivi
               </span>
-              <h1 className="serif-font text-6xl sm:text-7xl font-light text-white tracking-tight">
+              <h1 className="serif-font text-3xl sm:text-6xl md:text-7xl font-light text-white tracking-tight">
                 Tüm Yazılar & Keşifler
               </h1>
-              <p className="text-white/60 text-lg sm:text-xl mt-2 max-w-2xl font-sans">
+              <p className="text-white/60 text-sm sm:text-xl mt-2 max-w-2xl font-sans font-light">
                 Farkındalık, dönüşüm ve içsel netlik üzerine hazırlanan tüm makaleleri keşfedin.
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-3">
               {isAdmin ? (
                 <button
                   onClick={onNavigateAdmin}
@@ -134,7 +134,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-4.5 py-2.5 rounded-xl text-base font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 sm:px-4.5 sm:py-2.5 rounded-xl text-xs sm:text-base font-semibold transition-all cursor-pointer ${
                   selectedCategory === cat
                     ? 'bg-white !text-neutral-950 font-bold shadow-lg scale-105 border border-white'
                     : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20 border border-white/15'
