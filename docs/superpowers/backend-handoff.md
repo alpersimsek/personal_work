@@ -28,18 +28,29 @@ Local user testing comes before hosting. Completed app is running at http://loca
 | 7: Production frontend serving and JSON API boundary | Complete | 3034635 |
 | 8: All frontend API call sites and async/error handling | Complete | ce051b4 |
 | 9: Production deployment | Locally prepared/tested; live hosting pending | see latest branch commit |
+| 10: Application backup/restore | Superseded by owner request | 7867a95 (historical) |
+| 11: Remove application backup/restore | Complete | 6ab00c4 |
+| 12: Disk-backed blog images | Complete | see latest branch commit |
 
-The frontend now uses centrally persisted posts and server-verified cookie sessions. Client admin credential env variables and localStorage-era JSON import/export are removed. Image formatting remains unchanged. Subscriber signup remains backend-only; signup UI, consent wording and mailing-list provider remain deferred.
+The frontend now uses centrally persisted posts and server-verified cookie sessions. Client admin credential env variables and localStorage-era JSON import/export are removed. Image cropping/compression remains unchanged; uploaded files now live on disk with database paths (Task 12). Subscriber signup remains backend-only; signup UI, consent wording and mailing-list provider remain deferred.
 
 ## Backup decision
 
-Owner requested removal of application backup/restore in favor of hosting-provider backups. Backend endpoints, backup-specific code/tests and admin controls are removed. Task 10 is historical and superseded by Task 11; see `docs/superpowers/reports/task-11-remove-blog-backup-report.md`. Configure provider backups during hosting setup. Do not reintroduce application backup operations.
+Owner requested removal of application backup/restore in favor of hosting-provider backups. Backend endpoints, backup-specific code/tests and admin controls are removed. Task 10 is historical and superseded by Task 11; see `docs/superpowers/reports/task-11-remove-blog-backup-report.md`. Configure provider backups for both database and the persistent uploads directory during hosting setup. Do not reintroduce application backup operations.
+
+## Task 12: Disk-backed blog images
+
+Admin POST /api/admin/images accepts authenticated/current-admin raw PNG/JPEG/WebP files, checks signatures and 5 MB limit, atomically saves content-hash filenames under UPLOADS_DIR/blog, and returns /uploads/blog URLs. The active editor uploads its optimized JPEG before saving; post writes reject embedded data images. External HTTP(S) image URLs remain supported. Vite proxies uploads locally; Express serves them in development/production with nosniff and a JSON 404 boundary.
+
+Run npm run images:migrate locally or npm run images:migrate:prod after compilation to convert legacy covers. Migration is repeatable, preserves post metadata, writes before updating references and protects concurrent edits. Local migration found no embedded covers. Keep uploads out of Git and outside the host checkout via absolute UPLOADS_DIR. Transfer local image files separately if moving local blog data; GitHub carries code only. Files are retained after post deletion/replacement to protect shared references. See docs/superpowers/reports/task-12-disk-blog-images-report.md and the updated deployment runbook for GitHub deployment/private deploy keys. No push/merge/live deployment performed.
 
 ## Latest validation
 
-Node 20.20.2: server tests 36/36, frontend TypeScript, backend compilation and frontend production build passed. Chromium walkthrough covered login/create/edit/public visibility/draft toggles/persisted likes/delete/logout/access rejection and API error feedback without runtime exceptions.
+Node 20.20.2: server tests 43/43, frontend TypeScript, backend compilation and frontend production build passed. Chromium walkthrough covered login/create/edit/public visibility/draft toggles/persisted likes/delete/logout/access rejection and API error feedback without runtime exceptions.
 
 A clean npm ci --omit=dev artifact was tested without TypeScript or tsx: compiled migrations/seed and repeat seed, production startup, real homepage/API boundary, auth cookie attributes, blog operations and subscriber consent/listing all passed against an isolated temporary MariaDB database. Database/grants/server were cleaned up. Provider HTTPS/Passenger/proxy behavior remains untested until actual hosting access exists.
+
+Disk image browser checks passed against isolated test DB: formatting/upload/preview, upload error/retry and disabled pending save, path-only post persistence, independent public image serving, WebP upload, production assets and mobile fit without runtime errors. Compiled server restart also preserved image serving.
 
 Removal checked in the local admin browser and all three former endpoints return JSON 404. No development blog data was changed.
 

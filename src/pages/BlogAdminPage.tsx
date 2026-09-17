@@ -67,7 +67,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || isFormattingImage || saving) return;
 
     if (!file.type.startsWith('image/')) {
       setStatusNotice({ type: 'error', text: 'Lütfen geçerli bir resim dosyası seçin (PNG, JPG, WebP).' });
@@ -77,12 +77,13 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     try {
       setIsFormattingImage(true);
       const formattedBase64 = await formatCoverImage(file, 1200, 675, 0.82);
-      setCoverImage(formattedBase64);
+      setCoverImage(await blogService.uploadImage(formattedBase64));
       setStatusNotice({ type: 'success', text: 'Görsel yüklendi ve 16:9 HD (1200x675px) olarak otomatik formatlandı!' });
-    } catch {
-      setStatusNotice({ type: 'error', text: 'Görsel işlenirken bir hata oluştu.' });
+    } catch (error) {
+      showError(error);
     } finally {
       setIsFormattingImage(false);
+      e.target.value = '';
     }
   };
 
@@ -120,7 +121,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   const handleSavePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (saving) return;
+    if (saving || isFormattingImage) return;
     if (!title.trim() || !content.trim()) {
       setStatusNotice({ type: 'error', text: 'Lütfen başlık ve içerik alanlarını doldurun.' });
       return;
@@ -231,6 +232,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-neutral-200">
           <div className="flex gap-2">
             <button
+              disabled={isFormattingImage || saving}
               onClick={() => setActiveTab('list')}
               className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
                 activeTab === 'list'
@@ -241,6 +243,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
               Makale Arşivi ({posts.length})
             </button>
             <button
+              disabled={isFormattingImage || saving}
               onClick={() => setActiveTab('editor')}
               className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
                 activeTab === 'editor'
@@ -254,6 +257,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
           {activeTab === 'list' && (
             <button
+              disabled={isFormattingImage || saving}
               onClick={handleStartNewPost}
               className="px-5 py-2.5 rounded-xl bg-stone-200 text-stone-900 text-xs font-bold border border-stone-300 flex items-center gap-2 shadow-xs cursor-pointer"
             >
@@ -279,14 +283,14 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     key={post.id}
                     className="p-5 rounded-2xl bg-white border border-neutral-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
-                    <div className="flex items-start gap-4 flex-1">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
                       <img
                         src={post.coverImage}
                         alt={post.title}
                         className="w-20 h-20 rounded-xl object-cover border border-neutral-200 shrink-0 shadow-inner"
                       />
-                      <div>
-                        <div className="flex items-center gap-2 mb-1.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
                             {post.category}
                           </span>
@@ -307,7 +311,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                         </div>
                         <h4 className="text-base font-semibold text-neutral-900 line-clamp-1">{post.title}</h4>
                         <p className="text-xs text-neutral-500 mt-1 line-clamp-1 font-sans">{post.summary}</p>
-                        <div className="flex items-center gap-3 text-xs text-neutral-400 mt-2 font-mono">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400 mt-2 font-mono">
                           <span>{post.date}</span>
                           <span>•</span>
                           <span>{post.readTime}</span>
@@ -422,6 +426,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 </label>
                 <button
                   type="button"
+                  disabled={isFormattingImage || saving}
                   onClick={() => setShowUrlInput(!showUrlInput)}
                   className="text-[11px] font-semibold text-stone-600 underline cursor-pointer"
                 >
@@ -434,6 +439,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   <input
                     type="text"
                     value={coverImage}
+                    disabled={isFormattingImage || saving}
                     onChange={(e) => setCoverImage(e.target.value)}
                     placeholder="https://images.unsplash.com/..."
                     className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
@@ -444,6 +450,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 </div>
               ) : (
                 <div className="space-y-3">
+                  {isFormattingImage && coverImage && <p role="status" className="text-xs text-stone-700">Görsel hazırlanıyor ve yükleniyor…</p>}
                   {/* File Upload Zone / Preview Card */}
                   {coverImage ? (
                     <div className="relative rounded-2xl border border-stone-200 overflow-hidden bg-stone-50 p-4 flex flex-col sm:flex-row items-center gap-4">
@@ -469,7 +476,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                           </span>
                         </div>
                         <p className="text-xs text-neutral-600 font-medium">
-                          Görsel makale kartları ve detay sayfasına tam uyumlu olarak depolanmaya hazır.
+                          Görsel yüklendi; makale kartlarında ve detay sayfasında kullanılabilir.
                         </p>
 
                         <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
@@ -480,6 +487,8 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                             <span>Farklı Resim Seç</span>
                             <input
                               type="file"
+                              aria-label="Kapak görseli dosyası"
+                              disabled={isFormattingImage || saving}
                               accept="image/png, image/jpeg, image/jpg, image/webp"
                               onChange={handleImageFileUpload}
                               className="hidden"
@@ -488,6 +497,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
                           <button
                             type="button"
+                            disabled={isFormattingImage || saving}
                             onClick={() => setCoverImage('')}
                             className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200 cursor-pointer"
                           >
@@ -500,6 +510,8 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     <label className="relative border-2 border-dashed border-stone-300 bg-stone-50/60 rounded-2xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all text-center">
                       <input
                         type="file"
+                        aria-label="Kapak görseli dosyası"
+                        disabled={isFormattingImage || saving}
                         accept="image/png, image/jpeg, image/jpg, image/webp"
                         onChange={handleImageFileUpload}
                         className="hidden"
@@ -511,7 +523,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                           </svg>
-                          <span className="text-xs font-bold">Görsel İşleniyor ve Formatlanıyor (16:9 1200x675px)...</span>
+                          <span className="text-xs font-bold">Görsel hazırlanıyor ve yükleniyor…</span>
                         </div>
                       ) : (
                         <>
@@ -608,13 +620,14 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
             <div className="flex items-center justify-end gap-3 pt-6 border-t border-neutral-200">
               <button
                 type="button"
+                disabled={isFormattingImage || saving}
                 onClick={() => setActiveTab('list')}
                 className="px-6 py-3 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-semibold cursor-pointer"
               >
                 İptal
               </button>
               <button
-                type="submit" disabled={saving}
+                type="submit" disabled={saving || isFormattingImage}
                 className="px-8 py-3 rounded-xl bg-stone-200 text-stone-900 font-bold border border-stone-300 text-xs shadow-xs cursor-pointer"
               >
                 {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}

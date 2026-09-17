@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
+**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Additional Task 12 is complete: blog images are stored on disk with a repeatable legacy-image migration. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
 
 **Goal:** Replace the client-side-only admin login and localStorage blog storage with a real Express + MariaDB backend, add a subscribers table for the future mailing-list feature, and wire the existing React frontend to call it.
 
@@ -13,6 +13,8 @@
 **Spec:** `docs/superpowers/specs/2026-09-17-backend-design.md`
 
 ## Global Constraints
+
+- Latest owner amendment: image files live under persistent UPLOADS_DIR/blog; database stores paths/external URLs. Preserve uploads across Git deployments and include them in provider backups. See task-12-disk-blog-images-report.md; earlier image-storage recipes are historical.
 
 - Node version: 20.x locally (`.nvmrc`, already in repo) and on the target hosting (which supports 16–24).
 - Database: MariaDB 10.6+ (local via the existing `docker-compose.yml`, production via the host's provisioned database).

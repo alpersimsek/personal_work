@@ -12,7 +12,7 @@ Use port 3100 for the completed backend version. Existing processes on ports 300
 
 Admin credentials are `ADMIN_USERNAME` and `ADMIN_PASSWORD` in this worktree's `.env`; they were checked successfully without changing them. Do not use the old browser credential variables from the main checkout.
 
-The development database has been migrated and the admin seeded. It currently has no blog posts; an empty public list is expected until you create one. Blog changes persist in MariaDB and are shared between browsers.
+The development database has been migrated and the admin seeded. An empty public list is expected until a published post is created. Blog changes persist in MariaDB and are shared between browsers.
 
 ## User walkthrough
 
@@ -26,9 +26,23 @@ The development database has been migrated and the admin seeded. It currently ha
 8. Delete the temporary post and confirm it disappears.
 9. Log out and verify the admin panel asks you to log in again.
 
+## Disk-backed blog images
+
+In the admin editor, choose a PNG/JPG/WebP cover. The browser keeps the existing 1200×675 crop/compression and uploads a JPEG to the authenticated image endpoint. Confirm the preview loads, then save the article and view it independently. Images now live in this worktree’s ignored uploads/blog folder; post records contain /uploads/blog paths, not image bytes. Upload failure preserves the previous cover and allows retry; saving is disabled until upload completes. External HTTP(S) image links still work.
+
+Default local storage is ./uploads. Set UPLOADS_DIR to an absolute writable directory to move storage; move existing files too. Vite proxies /uploads to the development API. Do not remove this folder during builds/restarts, and do not expect Git to carry image files to hosting. Deleted/replaced post images remain on disk to protect shared references.
+
+Legacy database covers can be converted safely from the worktree root:
+
+```bash
+NODE_ENV=development npm run images:migrate
+```
+
+This changes only embedded cover-image references after writing each file, preserves post metadata, and can be rerun. Current local database had no embedded covers to convert; the migration/retry behavior was tested in an isolated database. Restarting the API preserves uploaded images.
+
 ## Backups
 
-Application backup/restore controls are removed at the owner’s request. Hosting-provider backups will be used after deployment; configure them during hosting setup.
+Application backup/restore controls are removed at the owner’s request. Hosting-provider backups will be used after deployment; configure them during hosting setup, covering both MariaDB and the persistent uploads directory.
 
 Also try the homepage sections, themes, mobile viewport, and WhatsApp consultation flow. Subscribers are backend-only for now; there is no signup form in this implementation.
 
@@ -42,6 +56,7 @@ nvm use 20
 docker compose -p personal_work up -d mariadb adminer
 NODE_ENV=development npm run db:migrate
 NODE_ENV=development npm run db:seed
+NODE_ENV=development npm run images:migrate
 ```
 
 Then use two terminals in that same worktree (run `nvm use 20` in each):
@@ -63,6 +78,6 @@ npm run lint
 
 ## Readiness evidence
 
-MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Latest automated suite passed 36/36 on Node 20.
+MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Latest automated suite passed 43/43 on Node 20.
 
 Hosting work is deferred until local testing is completed and the owner confirms readiness. Record findings here or in the handoff, fix reported issues, and only then proceed to the production deployment runbook.

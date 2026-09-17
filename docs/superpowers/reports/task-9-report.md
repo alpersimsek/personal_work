@@ -28,3 +28,8 @@ Limits: local API checks exercised cookie flags over loopback HTTP using explici
 Claude resume: obtain purchased hosting/domain/access, follow docs/superpowers/deployment.md, and complete its live acceptance checklist. Update this report and ledger after real deployment; do not mark Task 9 complete based on local checks.
 
 Owner update (2026-09-17): local acceptance testing first, hosting after it is completed. Local app started on frontend 3100/API 3101 with development MariaDB; migrations/seed passed and homepage/API/admin login/logout checked. See docs/superpowers/local-testing.md. Live deployment remains deferred.
+
+
+## Task 12 deployment amendment (2026-09-17)
+
+Blog images now use persistent UPLOADS_DIR/blog with database paths. Configure storage outside the Git checkout, include files alongside MariaDB in provider backups and validate restart/recovery. Source/compiled image migration commands and manual GitHub/private-deploy-key deployment steps are documented in docs/superpowers/deployment.md. Task 12 tests/builds/browser/compiled runtime checks passed; live deployment remains pending local owner acceptance and hosting access.

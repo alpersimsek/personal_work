@@ -1,4 +1,11 @@
 import { z } from 'zod';
+import { IMAGE_PATH } from '../storage/blogImages.js';
+
+const coverImageSchema = z.string().max(2048).refine(value => {
+  if (value === '' || IMAGE_PATH.test(value)) return true;
+  try { return ['https:', 'http:'].includes(new URL(value).protocol); }
+  catch { return false; }
+});
 
 export const createPostSchema = z.object({
   title: z.string().trim().min(1).max(255),
@@ -8,7 +15,7 @@ export const createPostSchema = z.object({
   tags: z.array(z.string()).optional(),
   author: z.string().max(100).optional(),
   readTime: z.string().max(50).optional(),
-  coverImage: z.string().optional(),
+  coverImage: coverImageSchema.optional(),
   published: z.boolean().optional(),
   featured: z.boolean().optional(),
 });

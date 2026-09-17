@@ -21,6 +21,10 @@ export default defineConfig(({ mode }) => {
         usePolling: true
       },
       proxy: {
+        '/uploads': {
+          target: `http://127.0.0.1:${process.env.API_PORT || env.API_PORT || '3001'}`,
+          changeOrigin: true,
+        },
         '/api': {
           target: `http://127.0.0.1:${process.env.API_PORT || env.API_PORT || '3001'}`,
           changeOrigin: true,

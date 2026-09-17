@@ -54,6 +54,15 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
 }
 
 export const blogService = {
+  async uploadImage(formattedDataUrl: string): Promise<string> {
+    const blob = await (await fetch(formattedDataUrl)).blob();
+    const response = await fetch('/api/admin/images', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': blob.type }, body: blob,
+    });
+    const data = await parseJsonOrThrow(response);
+    return data.url;
+  },
   async getPublishedPosts(options: BlogFilterOptions = {}): Promise<{
     posts: BlogPost[];
     total: number;
@@ -189,4 +198,3 @@ export async function formatCoverImage(
     reader.readAsDataURL(file);
   });
 }
-

@@ -28,8 +28,9 @@ to a third-party mailing-list provider.
   decision deferred).
 - Real user self-registration. The `users` table is shaped to support
   it later, but only a single seeded admin account is created now.
-- Object storage for images. Cover images are stored as data-URL text
-  in the database (existing `formatCoverImage()` behavior unchanged).
+- External object storage for images. Owner amendment uses persistent disk files
+  in `UPLOADS_DIR/blog`; the database stores only local paths or external URLs.
+  Existing `formatCoverImage()` cropping/compression is retained before upload.
 - CSRF token scheme beyond `SameSite` cookie protection — acceptable
   given frontend and API are same-origin in production and there is a
   single low-value admin account.
@@ -106,7 +107,7 @@ CREATE TABLE blog_posts (
   tags           JSON,
   author         VARCHAR(100),
   read_time      VARCHAR(50),
-  cover_image    LONGTEXT,                 -- data URL, matches formatCoverImage() output
+  cover_image    LONGTEXT,                 -- image path or external URL (legacy data URLs migrated by images:migrate)
   published      BOOLEAN NOT NULL DEFAULT true,
   featured       BOOLEAN NOT NULL DEFAULT false,
   likes          INT NOT NULL DEFAULT 0,
@@ -196,3 +197,11 @@ Admin (behind `requireAuth`, reads the JWT cookie):
 ## Latest owner amendment: hosting-provider backups (2026-09-17)
 
 The owner requested removal of the application backup/restore feature added in Task 10. Blog backup/restore endpoints and admin controls are out of scope; hosting-provider backups will be configured during deployment. See docs/superpowers/reports/task-11-remove-blog-backup-report.md. Existing blog data and CRUD operations are preserved.
+
+## Owner amendment: disk-backed blog images (2026-09-17)
+
+Authenticated/current-admin POST /api/admin/images accepts raw PNG/JPEG/WebP bytes up to 5 MB and returns a content-hash URL /uploads/blog/<hash>.<extension>. Files are published atomically under UPLOADS_DIR/blog and served in development and production. The editor still crops/compresses images to 1200×675 JPEG before upload; post writes reject data URLs. External HTTP(S) image links remain supported.
+
+images:migrate (source) and images:migrate:prod (compiled) convert legacy database cover images without changing post metadata. Conversion is repeatable, writes files before changing references, and preserves a concurrent editor’s value. Failed rows retain their old data URLs; fix the failure and rerun. The LONGTEXT column remains for migration compatibility but new values are short references.
+
+Persistent uploads are ignored by Git and must survive deployments. Provider backups must include both database and files. Files are retained when posts are deleted/replaced because another post/editor may reference them; automatic orphan cleanup is deferred. Uploaded image URLs are public assets, including images used in draft posts. No application backup/restore UI is added.
