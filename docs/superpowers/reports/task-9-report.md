@@ -33,3 +33,8 @@ Owner update (2026-09-17): local acceptance testing first, hosting after it is c
 ## Task 12 deployment amendment (2026-09-17)
 
 Blog images now use persistent UPLOADS_DIR/blog with database paths. Configure storage outside the Git checkout, include files alongside MariaDB in provider backups and validate restart/recovery. Source/compiled image migration commands and manual GitHub/private-deploy-key deployment steps are documented in docs/superpowers/deployment.md. Task 12 tests/builds/browser/compiled runtime checks passed; live deployment remains pending local owner acceptance and hosting access.
+
+
+## Task 13 deployment preference (2026-09-17)
+
+Owner selected GitHub clone/pull and builds on the hosting server. Use npm ci --include=dev and npm run build:hosting, then compiled DB commands and panel restart. Repo root is the Node app root; dist-server/index.js serves dist and API/uploads in production. Build and compiled real-static-serving smoke passed locally. Actual hosting/published deployment branch remain pending; see task-13-hosting-server-build-report.md and deployment.md.

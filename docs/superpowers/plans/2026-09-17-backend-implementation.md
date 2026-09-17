@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Additional Task 12 is complete: blog images are stored on disk with a repeatable legacy-image migration. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
+**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Additional Task 12 is complete: blog images are stored on disk with a repeatable legacy-image migration. Task 13 preparation is complete for the owner-selected GitHub pull/server build flow with build:hosting. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
 
 **Goal:** Replace the client-side-only admin login and localStorage blog storage with a real Express + MariaDB backend, add a subscribers table for the future mailing-list feature, and wire the existing React frontend to call it.
 

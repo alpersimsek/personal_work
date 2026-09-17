@@ -6,6 +6,8 @@ Updated: 2026-09-17 by Codex.
 
 Local user testing comes before hosting. Completed app is running at http://localhost:3100 with development API on 3101. Use `docs/superpowers/local-testing.md` for login location, walkthrough and restart commands. Development migrations/seed and browser login/logout readiness checks passed. No blog fixtures were added. Wait for local testing results and address them before live deployment.
 
+Owner selected GitHub pull + build on hosting (Task 13, report docs/superpowers/reports/task-13-hosting-server-build-report.md): use npm ci --include=dev, npm run build:hosting, then compiled DB commands and panel restart. Production Express serves dist; application root remains the repo root, startup dist-server/index.js. Source branch must be published before host clone. See the deployment runbook.
+
 ## Resume here
 
 - Worktree: `.claude/worktrees/backend-implementation` relative to the main checkout.
@@ -30,7 +32,8 @@ Local user testing comes before hosting. Completed app is running at http://loca
 | 9: Production deployment | Locally prepared/tested; live hosting pending | see latest branch commit |
 | 10: Application backup/restore | Superseded by owner request | 7867a95 (historical) |
 | 11: Remove application backup/restore | Complete | 6ab00c4 |
-| 12: Disk-backed blog images | Complete | see latest branch commit |
+| 12: Disk-backed blog images | Complete | ea0392a |
+| 13: GitHub source / hosting-side build flow | Preparation complete; actual hosting remains pending | see latest branch commit |
 
 The frontend now uses centrally persisted posts and server-verified cookie sessions. Client admin credential env variables and localStorage-era JSON import/export are removed. Image cropping/compression remains unchanged; uploaded files now live on disk with database paths (Task 12). Subscriber signup remains backend-only; signup UI, consent wording and mailing-list provider remain deferred.
 
@@ -45,6 +48,8 @@ Admin POST /api/admin/images accepts authenticated/current-admin raw PNG/JPEG/We
 Run npm run images:migrate locally or npm run images:migrate:prod after compilation to convert legacy covers. Migration is repeatable, preserves post metadata, writes before updating references and protects concurrent edits. Local migration found no embedded covers. Keep uploads out of Git and outside the host checkout via absolute UPLOADS_DIR. Transfer local image files separately if moving local blog data; GitHub carries code only. Files are retained after post deletion/replacement to protect shared references. See docs/superpowers/reports/task-12-disk-blog-images-report.md and the updated deployment runbook for GitHub deployment/private deploy keys. No push/merge/live deployment performed.
 
 ## Latest validation
+
+Task 13: npm run build:hosting passed on Node 20 and compiled production startup served the real dist homepage/assets/SPA with healthy API/JSON 404 boundary. No database writes.
 
 Node 20.20.2: server tests 43/43, frontend TypeScript, backend compilation and frontend production build passed. Chromium walkthrough covered login/create/edit/public visibility/draft toggles/persisted likes/delete/logout/access rejection and API error feedback without runtime exceptions.
 

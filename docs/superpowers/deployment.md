@@ -4,21 +4,36 @@ Status: prepared locally; live deployment awaits a purchased hosting account, do
 
 Use the backend worktree branch `worktree-backend-implementation`. `main` does not yet include these backend changes. Node 20 is specified in `.nvmrc` and package engines. The app needs a MariaDB database and same-origin HTTPS frontend/API.
 
-## Build and install
+## Deployment flow selected by the owner
 
-There are two supported build paths. Do not omit development dependencies before trying to compile the server: TypeScript is a development dependency.
+Pull source from GitHub and build on the hosting server. The production Node backend serves the generated dist frontend, /api endpoints and persistent /uploads images on the same domain. Set the Node application root to the repository root and startup file to dist-server/index.js; dist is the frontend asset directory served by Express, not a separate Node application root. No Vite development/preview server is needed in production.
 
-Build on the hosting machine (if resources allow):
+The completed backend branch is currently local and unmerged/unpushed. Publish the reviewed deployment branch before cloning it on hosting; main still contains the older app. Substitute the actual GitHub owner/repository below and use the published deployment branch if its name changes:
 
 ```bash
-npm ci
-npm run lint
-npm run build
-npm run build:server
+git clone --branch worktree-backend-implementation git@github.com:OWNER/REPOSITORY.git tugba-app
+cd tugba-app
+```
+
+For a private repository, configure a read-only deploy key first using the GitHub-based deployment section below. Use the hosting account’s Node-enabled terminal and Node 20 as currently specified by this repository. Configure the production environment and MariaDB before database commands.
+
+## Build and install on hosting
+
+```bash
+npm ci --include=dev
+npm run build:hosting
 npm prune --omit=dev
 ```
 
-Or build locally with Node 20 and upload `dist/`, `dist-server/`, `package.json`, and `package-lock.json` to the app root, then run `npm ci --omit=dev` there. Never upload the local `.env`, test database reset script as an operational command, or local credential values. Database migrations and seed are included in the compiled server output.
+Explicit --include=dev is required even if the hosting shell already has NODE_ENV=production, because the build needs TypeScript and other development dependencies. build:hosting checks frontend TypeScript, builds dist, and compiles the backend/migrations into dist-server. Generated folders are ignored by Git and created on the hosting machine. If CloudLinux’s managed node_modules layout requires the panel’s installer, use its supported installation flow with development dependencies included before building.
+
+Keep production secrets in the hosting environment panel, not in Git. Never copy local development credentials to hosting. Initialize the database using the compiled commands below, then start/restart through the Node app manager. On a generic server without that manager, the equivalent command from the repository root is:
+
+```bash
+NODE_ENV=production npm start
+```
+
+The host must keep that process running. Production environment enables Express static serving from dist; npm start launches dist-server/index.js.
 
 ## Configure hosting
 
@@ -80,14 +95,12 @@ Veridyen advertises cPanel and Terminal. cPanel supports cloning/pulling GitHub 
 
 The backend worktree is currently local and unmerged/unpushed. Publish the reviewed deployment branch to GitHub after local owner acceptance before attempting a server clone. Clone into a private app directory, select that published branch, and point the Node app manager at that directory with startup dist-server/index.js.
 
-From the app’s Node-enabled terminal after initial clone, updates follow this sequence:
+From the app’s Node-enabled terminal, with production database/environment variables active, updates follow this sequence:
 
 ```bash
 git pull --ff-only
-npm ci
-npm run lint
-npm run build
-npm run build:server
+npm ci --include=dev
+npm run build:hosting
 npm prune --omit=dev
 npm run db:migrate:prod
 npm run images:migrate:prod
