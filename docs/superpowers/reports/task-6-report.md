@@ -2,6 +2,7 @@
 
 Date: 2026-09-17
 Status: complete.
+Implementation commit: `8035113`.
 
 Delivered subscriber repository, validated/rate-limited public signup with honeypot no-op and persisted consent timestamp, normalized email/name, and admin-only subscriber listing. Concurrent duplicate inserts are caught and return 409 rather than 500. Consent booleans are normalized for JSON.
 

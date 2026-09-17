@@ -8,6 +8,7 @@ import type { Knex } from 'knex';
 // the repository root, so a plain './migrations' would not resolve. Anchor
 // both paths to this file's location so they work regardless of cwd.
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const extension = path.extname(fileURLToPath(import.meta.url)).slice(1);
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -21,11 +22,13 @@ const shared: Knex.Config = {
   client: 'mysql2',
   migrations: {
     directory: path.join(currentDir, 'migrations'),
-    extension: 'ts',
+    extension,
+    loadExtensions: [`.${extension}`],
   },
   seeds: {
     directory: path.join(currentDir, 'seeds'),
-    extension: 'ts',
+    extension,
+    loadExtensions: [`.${extension}`],
   },
 };
 
@@ -34,7 +37,7 @@ const connectionFor = (databaseSuffix = ''): Knex.MySql2ConnectionConfig => ({
   port: Number(process.env.DB_PORT) || 3306,
   user: requireEnv('DB_USER'),
   password: requireEnv('DB_PASSWORD'),
-  database: `${process.env.DB_NAME}${databaseSuffix}`,
+  database: `${requireEnv('DB_NAME')}${databaseSuffix}`,
 });
 
 const config: Record<string, Knex.Config> = {

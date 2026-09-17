@@ -2,6 +2,7 @@
 
 Date: 2026-09-17
 Status: complete.
+Implementation commit: `ce051b4`.
 
 Auth/blog services call same-origin API endpoints with cookie credentials for admin operations. Removed client-side admin credential env variables and localStorage session/blog persistence. Existing formatCoverImage canvas function is retained unchanged. Removed JSON backup/import handlers and buttons from both admin interfaces.
 

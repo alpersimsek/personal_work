@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
+
 **Goal:** Replace the client-side-only admin login and localStorage blog storage with a real Express + MariaDB backend, add a subscribers table for the future mailing-list feature, and wire the existing React frontend to call it.
 
 **Architecture:** A new `server/` directory holds a TypeScript Express app (routes, middleware, Knex-based repositories). It runs standalone in dev (proxied from Vite) and, in production, also serves the built `dist/` frontend from the same process, since the target hosting runs one Node process per app. Auth uses a JWT in an httpOnly cookie, verified server-side against a bcrypt hash — this replaces the client-side password check that shipped credentials into the browser bundle.
@@ -2142,6 +2144,8 @@ git commit -m "Wire the frontend to the real backend API, remove localStorage-er
 
 ### Task 9: Production deployment to the Node.js hosting
 
+**Current status:** live deployment pending hosting access. Follow the corrected `docs/superpowers/deployment.md`; local readiness validation is in `docs/superpowers/reports/task-9-report.md`.
+
 **Files:** none (operational steps against the purchased hosting account — no repo changes beyond what's already committed).
 
 This task has no automated test — it's a one-time (and repeatable-on-redeploy) checklist against real infrastructure that doesn't exist until the hosting plan is purchased. "Testing" it means confirming the live site actually responds correctly at the end.
@@ -2172,9 +2176,10 @@ ADMIN_PASSWORD=<the real admin password to use in production>
 Push the repository to the server via the method your cPanel account supports (Git Version Control feature, or upload via File Manager/FTP if Git isn't enabled on your plan). On the server, in the app's root:
 
 ```bash
-npm install --omit=dev
+npm ci
 npm run build
 npm run build:server
+npm prune --omit=dev
 ```
 
 - [ ] **Step 4: Run migrations and seed the production admin user**
@@ -2182,8 +2187,8 @@ npm run build:server
 Still on the server, with the environment variables from Step 2 in effect (cPanel's Node.js App Manager loads them automatically when you use its "Run NPM Install"/terminal feature for the app):
 
 ```bash
-npm run db:migrate
-npm run db:seed
+npm run db:migrate:prod
+npm run db:seed:prod
 ```
 
 - [ ] **Step 5: Point the app's startup file at the compiled server entry**

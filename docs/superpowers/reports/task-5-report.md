@@ -2,6 +2,7 @@
 
 Date: 2026-09-17
 Status: complete.
+Implementation commit: `28673ee`.
 
 Delivered post validation schemas, posts repository, public list/detail/like endpoints, admin list/create/update/delete/publish endpoints, and database-backed admin-role middleware. Tags and MariaDB booleans are normalized before JSON responses; search includes tags.
 

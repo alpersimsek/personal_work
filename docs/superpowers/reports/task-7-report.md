@@ -2,6 +2,7 @@
 
 Date: 2026-09-17
 Status: complete.
+Implementation commit: `3034635`.
 
 Express serves dist assets and SPA fallback in production; unknown /api paths return JSON 404 before static serving. Existing router imports/mounts are preserved. Factory options support fixture directories and disabling static serving.
 
