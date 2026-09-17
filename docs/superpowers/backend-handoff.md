@@ -31,11 +31,19 @@ Local user testing comes before hosting. Completed app is running at http://loca
 
 The frontend now uses centrally persisted posts and server-verified cookie sessions. Client admin credential env variables and localStorage-era JSON import/export are removed. Image formatting remains unchanged. Subscriber signup remains backend-only; signup UI, consent wording and mailing-list provider remain deferred.
 
+## Task 10: Blog backup and restore
+
+Owner explicitly requested server-backed backup/restore after the original plan removed browser-only JSON import/export. This supersedes that exclusion. Active admin page now offers Blog Yedekleme: download JSON, upload/preview, confirm restore or cancel. Restore merges by slug in a transaction, updates matching posts, adds missing ones, and preserves unrelated posts. Legacy browser exports are supported; upload limit is 50 MB.
+
+Endpoints: GET /api/admin/blog-backup, POST /api/admin/blog-backup/preview, POST /api/admin/blog-backup/restore. All require authentication/current admin role. Report: docs/superpowers/reports/task-10-blog-backup-report.md. Database IDs/users/subscribers/secrets are not exported. Keep this feature when continuing the original plan.
+
 ## Latest validation
 
-Node 20.20.2: server tests 36/36, frontend TypeScript, backend compilation and frontend production build passed. Chromium walkthrough covered login/create/edit/public visibility/draft toggles/persisted likes/delete/logout/access rejection and API error feedback without runtime exceptions.
+Node 20.20.2: server tests 46/46, frontend TypeScript, backend compilation and frontend production build passed. Chromium walkthrough covered login/create/edit/public visibility/draft toggles/persisted likes/delete/logout/access rejection and API error feedback without runtime exceptions.
 
 A clean npm ci --omit=dev artifact was tested without TypeScript or tsx: compiled migrations/seed and repeat seed, production startup, real homepage/API boundary, auth cookie attributes, blog operations and subscriber consent/listing all passed against an isolated temporary MariaDB database. Database/grants/server were cleaned up. Provider HTTPS/Passenger/proxy behavior remains untested until actual hosting access exists.
+
+Backup browser checks also passed: actual download, preview/cancel, confirmed restore, legacy imports, failure/retry feedback, mobile fit and no runtime exceptions. Tests used isolated test DB/API/UI; development blog data was not modified. Server test files run sequentially to avoid shared test-table interference.
 
 ## Operational notes
 

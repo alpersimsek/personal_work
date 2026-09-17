@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
+**Progress (2026-09-17, Codex):** Tasks 1–8 and the additional Task 10 blog backup/restore complete. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
 
 **Goal:** Replace the client-side-only admin login and localStorage blog storage with a real Express + MariaDB backend, add a subscribers table for the future mailing-list feature, and wire the existing React frontend to call it.
 
@@ -19,7 +19,8 @@
 - Every new server-side runtime dependency must be pure JavaScript — no native/compiled addons — because the target cPanel/CloudLinux hosting environment is unreliable for compiling native bindings. This is why `bcryptjs` is used instead of `bcrypt`.
 - Auth session lives in an httpOnly, Secure (in production), `SameSite=Lax` cookie named `session` — never in `localStorage`, never readable by JS.
 - No new frontend test framework is introduced in this plan (the frontend currently has none; adding one is out of scope — verification for frontend changes is `npm run lint` plus a manual browser smoke test, called out explicitly in Task 8).
-- The bulk JSON export/import feature in the two admin UI components is removed, not ported — it was a workaround for localStorage having no server-side backup; with a real database the host's own backups (and Knex migrations) are the right mechanism, and a public admin endpoint that bulk-overwrites the posts table from arbitrary uploaded JSON is not something to carry forward.
+- **Superseded by owner request, 2026-09-17:** the browser-only JSON export/import was removed in Task 8, then server-backed admin backup/restore was explicitly requested and implemented as Task 10. Keep the new validated transactional endpoints and frontend controls. See docs/superpowers/reports/task-10-blog-backup-report.md. The older Task 8 recipe below is historical and does not authorize removing Task 10.
+
 - The subscribers feature in this plan is backend-only (table + `POST /api/subscribe` + `GET /api/admin/subscribers`). No frontend signup form or mailing-list provider integration — both are explicitly deferred by the project owner to a later, separate piece of work.
 
 ---

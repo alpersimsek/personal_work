@@ -53,7 +53,51 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
   return data;
 }
 
+export interface BlogRestorePreview {
+  total: number;
+  created: number;
+  updated: number;
+  published: number;
+  drafts: number;
+}
+
+export interface BlogRestoreResult {
+  total: number;
+  created: number;
+  updated: number;
+}
+
 export const blogService = {
+  async downloadBackup(): Promise<void> {
+    const response = await fetch('/api/admin/blog-backup', { credentials: 'include' });
+    if (!response.ok) await parseJsonOrThrow(response);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `tugba-blog-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
+
+  async previewRestore(backup: unknown): Promise<BlogRestorePreview> {
+    const response = await fetch('/api/admin/blog-backup/preview', {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(backup),
+    });
+    return parseJsonOrThrow(response);
+  },
+
+  async restoreBackup(backup: unknown): Promise<BlogRestoreResult> {
+    const response = await fetch('/api/admin/blog-backup/restore', {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(backup),
+    });
+    return parseJsonOrThrow(response);
+  },
+
   async getPublishedPosts(options: BlogFilterOptions = {}): Promise<{
     posts: BlogPost[];
     total: number;

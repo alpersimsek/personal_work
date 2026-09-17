@@ -26,6 +26,14 @@ The development database has been migrated and the admin seeded. It currently ha
 8. Delete the temporary post and confirm it disappears.
 9. Log out and verify the admin panel asks you to log in again.
 
+## Blog backup and restore
+
+On the admin archive tab, use **Blog Yedekleme → Yedek İndir** to download all blog posts, drafts, images and statistics. Choose that JSON file in **Geri yüklenecek yedek dosyası** to validate it and see how many posts will be added or updated. Select **Geri Yükle** to apply it, or **Vazgeç** to cancel.
+
+Restoring updates posts with matching slugs and adds missing posts. It preserves posts not in the file. Matching posts' content, publish state, counters and timestamps are reset to the backup values. Old browser-exported JSON arrays also work. Maximum upload size is 50 MB.
+
+To test: create a temporary post, download a backup, edit or delete that temporary post, select the backup and inspect the preview, then restore it and confirm the original content returns. Download a current backup before restoring older content you want to preserve. Subscriber data and admin credentials are not part of these files.
+
 Also try the homepage sections, themes, mobile viewport, and WhatsApp consultation flow. Subscribers are backend-only for now; there is no signup form in this implementation.
 
 ## Restart commands
@@ -43,7 +51,7 @@ NODE_ENV=development npm run db:seed
 Then use two terminals in that same worktree (run `nvm use 20` in each):
 
 ```bash
-NODE_ENV=development API_PORT=3101 npm run dev:api
+NODE_ENV=development API_PORT=3101 CHOKIDAR_USEPOLLING=true npm run dev:api
 ```
 
 ```bash
@@ -59,6 +67,6 @@ npm run lint
 
 ## Readiness evidence
 
-MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Existing automated suite had already passed 36/36 on Node 20.
+MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Latest automated suite passed 46/46 on Node 20.
 
 Hosting work is deferred until local testing is completed and the owner confirms readiness. Record findings here or in the handoff, fix reported issues, and only then proceed to the production deployment runbook.
