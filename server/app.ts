@@ -2,6 +2,7 @@ import 'express-async-errors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
+import { postsRouter, adminPostsRouter } from './routes/posts.js';
 import { authRouter } from './routes/auth.js';
 
 export function createApp(_options: { staticDir?: string; serveStatic?: boolean } = {}) {
@@ -14,6 +15,9 @@ export function createApp(_options: { staticDir?: string; serveStatic?: boolean 
   });
 
   app.use('/api/auth', authRouter);
+
+  app.use('/api/posts', postsRouter);
+  app.use('/api/admin/posts', adminPostsRouter);
 
   app.use(errorHandler);
 
