@@ -9,6 +9,14 @@ import type { Knex } from 'knex';
 // both paths to this file's location so they work regardless of cwd.
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} is not set`);
+  }
+  return value;
+}
+
 const shared: Knex.Config = {
   client: 'mysql2',
   migrations: {
@@ -21,11 +29,11 @@ const shared: Knex.Config = {
   },
 };
 
-const connectionFor = (databaseSuffix = ''): Knex.ConnectionConfig => ({
-  host: process.env.DB_HOST,
+const connectionFor = (databaseSuffix = ''): Knex.MySql2ConnectionConfig => ({
+  host: requireEnv('DB_HOST'),
   port: Number(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  user: requireEnv('DB_USER'),
+  password: requireEnv('DB_PASSWORD'),
   database: `${process.env.DB_NAME}${databaseSuffix}`,
 });
 
