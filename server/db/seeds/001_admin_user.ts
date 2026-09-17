@@ -1,0 +1,16 @@
+import type { Knex } from 'knex';
+import bcrypt from 'bcryptjs';
+
+export async function seed(knex: Knex): Promise<void> {
+  const username = (process.env.ADMIN_USERNAME ?? '').trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD ?? '';
+  if (!username || !password) {
+    throw new Error('ADMIN_USERNAME and ADMIN_PASSWORD must be set to seed the admin user.');
+  }
+
+  const existing = await knex('users').where({ username }).first();
+  if (existing) return;
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  await knex('users').insert({ username, password_hash: passwordHash, role: 'admin' });
+}
