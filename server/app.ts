@@ -3,6 +3,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
 import { postsRouter, adminPostsRouter } from './routes/posts.js';
+import { subscribersRouter, adminSubscribersRouter } from './routes/subscribers.js';
 import { authRouter } from './routes/auth.js';
 
 export function createApp(_options: { staticDir?: string; serveStatic?: boolean } = {}) {
@@ -18,6 +19,9 @@ export function createApp(_options: { staticDir?: string; serveStatic?: boolean 
 
   app.use('/api/posts', postsRouter);
   app.use('/api/admin/posts', adminPostsRouter);
+
+  app.use('/api/subscribe', subscribersRouter);
+  app.use('/api/admin/subscribers', adminSubscribersRouter);
 
   app.use(errorHandler);
 
