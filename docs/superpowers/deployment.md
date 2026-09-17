@@ -2,20 +2,20 @@
 
 Status: prepared locally; live deployment awaits a purchased hosting account, domain, and access details.
 
-Use the backend worktree branch `worktree-backend-implementation`. `main` does not yet include these backend changes. Node 20 is specified in `.nvmrc` and package engines. The app needs a MariaDB database and same-origin HTTPS frontend/API.
+Use the backend worktree branch `worktree-backend-implementation`. `main` does not yet include these backend changes. Node 22 is specified in `.nvmrc` and package engines. The app needs a MariaDB database and same-origin HTTPS frontend/API.
 
 ## Deployment flow selected by the owner
 
 Pull source from GitHub and build on the hosting server. The production Node backend serves the generated dist frontend, /api endpoints and persistent /uploads images on the same domain. Set the Node application root to the repository root and startup file to dist-server/index.js; dist is the frontend asset directory served by Express, not a separate Node application root. No Vite development/preview server is needed in production.
 
-The completed backend branch is currently local and unmerged/unpushed. Publish the reviewed deployment branch before cloning it on hosting; main still contains the older app. Substitute the actual GitHub owner/repository below and use the published deployment branch if its name changes:
+Deploy the reviewed worktree-backend-implementation branch from GitHub; main still contains the earlier app. Clone the deployment branch:
 
 ```bash
-git clone --branch worktree-backend-implementation git@github.com:OWNER/REPOSITORY.git tugba-app
+git clone --branch worktree-backend-implementation git@github.com:alpersimsek/personal_work.git tugba-app
 cd tugba-app
 ```
 
-For a private repository, configure a read-only deploy key first using the GitHub-based deployment section below. Use the hosting account’s Node-enabled terminal and Node 20 as currently specified by this repository. Configure the production environment and MariaDB before database commands.
+For a private repository, configure a read-only deploy key first using the GitHub-based deployment section below. Use the hosting account’s Node-enabled terminal and Node 22 as currently specified by this repository. Configure the production environment and MariaDB before database commands.
 
 ## Build and install on hosting
 
@@ -66,7 +66,7 @@ npm run db:seed:prod
 npm run images:migrate:prod
 ```
 
-These commands run compiled JavaScript and need no `tsx` or TypeScript compiler. The seed only creates an admin if that username does not already exist; changing ADMIN_PASSWORD and reseeding does not rotate an existing user's password. Do not run `db:test:reset` in production.
+These commands run compiled JavaScript and need no `tsx` or TypeScript compiler. Migration records keep stable original `.ts` names in both source and compiled runs; a locally migrated database can be imported without renaming its migration history. The seed only creates an admin if that username does not already exist; changing ADMIN_PASSWORD and reseeding does not rotate an existing user's password. Do not run `db:test:reset` in production.
 
 Restart the app through the hosting control panel after environment or code changes.
 
@@ -93,7 +93,7 @@ Add live checks: upload an admin cover, save the post, confirm an independent br
 
 Veridyen advertises cPanel and Terminal. cPanel supports cloning/pulling GitHub repositories through Git Version Control or an enabled terminal; confirm these features for the purchased account. For a private repository, configure a read-only GitHub deploy key using the host’s SSH/Terminal access. No personal token should be committed or embedded in a clone URL.
 
-The backend worktree is currently local and unmerged/unpushed. Publish the reviewed deployment branch to GitHub after local owner acceptance before attempting a server clone. Clone into a private app directory, select that published branch, and point the Node app manager at that directory with startup dist-server/index.js.
+Use GitHub repository alpersimsek/personal_work, deployment branch worktree-backend-implementation and release commit hosting_ready. Clone into a private app directory, select that deployment branch, and point the Node app manager at that directory with startup dist-server/index.js. Deployment itself still awaits hosting access.
 
 From the app’s Node-enabled terminal, with production database/environment variables active, updates follow this sequence:
 
@@ -109,3 +109,5 @@ npm run images:migrate:prod
 Use the panel’s dependency installer if its CloudLinux Node environment requires it. Restart through the Node app manager and run live acceptance checks. The app’s production environment variables must be active for database commands. UPLOADS_DIR remains outside the checkout and is never removed during builds. Keep secrets in the host’s environment panel. This is manual Git deployment; automatic deployment is not configured.
 
 Sources: [Veridyen Node.js hosting](https://www.veridyen.com/nodejs-hosting), [cPanel Git Version Control](https://docs.cpanel.net/cpanel/files/git-version-control/), [private repository deploy keys](https://docs.cpanel.net/knowledge-base/web-services/guide-to-git-set-up-access-to-private-repositories/).
+
+Node 22 replaces the earlier Node 20 target after hosting-readiness review. Node 20 is end-of-life; Node 22 is supported LTS. Select Node 22 for both build and app runtime. Source: [Node.js release status](https://nodejs.org/en/about/previous-releases).

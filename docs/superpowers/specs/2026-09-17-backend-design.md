@@ -42,7 +42,7 @@ Node.js plans researched separately), using cPanel's Node.js App
 Manager (Phusion Passenger) to run a single Node process per app, plus
 a MariaDB 10.6+ database provisioned through the same panel. Local
 development mirrors this with the Docker Compose MariaDB 10.6 setup
-already in the repo (`docker-compose.yml`) and Node 20 (`.nvmrc`).
+already in the repo (`docker-compose.yml`) and Node 22 (`.nvmrc`, updated in hosting-readiness review).
 
 ## Architecture
 
@@ -205,3 +205,7 @@ Authenticated/current-admin POST /api/admin/images accepts raw PNG/JPEG/WebP byt
 images:migrate (source) and images:migrate:prod (compiled) convert legacy database cover images without changing post metadata. Conversion is repeatable, writes files before changing references, and preserves a concurrent editor’s value. Failed rows retain their old data URLs; fix the failure and rerun. The LONGTEXT column remains for migration compatibility but new values are short references.
 
 Persistent uploads are ignored by Git and must survive deployments. Provider backups must include both database and files. Files are retained when posts are deleted/replaced because another post/editor may reference them; automatic orphan cleanup is deferred. Uploaded image URLs are public assets, including images used in draft posts. No application backup/restore UI is added.
+
+## Hosting-readiness amendment (Task 14)
+
+Use Node 22 for source/build/runtime; Node 20 task results are historical. Database migration identities keep original .ts filenames whether execution uses source .ts modules or compiled .js modules, so importing a local database does not invalidate migration history. The reviewed source release is hosting_ready on GitHub branch worktree-backend-implementation; main remains separate and actual hosting deployment awaits access.

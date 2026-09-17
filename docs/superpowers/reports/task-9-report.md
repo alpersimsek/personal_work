@@ -38,3 +38,8 @@ Blog images now use persistent UPLOADS_DIR/blog with database paths. Configure s
 ## Task 13 deployment preference (2026-09-17)
 
 Owner selected GitHub clone/pull and builds on the hosting server. Use npm ci --include=dev and npm run build:hosting, then compiled DB commands and panel restart. Repo root is the Node app root; dist-server/index.js serves dist and API/uploads in production. Build and compiled real-static-serving smoke passed locally. Actual hosting/published deployment branch remain pending; see task-13-hosting-server-build-report.md and deployment.md.
+
+
+## Task 14 hosting_ready source release (2026-09-17)
+
+User authorized publication of reviewed backend source to GitHub branch worktree-backend-implementation with commit hosting_ready. Use Node 22, not the historical Node 20 target. Fixed source/compiled migration identities so local migration records transfer safely; 44/44 server tests, hosting build and a clean compiled runtime/fresh DB/auth/dist artifact smoke passed. Current deployment README/runbook/handoff updated. Actual hosting deployment and provider checks remain pending access; release label does not mark Task 9 complete.

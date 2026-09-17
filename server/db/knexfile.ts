@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readdir } from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import type { Knex } from 'knex';
 
 // Knex resolves migrations/seeds `directory` relative to `process.cwd()`,
@@ -9,6 +10,16 @@ import type { Knex } from 'knex';
 // both paths to this file's location so they work regardless of cwd.
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const extension = path.extname(fileURLToPath(import.meta.url)).slice(1);
+const migrationsDir = path.join(currentDir, 'migrations');
+const migrationSource: Knex.MigrationSource<string> = {
+  async getMigrations() {
+    return (await readdir(migrationsDir)).filter(name => name.endsWith(`.${extension}`)).sort();
+  },
+  // Preserve the original recorded .ts identities when executing compiled .js files.
+  // This lets a locally migrated database move to hosting without rerunning migrations.
+  getMigrationName(name) { return name.replace(/\.js$/, '.ts'); },
+  getMigration(name) { return import(pathToFileURL(path.join(migrationsDir, name)).href); },
+};
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -21,9 +32,8 @@ function requireEnv(name: string): string {
 const shared: Knex.Config = {
   client: 'mysql2',
   migrations: {
-    directory: path.join(currentDir, 'migrations'),
-    extension,
-    loadExtensions: [`.${extension}`],
+    migrationSource,
+    extension: 'ts',
   },
   seeds: {
     directory: path.join(currentDir, 'seeds'),

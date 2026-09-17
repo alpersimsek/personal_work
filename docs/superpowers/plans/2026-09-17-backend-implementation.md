@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Additional Task 12 is complete: blog images are stored on disk with a repeatable legacy-image migration. Task 13 preparation is complete for the owner-selected GitHub pull/server build flow with build:hosting. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
+**Progress (2026-09-17, Codex):** Tasks 1–8 complete. Task 10 backup/restore was removed in Task 11 at the owner’s request; hosting-provider backups will be used. Additional Task 12 is complete: blog images are stored on disk with a repeatable legacy-image migration. Task 13 preparation is complete for the owner-selected GitHub pull/server build flow with build:hosting. Task 14 review is complete for the hosting_ready source release: Node 22, source/compiled migration compatibility fix and 44 passing tests. Task 9 locally prepared and tested; live deployment awaits hosting/domain/access. Task reports and current handoff: `docs/superpowers/backend-handoff.md`. The step checkboxes below are the original recipe; completion evidence is in the task reports.
 
 **Goal:** Replace the client-side-only admin login and localStorage blog storage with a real Express + MariaDB backend, add a subscribers table for the future mailing-list feature, and wire the existing React frontend to call it.
 
@@ -16,7 +16,7 @@
 
 - Latest owner amendment: image files live under persistent UPLOADS_DIR/blog; database stores paths/external URLs. Preserve uploads across Git deployments and include them in provider backups. See task-12-disk-blog-images-report.md; earlier image-storage recipes are historical.
 
-- Node version: 20.x locally (`.nvmrc`, already in repo) and on the target hosting (which supports 16–24).
+- Node version: 22.x locally and on hosting (`.nvmrc` and package engines updated in Task 14 after Node 20 reached end-of-life). Earlier Node 20 task evidence remains historical.
 - Database: MariaDB 10.6+ (local via the existing `docker-compose.yml`, production via the host's provisioned database).
 - Every new server-side runtime dependency must be pure JavaScript — no native/compiled addons — because the target cPanel/CloudLinux hosting environment is unreliable for compiling native bindings. This is why `bcryptjs` is used instead of `bcrypt`.
 - Auth session lives in an httpOnly, Secure (in production), `SameSite=Lax` cookie named `session` — never in `localStorage`, never readable by JS.

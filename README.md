@@ -4,7 +4,7 @@ React frontend with an Express API, MariaDB blog/subscriber data, server-verifie
 
 ## Hosting from GitHub
 
-Clone the published backend deployment branch on the hosting server. From the repository root, using the app's Node environment:
+Clone the published backend deployment branch on the hosting server. From the repository root, using the app's Node 22 environment:
 
 ```bash
 npm ci --include=dev
@@ -28,7 +28,7 @@ Express serves the built **`dist` folder**, API and uploaded images under the sa
 
 For updates, use `git pull --ff-only`, repeat install/build/migration commands and restart. Full instructions, private GitHub deploy keys and acceptance checks: [deployment runbook](docs/superpowers/deployment.md).
 
-The completed backend work is currently on `worktree-backend-implementation`; publish that reviewed branch before attempting a host clone. `main` still contains the earlier implementation.
+Clone `alpersimsek/personal_work` branch `worktree-backend-implementation` for the `hosting_ready` release. `main` still contains the earlier implementation.
 
 ## Local testing
 

@@ -6,12 +6,12 @@ Updated: 2026-09-17 by Codex.
 
 Local user testing comes before hosting. Completed app is running at http://localhost:3100 with development API on 3101. Use `docs/superpowers/local-testing.md` for login location, walkthrough and restart commands. Development migrations/seed and browser login/logout readiness checks passed. No blog fixtures were added. Wait for local testing results and address them before live deployment.
 
-Owner selected GitHub pull + build on hosting (Task 13, report docs/superpowers/reports/task-13-hosting-server-build-report.md): use npm ci --include=dev, npm run build:hosting, then compiled DB commands and panel restart. Production Express serves dist; application root remains the repo root, startup dist-server/index.js. Source branch must be published before host clone. See the deployment runbook.
+Owner selected GitHub pull + build on hosting (Task 13, report docs/superpowers/reports/task-13-hosting-server-build-report.md): use npm ci --include=dev, npm run build:hosting, then compiled DB commands and panel restart. Production Express serves dist; application root remains the repo root, startup dist-server/index.js. Deploy GitHub repository alpersimsek/personal_work branch worktree-backend-implementation (hosting_ready release); use Node 22 for both build/runtime. See the deployment runbook.
 
 ## Resume here
 
 - Worktree: `.claude/worktrees/backend-implementation` relative to the main checkout.
-- Branch: `worktree-backend-implementation`; backend changes are not merged into `main` or pushed remotely.
+- Branch: `worktree-backend-implementation`; backend changes are published on this deployment branch; they are not merged into `main`.
 - **Tasks 1–8 are complete. Task 9 is prepared locally but live deployment awaits purchased hosting, domain and access details.**
 - Use `docs/superpowers/deployment.md` for the corrected deployment commands and live acceptance checklist.
 - Plan: `docs/superpowers/plans/2026-09-17-backend-implementation.md`.
@@ -33,7 +33,8 @@ Owner selected GitHub pull + build on hosting (Task 13, report docs/superpowers/
 | 10: Application backup/restore | Superseded by owner request | 7867a95 (historical) |
 | 11: Remove application backup/restore | Complete | 6ab00c4 |
 | 12: Disk-backed blog images | Complete | ea0392a |
-| 13: GitHub source / hosting-side build flow | Preparation complete; actual hosting remains pending | see latest branch commit |
+| 13: GitHub source / hosting-side build flow | Preparation complete; actual hosting remains pending | 55c54ed |
+| 14: Hosting-readiness review and GitHub source publication | Reviewed source release; hosting deployment remains pending | hosting_ready |
 
 The frontend now uses centrally persisted posts and server-verified cookie sessions. Client admin credential env variables and localStorage-era JSON import/export are removed. Image cropping/compression remains unchanged; uploaded files now live on disk with database paths (Task 12). Subscriber signup remains backend-only; signup UI, consent wording and mailing-list provider remain deferred.
 
@@ -45,9 +46,13 @@ Owner requested removal of application backup/restore in favor of hosting-provid
 
 Admin POST /api/admin/images accepts authenticated/current-admin raw PNG/JPEG/WebP files, checks signatures and 5 MB limit, atomically saves content-hash filenames under UPLOADS_DIR/blog, and returns /uploads/blog URLs. The active editor uploads its optimized JPEG before saving; post writes reject embedded data images. External HTTP(S) image URLs remain supported. Vite proxies uploads locally; Express serves them in development/production with nosniff and a JSON 404 boundary.
 
-Run npm run images:migrate locally or npm run images:migrate:prod after compilation to convert legacy covers. Migration is repeatable, preserves post metadata, writes before updating references and protects concurrent edits. Local migration found no embedded covers. Keep uploads out of Git and outside the host checkout via absolute UPLOADS_DIR. Transfer local image files separately if moving local blog data; GitHub carries code only. Files are retained after post deletion/replacement to protect shared references. See docs/superpowers/reports/task-12-disk-blog-images-report.md and the updated deployment runbook for GitHub deployment/private deploy keys. No push/merge/live deployment performed.
+Run npm run images:migrate locally or npm run images:migrate:prod after compilation to convert legacy covers. Migration is repeatable, preserves post metadata, writes before updating references and protects concurrent edits. Local migration found no embedded covers. Keep uploads out of Git and outside the host checkout via absolute UPLOADS_DIR. Transfer local image files separately if moving local blog data; GitHub carries code only. Files are retained after post deletion/replacement to protect shared references. See docs/superpowers/reports/task-12-disk-blog-images-report.md and the updated deployment runbook for GitHub deployment/private deploy keys. Task 14 publishes the reviewed source branch; no main merge or live deployment performed.
 
 ## Latest validation
+
+Task 14 hosting_ready review: Node 22.23.2 target, 44/44 server tests (including source-to-compiled migration regression), hosting build and compiled DB/runtime checks passed. Migration records retain original .ts names while compiled JavaScript executes, preserving compatibility when local data moves to hosting. Updated README/runbook specify the actual GitHub deployment branch. Provider deployment remains pending access.
+
+Earlier task evidence:
 
 Task 13: npm run build:hosting passed on Node 20 and compiled production startup served the real dist homepage/assets/SPA with healthy API/JSON 404 boundary. No database writes.
 

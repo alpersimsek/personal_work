@@ -52,14 +52,14 @@ From the main workspace:
 
 ```bash
 cd /mnt/e/Tugba/personal_work/.claude/worktrees/backend-implementation
-nvm use 20
+nvm use
 docker compose -p personal_work up -d mariadb adminer
 NODE_ENV=development npm run db:migrate
 NODE_ENV=development npm run db:seed
 NODE_ENV=development npm run images:migrate
 ```
 
-Then use two terminals in that same worktree (run `nvm use 20` in each):
+Then use two terminals in that same worktree (run `nvm use` in each):
 
 ```bash
 NODE_ENV=development API_PORT=3101 CHOKIDAR_USEPOLLING=true npm run dev:api
@@ -78,6 +78,6 @@ npm run lint
 
 ## Readiness evidence
 
-MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Latest automated suite passed 43/43 on Node 20.
+MariaDB is healthy. Development migrations and seed passed. Frontend-proxied API health and public listing passed. Chromium checked homepage/public blog/admin login/admin listing/logout with no runtime exceptions and no changes to blog data. Latest automated suite passed 44/44 on Node 22.
 
 Hosting work is deferred until local testing is completed and the owner confirms readiness. Record findings here or in the handoff, fix reported issues, and only then proceed to the production deployment runbook.
