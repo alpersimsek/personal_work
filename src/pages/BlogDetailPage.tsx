@@ -25,6 +25,8 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
 }) => {
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
+  const [likePending, setLikePending] = useState(false);
+  const [likeError, setLikeError] = useState('');
   const [copied, setCopied] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -36,17 +38,17 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
   }, [post]);
 
   useEffect(() => {
+    let cancelled = false;
     if (post) {
       setLikesCount(post.likes || 0);
       setHasLiked(false);
-
-      // Fetch related posts in same category
-      const { posts: allPublished } = blogService.getPublishedPosts({ limit: 10 });
-      const related = allPublished
-        .filter((p) => p.id !== post.id && (p.category === post.category || true))
-        .slice(0, 2);
-      setRelatedPosts(related);
+      setLikeError('');
+      setRelatedPosts([]);
+      blogService.getPublishedPosts({ limit: 10 }).then(({ posts }) => {
+        if (!cancelled) setRelatedPosts(posts.filter(p => p.id !== post.id).slice(0, 2));
+      }).catch(() => {});
     }
+    return () => { cancelled = true; };
   }, [post]);
 
   const handleOpenBookingModal = () => {
@@ -70,12 +72,16 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
     );
   }
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      const updatedLikes = blogService.likePost(post.id);
-      setLikesCount(updatedLikes);
+  const handleLike = async () => {
+    if (hasLiked || likePending) return;
+    setLikePending(true);
+    setLikeError('');
+    try {
+      setLikesCount(await blogService.likePost(post.id));
       setHasLiked(true);
-    }
+    } catch (error) {
+      setLikeError(error instanceof Error ? error.message : 'Beğeni kaydedilemedi.');
+    } finally { setLikePending(false); }
   };
 
   const handleShare = () => {
@@ -251,6 +257,8 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
           <div className="mt-8 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-sans">
             <button
               onClick={handleLike}
+                  disabled={likePending || hasLiked}
+                  title={likeError || undefined}
               className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer w-full sm:w-auto ${
                 hasLiked
                   ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40 shadow-sm'
@@ -272,6 +280,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
               </svg>
               <span className="truncate">{hasLiked ? 'Beğenildi!' : 'Faydalı Buldum'} ({likesCount})</span>
             </button>
+                {likeError && <p role="alert" className="text-red-400 text-sm">{likeError}</p>}
 
             <button
               onClick={handleShare}

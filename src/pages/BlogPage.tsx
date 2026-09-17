@@ -49,16 +49,24 @@ export const BlogPage: React.FC<BlogPageProps> = ({
   }, []);
 
   useEffect(() => {
-    const result = blogService.getPublishedPosts({
-      category: selectedCategory === 'Tümü' ? undefined : selectedCategory,
-      searchQuery: searchQuery.trim() || undefined,
-      page: currentPage,
-      limit: 6,
-    });
-    setPostsData(result);
+    let cancelled = false;
+    setLoading(true);
+    setLoadError('');
+    blogService.getPublishedPosts({ category: selectedCategory, searchQuery, page: currentPage, limit: 6 })
+      .then(result => { if (!cancelled) setPostsData(result); })
+      .catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Yazılar yüklenemedi.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [selectedCategory, searchQuery, currentPage]);
 
-  const isAdmin = authService.getSession().isLoggedIn;
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    authService.getSession().then(session => { if (!cancelled) setIsAdmin(session.isLoggedIn); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   const handleCategoryChange = (cat: BlogCategory | 'Tümü') => {
     setSelectedCategory(cat);
@@ -161,7 +169,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
         </div>
 
         {/* Blog Post Grid */}
-        {postsData.posts.length === 0 ? (
+        {loading ? (<p role="status" className="py-12 text-center text-white/60">Yazılar yükleniyor…</p>) : loadError ? (<p role="alert" className="py-12 text-center text-red-300">{loadError}</p>) : postsData.posts.length === 0 ? (
           <div className="text-center py-24 bg-neutral-900/40 rounded-2xl border border-white/10">
             <p className="text-white/60 text-lg font-light">Aradığınız kriterlere uygun makale bulunamadı.</p>
           </div>

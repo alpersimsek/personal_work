@@ -35,20 +35,24 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
     currentPage: number;
   }>({ posts: [], total: 0, totalPages: 1, currentPage: 1 });
 
-  const isAdmin = authService.getSession().isLoggedIn;
-
-  const loadPosts = () => {
-    const data = blogService.getPublishedPosts({
-      category: selectedCategory,
-      searchQuery,
-      page: currentPage,
-      limit: 6,
-    });
-    setPostsData(data);
-  };
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    authService.getSession().then(session => { if (!cancelled) setIsAdmin(session.isLoggedIn); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
-    loadPosts();
+    let cancelled = false;
+    setLoading(true);
+    setLoadError('');
+    blogService.getPublishedPosts({ category: selectedCategory, searchQuery, page: currentPage, limit: 6 })
+      .then(result => { if (!cancelled) setPostsData(result); })
+      .catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Yazılar yüklenemedi.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [selectedCategory, searchQuery, currentPage, refreshTrigger]);
 
   const handleCategoryChange = (cat: BlogCategory | 'Tümü') => {
@@ -147,7 +151,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
         </div>
 
         {/* Blog Post Grid */}
-        {postsData.posts.length === 0 ? (
+        {loading ? (<p role="status" className="py-12 text-center text-white/60">Yazılar yükleniyor…</p>) : loadError ? (<p role="alert" className="py-12 text-center text-red-300">{loadError}</p>) : postsData.posts.length === 0 ? (
           <div className="text-center py-20 bg-neutral-900/40 rounded-2xl border border-white/10">
             <svg className="w-12 h-12 text-white/20 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />

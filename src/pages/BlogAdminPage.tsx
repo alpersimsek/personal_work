@@ -27,6 +27,8 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'editor'>('list');
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
 
   // Form State
@@ -44,17 +46,23 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     window.scrollTo(0, 0);
-    const session = authService.getSession();
-    setIsLoggedIn(session.isLoggedIn);
-    if (session.isLoggedIn) {
-      refreshPosts();
-    }
+    authService.getSession().then(session => {
+      if (!cancelled) {
+        setIsLoggedIn(session.isLoggedIn);
+        if (session.isLoggedIn) void refreshPosts().catch(showError);
+      }
+    }).catch(error => { if (!cancelled) showError(error); })
+      .finally(() => { if (!cancelled) setSessionLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
-  const refreshPosts = () => {
-    const data = blogService.getAllPosts();
-    setPosts(data);
+  const showError = (error: unknown) => {
+    setStatusNotice({ type: 'error', text: error instanceof Error ? error.message : 'Bir hata oluştu.' });
+  };
+  const refreshPosts = async () => {
+    setPosts(await blogService.getAllPosts());
   };
 
   const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,99 +118,51 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setActiveTab('editor');
   };
 
-  const handleSavePost = (e: React.FormEvent) => {
+  const handleSavePost = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (!title.trim() || !content.trim()) {
       setStatusNotice({ type: 'error', text: 'Lütfen başlık ve içerik alanlarını doldurun.' });
       return;
     }
-
-    const finalCover = coverImage.trim() || DEFAULT_COVER_IMAGE;
-
-    const tagsArr = tagsInput
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    if (editingPost) {
-      blogService.updatePost(editingPost.id, {
-        title,
-        category,
-        summary,
-        content,
-        readTime,
-        coverImage: finalCover,
-        tags: tagsArr,
-        published,
-        featured,
-      });
-      setStatusNotice({ type: 'success', text: 'Makale başarıyla güncellendi!' });
-    } else {
-      blogService.createPost({
-        title,
-        category,
-        summary,
-        content,
-        readTime,
-        coverImage: finalCover,
-        tags: tagsArr,
-        published,
-        featured,
-      });
-      setStatusNotice({ type: 'success', text: 'Yeni makale başarıyla yayınlandı!' });
-    }
-
-    refreshPosts();
-    setTimeout(() => {
+    setSaving(true);
+    const data = { title, category, summary, content, readTime, coverImage: coverImage.trim() || DEFAULT_COVER_IMAGE,
+      tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean), published, featured };
+    try {
+      if (editingPost) {
+        const updated = await blogService.updatePost(editingPost.id, data);
+        if (!updated) throw new Error('Makale bulunamadı.');
+      } else {
+        await blogService.createPost(data);
+      }
+      await refreshPosts();
       setActiveTab('list');
-      setStatusNotice(null);
-    }, 1200);
+      setStatusNotice({ type: 'success', text: editingPost ? 'Makale başarıyla güncellendi!' : 'Yeni makale kaydedildi!' });
+    } catch (error) { showError(error); }
+    finally { setSaving(false); }
   };
 
-  const handleDelete = (id: string, postTitle: string) => {
-    if (window.confirm(`"${postTitle}" başlıklı makaleyi silmek istediğinize emin misiniz?`)) {
-      blogService.deletePost(id);
-      refreshPosts();
-    }
+  const handleDelete = async (id: string, postTitle: string) => {
+    if (!window.confirm(`"${postTitle}" başlıklı makaleyi silmek istediğinize emin misiniz?`)) return;
+    try {
+      if (!await blogService.deletePost(id)) throw new Error('Makale bulunamadı.');
+      await refreshPosts();
+    } catch (error) { showError(error); }
   };
 
-  const handleTogglePublish = (id: string) => {
-    blogService.togglePublish(id);
-    refreshPosts();
+  const handleTogglePublish = async (id: string) => {
+    try {
+      await blogService.togglePublish(id);
+      await refreshPosts();
+    } catch (error) { showError(error); }
   };
 
-  const handleExportJSON = () => {
-    const jsonStr = blogService.exportPostsJSON();
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tugba-blog-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleLogout = async () => {
+    try { await authService.logout(); setIsLoggedIn(false); }
+    catch (error) { showError(error); }
   };
 
-  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
-        if (blogService.importPostsJSON(text)) {
-          refreshPosts();
-          alert('Makaleler yedekten başarıyla yüklendi!');
-        } else {
-          alert('Hatalı JSON dosyası biçimi.');
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleLogout = () => {
-    authService.logout();
-    setIsLoggedIn(false);
-  };
+  if (sessionLoading) return <p role="status" className="p-12">Oturum kontrol ediliyor…</p>;
 
   if (!isLoggedIn) {
     return (
@@ -212,7 +172,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           onClose={onNavigateHome}
           onSuccess={() => {
             setIsLoggedIn(true);
-            refreshPosts();
+            void refreshPosts().catch(showError);
           }}
         />
       </div>
@@ -221,6 +181,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   return (
     <div className="admin-scope bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col w-full selection:bg-neutral-900 selection:text-white font-sans">
+      {activeTab === 'list' && statusNotice && <p role={statusNotice.type === 'error' ? 'alert' : 'status'} className="p-4">{statusNotice.text}</p>}
       {/* Pristine Light Luxury Top Navigation Header */}
       <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-5">
@@ -251,28 +212,6 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           >
             Blog Sayfası
           </button>
-
-          <button
-            onClick={handleExportJSON}
-            title="Tüm makaleleri JSON yedeği olarak indir"
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 flex items-center gap-1.5 cursor-pointer"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span>Yedekle</span>
-          </button>
-
-          <label
-            title="Yedek dosyasından yükle"
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 cursor-pointer flex items-center gap-1.5"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            <span>İçe Aktar</span>
-            <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
-          </label>
 
           <button
             onClick={handleLogout}
@@ -675,7 +614,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 İptal
               </button>
               <button
-                type="submit"
+                type="submit" disabled={saving}
                 className="px-8 py-3 rounded-xl bg-stone-200 text-stone-900 font-bold border border-stone-300 text-xs shadow-xs cursor-pointer"
               >
                 {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}

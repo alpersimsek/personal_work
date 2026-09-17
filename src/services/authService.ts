@@ -1,93 +1,30 @@
 import { AdminSession } from '../types';
 
-// Admin credentials are supplied at build time via env vars rather than
-// hardcoded, so the compiled bundle never contains a password reused
-// elsewhere. This still only gates the local blog-drafting UI (blog
-// posts live in this browser's localStorage) — it is not a real
-// security boundary, since anything shipped to the client is readable
-// by any visitor.
-const TARGET_USERNAME = (import.meta.env.VITE_ADMIN_USERNAME || '').trim().toLowerCase();
-const TARGET_PASSWORD_SHA256 = (import.meta.env.VITE_ADMIN_PASSWORD_SHA256 || '').trim().toLowerCase();
-const SESSION_KEY = 'tugba_admin_session';
-
-/**
- * Computes SHA-256 hash of a plain text password using Web Crypto API
- */
-export async function hashPasswordSHA256(password: string): Promise<string> {
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-  }
-  // Fallback (for older/non-subtle environments)
-  return password;
-}
-
 export const authService = {
-  /**
-   * Authenticate the admin user with SHA-256 password verification.
-   */
-  async login(username: string, plainPassword: string): Promise<{ success: boolean; message?: string }> {
-    if (!TARGET_USERNAME || !TARGET_PASSWORD_SHA256) {
-      return { success: false, message: 'Yönetici girişi yapılandırılmamış.' };
+  async login(username: string, password: string): Promise<{ success: boolean; message?: string }> {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      return { success: false, message: data.error ?? 'Geçersiz kullanıcı adı veya şifre.' };
     }
-
-    const trimmedUser = (username || '').trim().toLowerCase();
-    const trimmedPass = (plainPassword || '').trim();
-
-    if (trimmedUser !== TARGET_USERNAME) {
-      return { success: false, message: 'Geçersiz kullanıcı adı veya şifre.' };
-    }
-
-    const hashedInput = await hashPasswordSHA256(trimmedPass);
-    if (hashedInput.toLowerCase() !== TARGET_PASSWORD_SHA256) {
-      return { success: false, message: 'Geçersiz kullanıcı adı veya şifre.' };
-    }
-
-    // Login successful
-    const session: AdminSession = {
-      username: TARGET_USERNAME,
-      isLoggedIn: true,
-      loginTime: new Date().toISOString(),
-    };
-
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    } catch {
-      // Ignore quota errors
-    }
-
     return { success: true };
   },
 
-  /**
-   * Checks current admin session status
-   */
-  getSession(): AdminSession {
-    try {
-      const stored = localStorage.getItem(SESSION_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as AdminSession;
-        if (parsed.isLoggedIn && parsed.username === TARGET_USERNAME) {
-          return parsed;
-        }
-      }
-    } catch {
-      // Fallback
-    }
-    return { username: '', isLoggedIn: false };
+  async getSession(): Promise<AdminSession> {
+    const response = await fetch('/api/auth/me', { credentials: 'include' });
+    if (response.status === 401) return { username: '', isLoggedIn: false };
+    if (!response.ok) throw new Error('Oturum kontrol edilemedi.');
+    const data = await response.json();
+    return { username: data.username, isLoggedIn: true };
   },
 
-  /**
-   * Logs out admin user
-   */
-  logout(): void {
-    try {
-      localStorage.removeItem(SESSION_KEY);
-    } catch {
-      // Ignore
-    }
+  async logout(): Promise<void> {
+    const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    if (!response.ok) throw new Error('Çıkış yapılamadı.');
   },
 };

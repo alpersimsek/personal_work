@@ -17,23 +17,30 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
 }) => {
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
+  const [likePending, setLikePending] = useState(false);
+  const [likeError, setLikeError] = useState('');
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (post) {
       setLikesCount(post.likes || 0);
       setHasLiked(false);
+      setLikeError('');
     }
   }, [post]);
 
   if (!isOpen || !post) return null;
 
-  const handleLike = () => {
-    if (!hasLiked) {
-      const updatedLikes = blogService.likePost(post.id);
-      setLikesCount(updatedLikes);
+  const handleLike = async () => {
+    if (hasLiked || likePending) return;
+    setLikePending(true);
+    setLikeError('');
+    try {
+      setLikesCount(await blogService.likePost(post.id));
       setHasLiked(true);
-    }
+    } catch (error) {
+      setLikeError(error instanceof Error ? error.message : 'Beğeni kaydedilemedi.');
+    } finally { setLikePending(false); }
   };
 
   const handleShare = () => {
@@ -186,6 +193,8 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
             <div className="mt-8 p-4 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between">
               <button
                 onClick={handleLike}
+                  disabled={likePending || hasLiked}
+                  title={likeError || undefined}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all ${
                   hasLiked
                     ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
@@ -207,6 +216,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                 </svg>
                 <span>{hasLiked ? 'Beğenildi!' : 'Faydalı Buldum'} ({likesCount})</span>
               </button>
+                {likeError && <p role="alert" className="text-red-400 text-sm">{likeError}</p>}
 
               <button
                 onClick={handleShare}

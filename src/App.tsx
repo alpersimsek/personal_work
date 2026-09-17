@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { IndexPage } from './pages/Index';
 import { BlogPage } from './pages/BlogPage';
@@ -10,6 +10,7 @@ import { ConsultationModal } from './components/ConsultationModal';
 import { FAQModal } from './components/FAQModal';
 import { ThemeProvider } from './context/ThemeContext';
 import type { BlogPost } from './types';
+import { blogService } from './services/blogService';
 import { authService } from './services/authService';
 import './styles/blog.css';
 import './styles/admin.css';
@@ -17,6 +18,8 @@ import './styles/admin.css';
 type CurrentView = 'home' | 'blog-list' | 'blog-detail' | 'blog-admin';
 
 export default function App() {
+  const selectionRequest = useRef(0);
+  const [navigationError, setNavigationError] = useState('');
   const [currentView, setCurrentView] = useState<CurrentView>('home');
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -37,28 +40,40 @@ export default function App() {
     } else {
       setTargetSection(null);
     }
+    selectionRequest.current++;
+    setNavigationError('');
     setCurrentView('home');
   };
 
   const handleNavigateBlog = () => {
+    selectionRequest.current++;
+    setNavigationError('');
     setCurrentView('blog-list');
   };
 
-  const handleSelectPost = (post: BlogPost) => {
-    setSelectedPost(post);
-    setCurrentView('blog-detail');
+  const handleSelectPost = async (post: BlogPost) => {
+    const requestId = ++selectionRequest.current;
+    setNavigationError('');
+    try {
+      const latest = await blogService.getPostBySlug(post.slug);
+      if (requestId !== selectionRequest.current) return;
+      setSelectedPost(latest ?? null);
+      setCurrentView('blog-detail');
+    } catch (error) {
+      if (requestId === selectionRequest.current) setNavigationError(error instanceof Error ? error.message : 'Makale yüklenemedi.');
+    }
   };
 
-  const handleNavigateAdmin = () => {
-    if (authService.getSession().isLoggedIn) {
-      setCurrentView('blog-admin');
-    } else {
-      setLoginModalOpen(true);
-    }
+  const handleNavigateAdmin = async () => {
+    try {
+      if ((await authService.getSession()).isLoggedIn) setCurrentView('blog-admin');
+      else setLoginModalOpen(true);
+    } catch (error) { setNavigationError(error instanceof Error ? error.message : 'Oturum kontrol edilemedi.'); }
   };
 
   return (
     <ThemeProvider>
+      {navigationError && <p role="alert" className="fixed top-24 inset-x-4 z-50 bg-red-950 text-white p-4 rounded-xl">{navigationError}</p>}
       {currentView !== 'blog-admin' && (
         <Navbar
           onOpenBooking={() => setBookingModalOpen(true)}

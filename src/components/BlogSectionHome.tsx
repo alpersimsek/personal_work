@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 
@@ -12,7 +12,18 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
   onNavigateToBlog,
 }) => {
   // Get latest 3 published posts
-  const { posts } = blogService.getPublishedPosts({ page: 1, limit: 3 });
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    blogService.getPublishedPosts({ page: 1, limit: 3 }).then(result => {
+      if (!cancelled) { setPosts(result.posts); setTotal(result.total); }
+    }).catch(error => { if (!cancelled) setLoadError(error instanceof Error ? error.message : 'Yazılar yüklenemedi.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <section id="blog" className="py-24 relative bg-black border-t border-white/10 overflow-hidden">
@@ -49,6 +60,9 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
           </button>
         </div>
 
+        {loading && <p role="status" className="text-white/60 mb-6">Yazılar yükleniyor…</p>}
+        {loadError && <p role="alert" className="text-red-300 mb-6">{loadError}</p>}
+        {!loading && !loadError && posts.length === 0 && <p className="text-white/60 mb-6">Henüz yayınlanmış yazı bulunmuyor.</p>}
         {/* 3 Latest Post Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {posts.map((post) => (
@@ -107,7 +121,7 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
             onClick={onNavigateToBlog}
             className="w-full py-3 rounded-xl bg-white/10 text-white text-xs font-medium border border-white/15"
           >
-            Tüm Yazıları İncele ({blogService.getPublishedPosts().total})
+            Tüm Yazıları İncele ({total})
           </button>
         </div>
       </div>
