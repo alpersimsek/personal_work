@@ -14,7 +14,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [username, setUsername] = useState('terguner');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -104,7 +104,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
               onChange={(e) => setUsername(e.target.value)}
               required
               className="blog-modal-input w-full px-4 py-3 rounded-xl text-sm font-medium transition-none focus:outline-none placeholder-neutral-400"
-              placeholder="terguner"
+              placeholder="Kullanıcı adı"
             />
           </div>
 

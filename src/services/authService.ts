@@ -1,9 +1,13 @@
 import { AdminSession } from '../types';
 
-// Pre-computed SHA-256 hash of "UlkuTe2391!"
-// Input: "UlkuTe2391!" -> SHA-256 Hex: ed95b6a7194f4a3e20eebcd70e0600a9faacffdfd48f95c52c6575971485ee40
-const TARGET_USERNAME = 'terguner';
-const TARGET_PASSWORD_SHA256 = 'ed95b6a7194f4a3e20eebcd70e0600a9faacffdfd48f95c52c6575971485ee40';
+// Admin credentials are supplied at build time via env vars rather than
+// hardcoded, so the compiled bundle never contains a password reused
+// elsewhere. This still only gates the local blog-drafting UI (blog
+// posts live in this browser's localStorage) — it is not a real
+// security boundary, since anything shipped to the client is readable
+// by any visitor.
+const TARGET_USERNAME = (import.meta.env.VITE_ADMIN_USERNAME || '').trim().toLowerCase();
+const TARGET_PASSWORD_SHA256 = (import.meta.env.VITE_ADMIN_PASSWORD_SHA256 || '').trim().toLowerCase();
 const SESSION_KEY = 'tugba_admin_session';
 
 /**
@@ -23,21 +27,22 @@ export async function hashPasswordSHA256(password: string): Promise<string> {
 
 export const authService = {
   /**
-   * Authenticate admin user terguner with SHA-256 password verification
+   * Authenticate the admin user with SHA-256 password verification.
    */
   async login(username: string, plainPassword: string): Promise<{ success: boolean; message?: string }> {
+    if (!TARGET_USERNAME || !TARGET_PASSWORD_SHA256) {
+      return { success: false, message: 'Yönetici girişi yapılandırılmamış.' };
+    }
+
     const trimmedUser = (username || '').trim().toLowerCase();
     const trimmedPass = (plainPassword || '').trim();
 
-    if (trimmedUser !== TARGET_USERNAME.toLowerCase()) {
+    if (trimmedUser !== TARGET_USERNAME) {
       return { success: false, message: 'Geçersiz kullanıcı adı veya şifre.' };
     }
 
     const hashedInput = await hashPasswordSHA256(trimmedPass);
-    const isDirectMatch = trimmedPass === 'UlkuTe2391!';
-    const isHashMatch = hashedInput.toLowerCase() === TARGET_PASSWORD_SHA256.toLowerCase();
-
-    if (!isDirectMatch && !isHashMatch) {
+    if (hashedInput.toLowerCase() !== TARGET_PASSWORD_SHA256) {
       return { success: false, message: 'Geçersiz kullanıcı adı veya şifre.' };
     }
 
