@@ -193,6 +193,6 @@ Admin (behind `requireAuth`, reads the JWT cookie):
 - Final choice between Veridyen and hosting.com.tr for production
   hosting — leaning Veridyen per prior review, not yet purchased.
 
-## Owner amendment: blog backup and restore (2026-09-17)
+## Latest owner amendment: hosting-provider backups (2026-09-17)
 
-After initial implementation, the owner explicitly requested backend and admin-page blog backup/restore. Admin-only versioned JSON export and validated preview/transactional merge restore are now included. Backups cover blog content/media/status/counters/timestamps, exclude database IDs/users/subscribers/credentials, and support old browser-exported arrays. Restore updates matching slugs, creates missing posts and preserves unrelated posts. Maximum payload is 50 MB after authentication. See docs/superpowers/reports/task-10-blog-backup-report.md.
+The owner requested removal of the application backup/restore feature added in Task 10. Blog backup/restore endpoints and admin controls are out of scope; hosting-provider backups will be configured during deployment. See docs/superpowers/reports/task-11-remove-blog-backup-report.md. Existing blog data and CRUD operations are preserved.

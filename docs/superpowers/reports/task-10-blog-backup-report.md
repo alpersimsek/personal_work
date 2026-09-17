@@ -1,3 +1,5 @@
+> Superseded by Task 11: the owner requested removal of this feature in favor of hosting-provider backups. This report records historical implementation and validation only. See docs/superpowers/reports/task-11-remove-blog-backup-report.md.
+
 # Task 10 report: Blog backup and restore — Codex
 
 Date: 2026-09-17
@@ -33,4 +35,4 @@ Actual running localhost:3100 was also checked with Chromium: configured admin l
 
 The owner tests locally before hosting. App remains on localhost:3100, development API 3101. Running development API was restarted explicitly because the mounted drive's watch events had not updated it; polling enabled for the restarted watcher. Reports and current handoff updated. Changes remain in worktree-backend-implementation, not merged into main or deployed.
 
-Limits: restore merges by database slug key rather than replacing the complete blog table. Export/restore covers blog posts only. Upload limit is 50 MB. Do not remove these operations using the older plan's instructions: the owner explicitly requested them in this continuation.
+Limits: restore merges by database slug key rather than replacing the complete blog table. Export/restore covers blog posts only. Upload limit is 50 MB. These historical operations were subsequently removed by Task 11 at the owner’s request.

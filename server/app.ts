@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
 import { postsRouter, adminPostsRouter } from './routes/posts.js';
 import { subscribersRouter, adminSubscribersRouter } from './routes/subscribers.js';
-import { blogBackupRouter } from './routes/blogBackup.js';
 import { authRouter } from './routes/auth.js';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
@@ -14,7 +13,6 @@ const currentDir = path.dirname(fileURLToPath(import.meta.url));
 export function createApp(options: { staticDir?: string; serveStatic?: boolean } = {}) {
   const app = express();
   app.use(cookieParser());
-  app.use('/api/admin/blog-backup', blogBackupRouter);
   app.use(express.json({ limit: '15mb' }));
 
   app.get('/api/health', (_req, res) => {

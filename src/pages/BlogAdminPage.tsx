@@ -3,7 +3,6 @@ import { BlogPost, BlogCategory } from '../types';
 import { blogService, formatCoverImage } from '../services/blogService';
 import { authService } from '../services/authService';
 import { AdminLoginModal } from '../components/AdminLoginModal';
-import { BlogBackupControls } from '../components/BlogBackupControls';
 import { BrandLogo } from '../components/BrandLogo';
 
 interface BlogAdminPageProps {
@@ -265,12 +264,6 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
             </button>
           )}
         </div>
-
-        {activeTab === 'list' && <BlogBackupControls disabled={saving} onRestored={async () => {
-          await refreshPosts();
-          handleStartNewPost();
-          setActiveTab('list');
-        }} />}
 
         {/* Content Views */}
         {activeTab === 'list' ? (
