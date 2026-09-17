@@ -26,3 +26,5 @@ Validation on Node 20.20.2:
 Limits: local API checks exercised cookie flags over loopback HTTP using explicit Cookie headers; actual HTTPS browser behavior, Passenger/ESM compatibility and provider proxy configuration still require real hosting validation. Existing large frontend bundle/profile image warning remains.
 
 Claude resume: obtain purchased hosting/domain/access, follow docs/superpowers/deployment.md, and complete its live acceptance checklist. Update this report and ledger after real deployment; do not mark Task 9 complete based on local checks.
+
+Owner update (2026-09-17): local acceptance testing first, hosting after it is completed. Local app started on frontend 3100/API 3101 with development MariaDB; migrations/seed passed and homepage/API/admin login/logout checked. See docs/superpowers/local-testing.md. Live deployment remains deferred.

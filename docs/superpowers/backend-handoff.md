@@ -2,6 +2,10 @@
 
 Updated: 2026-09-17 by Codex.
 
+## Current owner priority
+
+Local user testing comes before hosting. Completed app is running at http://localhost:3100 with development API on 3101. Use `docs/superpowers/local-testing.md` for login location, walkthrough and restart commands. Development migrations/seed and browser login/logout readiness checks passed. No blog fixtures were added. Wait for local testing results and address them before live deployment.
+
 ## Resume here
 
 - Worktree: `.claude/worktrees/backend-implementation` relative to the main checkout.
