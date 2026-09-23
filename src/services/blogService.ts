@@ -48,7 +48,7 @@ function toBlogPost(row: ApiBlogPost): BlogPost {
 async function parseJsonOrThrow(response: Response): Promise<any> {
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || 'Bir hata oluştu.');
+    throw new Error(data.error || 'Yazılar şu anda yüklenemedi. Lütfen daha sonra tekrar deneyin.');
   }
   return data;
 }
