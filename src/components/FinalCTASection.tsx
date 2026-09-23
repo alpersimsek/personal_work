@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { ArrowRight, HelpCircle } from 'lucide-react';
+import { ArrowRight, HelpCircle, MessageCircle } from 'lucide-react';
 
 interface FinalCTASectionProps {
   onOpenBooking: () => void;
@@ -21,7 +21,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
     <section
       id="iletisim"
       ref={ref}
-      className="bg-black px-4 sm:px-6 pb-16 sm:pb-24 md:pb-28 relative"
+      className="bg-black px-4 sm:px-6 pt-10 sm:pt-16 md:pt-20 pb-10 sm:pb-16 md:pb-20 relative"
     >
       <div className="max-w-6xl mx-auto">
         <motion.div
@@ -34,9 +34,9 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 max-w-3xl mx-auto">
-            {/* Label */}
-            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold mb-4 sm:mb-6">
-              HAZIRSAN
+            {/* Icon badge */}
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 mb-5 text-white">
+              <MessageCircle size={20} />
             </div>
 
             {/* Heading */}
