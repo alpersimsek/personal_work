@@ -50,13 +50,14 @@ export const SubscribeSection: React.FC = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative z-10 max-w-xl mx-auto">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 mb-5 text-white">
-              <Mail size={20} />
+            <div className="inline-flex items-center gap-3 mb-5">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+                <Mail size={20} />
+              </div>
+              <h2 className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+                Bültene Katıl
+              </h2>
             </div>
-
-            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white font-serif tracking-tight leading-[1.15] mb-4">
-              Bültene Katıl
-            </h2>
 
             <p className="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed mb-8 font-light px-2">
               İçsel netlik, farkındalık ve yaşam dönüşümü üzerine yazıları e-posta ile ilk sen öğren.
