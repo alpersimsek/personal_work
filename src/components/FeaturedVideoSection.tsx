@@ -42,10 +42,10 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
             <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
               YAKLAŞIMIM
             </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-5xl text-white leading-[1.15] tracking-tight font-serif max-w-none mb-3 sm:mb-4">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight font-serif max-w-none mb-3 sm:mb-4">
               Koçluk sana ne yapman gerektiğini söylemek değildir.
             </h2>
-            <p className="text-white/80 text-base sm:text-lg md:text-xl font-light leading-relaxed max-w-4xl">
+            <p className="text-white/80 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-4xl">
               Doğru sorularla kendi cevaplarını daha net görmeni, seni tekrar eden döngüleri fark etmeni ve sana gerçekten ait olan yönü bulmanı sağlar.
             </p>
           </div>

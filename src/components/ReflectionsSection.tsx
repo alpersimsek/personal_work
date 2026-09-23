@@ -51,7 +51,7 @@ export const ReflectionsSection: React.FC = () => {
               <Quote size={15} className="text-white/70" />
               <span>DANIŞAN YANSIMALARI</span>
             </div>
-            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15]">
+            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
               Yolculuğu birlikte yürüyenler ne hissetti?
             </h2>
           </div>

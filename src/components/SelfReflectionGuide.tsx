@@ -141,10 +141,10 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
             <Compass size={16} className="text-white/70" />
             <span>3 DAKİKALIK İÇSEL FARKINDALIK</span>
           </div>
-          <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight max-w-2xl">
+          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight max-w-2xl">
             Şu an hangi aşamadasın?
           </h2>
-          <p className="text-white/80 text-base sm:text-lg md:text-xl max-w-none mt-3 sm:mt-4 font-light leading-relaxed">
+          <p className="text-white/80 text-sm sm:text-base md:text-lg max-w-none mt-3 sm:mt-4 font-light leading-relaxed">
             Doğru ve yanlış yanıt yok. 3 kısa soruyla nerede olduğunu ve koçluğun sana en çok nerede alan açabileceğini gör.
           </p>
         </div>
@@ -180,7 +180,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                   <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white tracking-tight mb-2.5">
                     {QUESTIONS[currentStep].question}
                   </h3>
-                  <p className="text-white/80 text-base sm:text-lg md:text-xl font-light mt-1">
+                  <p className="text-white/80 text-sm sm:text-base md:text-lg font-light mt-1">
                     {QUESTIONS[currentStep].subtitle}
                   </p>
                 </div>
@@ -194,7 +194,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                       className="w-full text-left p-4 sm:p-6 rounded-2xl liquid-glass border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group cursor-pointer flex items-start justify-between gap-4"
                     >
                       <div>
-                        <div className="text-white text-base sm:text-lg md:text-xl font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
+                        <div className="text-white text-sm sm:text-base md:text-lg font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
                           {opt.label}
                         </div>
                         <div className="text-white/80 text-base sm:text-lg font-light leading-relaxed mt-1">
@@ -228,7 +228,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                   {result.title}
                 </h3>
 
-                <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl mx-auto font-light">
+                <p className="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed max-w-xl mx-auto font-light">
                   {result.insight}
                 </p>
 

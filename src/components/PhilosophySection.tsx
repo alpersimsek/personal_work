@@ -73,7 +73,7 @@ export const PhilosophySection: React.FC = () => {
               <div className="text-white/60 text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase font-semibold">
                 NEREDESİN?
               </div>
-              <p className="text-white/85 text-base sm:text-lg md:text-xl leading-relaxed font-light">
+              <p className="text-white/85 text-sm sm:text-base md:text-lg leading-relaxed font-light">
                 Değişim, bulunduğun yeri dürüstçe görebildiğinde başlar. Nelerin seni beslediğini, nelerin tükettiğini ve hangi düşüncelerin artık sana hizmet etmediğini birlikte görünür hâle getiririz.
               </p>
             </div>
@@ -86,7 +86,7 @@ export const PhilosophySection: React.FC = () => {
               <div className="text-white/60 text-xs sm:text-sm md:text-base tracking-[0.2em] uppercase font-semibold">
                 NEREYE GİTMEK İSTİYORSUN?
               </div>
-              <p className="text-white/85 text-base sm:text-lg md:text-xl leading-relaxed font-light">
+              <p className="text-white/85 text-sm sm:text-base md:text-lg leading-relaxed font-light">
                 Farkındalık tek başına yeterli değildir. Sana ait hedefleri netleştirir, büyük değişimleri sürdürülebilir küçük adımlara böler ve düşünceden harekete geçen bir yapı oluştururuz.
               </p>
             </div>

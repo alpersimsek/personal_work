@@ -81,10 +81,10 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
               <span>DÜŞÜNCE & FARKINDALIK</span>
             </div>
 
-            <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl font-normal text-white tracking-tight">
+            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl font-normal text-white tracking-tight">
               Yazılar & Keşifler
             </h2>
-            <p className="text-white/80 text-base sm:text-lg md:text-xl mt-3 max-w-xl font-light leading-relaxed">
+            <p className="text-white/80 text-sm sm:text-base md:text-lg mt-3 max-w-xl font-light leading-relaxed">
               İçsel netlik, farkındalık ve yaşam dönüşümü üzerine kaleme alınan rehber yazılar.
             </p>
           </div>

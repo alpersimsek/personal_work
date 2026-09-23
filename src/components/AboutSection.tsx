@@ -30,7 +30,7 @@ export const AboutSection: React.FC = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-white leading-[1.15] tracking-tight font-serif max-w-5xl text-center sm:text-left mx-auto sm:mx-0"
+          className="text-2xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight font-serif max-w-5xl text-center sm:text-left mx-auto sm:mx-0"
         >
           Hayatını değiştirmek her zaman daha fazlasını yapmakla başlamaz.{' '}
           <br className="hidden sm:inline" />
@@ -46,7 +46,7 @@ export const AboutSection: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 pt-8 border-t border-white/10 text-white/80 text-base sm:text-lg md:text-xl leading-relaxed font-light"
+          className="mt-12 md:mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 pt-8 border-t border-white/10 text-white/80 text-sm sm:text-base md:text-lg leading-relaxed font-light"
         >
           <div>
             <h4 className="text-white text-xs sm:text-sm uppercase tracking-wider mb-2.5 font-semibold">01 / Sadeleşme</h4>

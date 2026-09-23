@@ -61,7 +61,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
             <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
               KOÇLUK ALANLARI
             </div>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
               Birlikte neyin üzerinde çalışabiliriz?
             </h2>
           </div>

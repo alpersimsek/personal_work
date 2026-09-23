@@ -23,7 +23,7 @@ export const CoachProfileSection: React.FC = () => {
             <Compass size={16} className="text-white/70" />
             <span>DANIŞMANLIK & YOL ARKADAŞLIĞI</span>
           </div>
-          <h2 className="serif-font text-3xl sm:text-5xl md:text-6xl text-white tracking-tight leading-tight">
+          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight">
             Koçun Hikayesi & Yaklaşımı
           </h2>
         </div>

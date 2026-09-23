@@ -51,7 +51,7 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/80 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light mb-8 sm:mb-12 px-2"
+          className="text-white/80 text-sm sm:text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-light mb-8 sm:mb-12 px-2"
         >
           Bazen tek bir doğru soru, uzun süredir baktığın bir şeyi tamamen farklı görmene yeter.
         </motion.p>
