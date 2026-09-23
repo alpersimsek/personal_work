@@ -35,8 +35,13 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
 
           <div className="relative z-10 max-w-3xl mx-auto">
             {/* Icon badge */}
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 mb-5 text-white">
-              <MessageCircle size={20} />
+            <div className="inline-flex items-center gap-3 mb-5">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+                <MessageCircle size={20} />
+              </div>
+              <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+                HAZIRSAN
+              </span>
             </div>
 
             {/* Heading */}
