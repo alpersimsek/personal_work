@@ -37,7 +37,7 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.85, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl text-white font-serif leading-[1.08] tracking-tight mb-6 sm:mb-8"
+          className="text-2xl sm:text-4xl md:text-5xl text-white font-serif leading-[1.15] tracking-tight mb-6 sm:mb-8"
         >
           <span>Belki de ihtiyacın olan şey yeni bir hayat değil.</span>
           <br />

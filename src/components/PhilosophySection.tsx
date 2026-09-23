@@ -33,7 +33,7 @@ export const PhilosophySection: React.FC = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-white tracking-tight mb-8 sm:mb-12 md:mb-16 font-serif"
+          className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight mb-8 sm:mb-12 md:mb-16 font-serif"
         >
           <span className="italic">Farkındalık</span>{' '}
           <span className="font-serif italic text-white/40 px-1 sm:px-2 font-normal">×</span>{' '}
