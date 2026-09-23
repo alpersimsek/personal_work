@@ -40,7 +40,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             </div>
 
             {/* Heading */}
-            <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-serif tracking-tight leading-[1.1] mb-5 sm:mb-6">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white font-serif tracking-tight leading-[1.15] mb-4">
               Kendinle daha açık bir{' '}
               <br className="hidden sm:inline" />
               <em className="italic text-white/80 font-serif">
@@ -49,7 +49,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             </h2>
 
             {/* Supporting copy */}
-            <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed max-w-2xl mx-auto mb-8 sm:mb-10 font-light px-2">
+            <p className="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl mx-auto mb-8 font-light px-2">
               İlk görüşme, birbirimizi tanımak ve birlikte çalışmanın sana uygun olup olmadığını görmek için.
             </p>
 
@@ -61,7 +61,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
                 onClick={onOpenBooking}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base md:text-lg flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+                className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
               >
                 <span className="whitespace-nowrap">Görüşme Planla</span>
                 <ArrowRight size={18} className="shrink-0" />
