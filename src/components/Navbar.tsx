@@ -116,9 +116,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={onOpenBooking}
-            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0"
+            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
           >
-            Görüşme Planla
+            <span className="lg:hidden">Randevu Al</span>
+            <span className="hidden lg:inline">Görüşme Planla</span>
           </motion.button>
         </div>
 
