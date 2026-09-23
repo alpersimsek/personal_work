@@ -12,6 +12,7 @@ import { ProcessSection } from '../components/ProcessSection';
 import { PersonalMessageSection } from '../components/PersonalMessageSection';
 import { BlogSectionHome } from '../components/BlogSectionHome';
 import { FinalCTASection } from '../components/FinalCTASection';
+import { SubscribeSection } from '../components/SubscribeSection';
 import { Footer } from '../components/Footer';
 import { ConsultationModal } from '../components/ConsultationModal';
 import { FAQModal } from '../components/FAQModal';
@@ -115,6 +116,9 @@ export const IndexPage: React.FC<IndexPageProps> = ({
         onOpenBooking={() => handleOpenBooking('netlik')}
         onOpenFAQ={() => setFaqModalOpen(true)}
       />
+
+      {/* 13. Subscribe Section */}
+      <SubscribeSection />
 
       {/* Footer */}
       <Footer onOpenBooking={() => handleOpenBooking('netlik')} onNavigateHome={onNavigateHome} onNavigateBlog={onNavigateBlog} />
