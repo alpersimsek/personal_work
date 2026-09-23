@@ -21,7 +21,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
     <section
       id="iletisim"
       ref={ref}
-      className="bg-black px-4 sm:px-6 pt-10 sm:pt-16 md:pt-20 pb-10 sm:pb-16 md:pb-20 relative"
+      className="bg-black px-4 sm:px-6 pt-6 sm:pt-10 md:pt-12 pb-6 sm:pb-10 md:pb-12 relative"
     >
       <div className="max-w-6xl mx-auto">
         <motion.div

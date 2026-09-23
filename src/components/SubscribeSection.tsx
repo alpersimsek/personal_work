@@ -39,7 +39,7 @@ export const SubscribeSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-black px-4 sm:px-6 pt-10 sm:pt-16 md:pt-20 pb-10 sm:pb-16 md:pb-20 relative" ref={ref}>
+    <section className="bg-black px-4 sm:px-6 pt-6 sm:pt-10 md:pt-12 pb-6 sm:pb-10 md:pb-12 relative" ref={ref}>
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
