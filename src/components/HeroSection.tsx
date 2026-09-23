@@ -191,18 +191,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-md px-2"
         >
           {/* Primary Consultation Pill */}
-          <div
+          <motion.button
             id="hero-primary-cta"
+            type="button"
             onClick={onOpenBooking}
-            className="liquid-glass rounded-full pl-6 sm:pl-8 pr-2.5 py-2.5 sm:py-3 flex items-center justify-between gap-4 w-full cta-pill cursor-pointer shadow-2xl transition-all border border-white/20 hover:border-white/40"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
           >
-            <span className="text-white text-sm sm:text-base md:text-lg font-semibold text-left truncate">
-              İlk görüşmeni planla
-            </span>
-            <div className="bg-white rounded-full p-2.5 sm:p-3 text-black transition-transform duration-300 arrow-move flex items-center justify-center shrink-0">
-              <ArrowRight size={18} />
-            </div>
-          </div>
+            <span className="whitespace-nowrap">İlk görüşmeni planla</span>
+            <ArrowRight size={18} className="shrink-0" />
+          </motion.button>
 
           {/* Secondary CTA */}
           <a
@@ -243,7 +242,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
           aria-label="Instagram"
         >
-          <Instagram size={20} className="opacity-70 group-hover:opacity-100" />
+          <Instagram size={20} />
         </a>
         <a
           id="social-link-linkedin"
@@ -253,7 +252,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
           aria-label="LinkedIn"
         >
-          <Linkedin size={20} className="opacity-70 group-hover:opacity-100" />
+          <Linkedin size={20} />
         </a>
         <a
           id="social-link-email"
@@ -261,7 +260,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
           aria-label="E-posta Gönder"
         >
-          <Mail size={20} className="opacity-70 group-hover:opacity-100" />
+          <Mail size={20} />
         </a>
       </motion.div>
 
