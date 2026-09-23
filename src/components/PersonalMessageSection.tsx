@@ -18,7 +18,7 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
   return (
     <section
       ref={ref}
-      className="bg-black py-16 sm:py-24 md:py-36 px-4 sm:px-6 relative overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.03)_0%,_transparent_70%)]"
+      className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.03)_0%,_transparent_70%)]"
     >
       <div className="max-w-4xl mx-auto text-center">
         {/* Label */}
