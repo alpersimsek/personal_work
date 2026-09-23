@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
         </a>
 
         {/* Center: Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-7 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide shrink-0">
+        <div className="hidden md:flex items-center gap-3 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide shrink-0">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
         </div>
 
         {/* Right: Contact Link, Theme Selector & Booking CTA */}
-        <div className="hidden md:flex items-center gap-4 sm:gap-5 shrink-0">
+        <div className="hidden md:flex items-center gap-2 lg:gap-5 shrink-0">
           <a
             id="nav-link-iletisim"
             href="#iletisim"
@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={onOpenBooking}
-            className="bg-white text-black px-5 py-2 sm:px-6 sm:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
+            className="bg-white text-black px-4 py-2 lg:px-6 lg:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
           >
             <span className="lg:hidden">Randevu Al</span>
             <span className="hidden lg:inline">Görüşme Planla</span>
