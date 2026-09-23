@@ -104,7 +104,7 @@ export const ReflectionsSection: React.FC = () => {
                 </div>
 
                 {/* Quote */}
-                <p className="serif-font text-2xl text-white/95 leading-relaxed italic mb-8 font-serif">
+                <p className="serif-font text-xl text-white/95 leading-relaxed italic mb-8 font-serif">
                   "{item.quote}"
                 </p>
               </div>
@@ -162,7 +162,7 @@ export const ReflectionsSection: React.FC = () => {
                   </div>
 
                   {/* Quote */}
-                  <p className="serif-font text-lg sm:text-xl text-white leading-relaxed italic mb-6 font-serif">
+                  <p className="serif-font text-base sm:text-lg text-white leading-relaxed italic mb-6 font-serif">
                     "{REFLECTIONS[activeIndex].quote}"
                   </p>
                 </div>
