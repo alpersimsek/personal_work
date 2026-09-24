@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { NavItem } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 import { BrandLogo } from './BrandLogo';
+import { CollapsedNavMenu } from './CollapsedNavMenu';
 import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
@@ -19,9 +20,63 @@ const NAV_LINKS: NavItem[] = [
   { label: 'Blog', href: '#blog' },
 ];
 
+const MENU_LINKS: NavItem[] = [...NAV_LINKS, { label: 'İletişim', href: '#iletisim' }];
+
+interface NavMenuContentProps {
+  onLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
+  onBook: () => void;
+}
+
+const NavMenuContent: React.FC<NavMenuContentProps> = ({ onLinkClick, onBook }) => (
+  <div className="flex flex-col space-y-3.5">
+    {NAV_LINKS.map((link) => (
+      <a
+        key={link.label}
+        href={link.href}
+        onClick={(e) => onLinkClick(e, link.href)}
+        className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
+      >
+        <span>{link.label}</span>
+        <ArrowUpRight size={16} className="opacity-40" />
+      </a>
+    ))}
+
+    <a
+      href="#iletisim"
+      onClick={(e) => onLinkClick(e, '#iletisim')}
+      className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
+    >
+      <span>İletişim</span>
+      <ArrowUpRight size={16} className="opacity-40" />
+    </a>
+
+    <div className="flex items-center justify-between py-2 border-b border-current/10">
+      <span className="text-sm font-medium">Görünüm Teması</span>
+      <ThemeToggle showLabel={true} />
+    </div>
+
+    <button
+      onClick={onBook}
+      className="w-full bg-white text-black font-semibold py-3 rounded-full text-sm mt-2 text-center shadow-md cursor-pointer"
+    >
+      Görüşme Planla
+    </button>
+  </div>
+);
+
+const COLLAPSE_SCROLL_THRESHOLD = 80;
+
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > COLLAPSE_SCROLL_THRESHOLD);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -71,7 +126,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
     <header className="fixed top-0 left-0 right-0 z-[100] px-2.5 sm:px-12 pt-2.5 sm:pt-6 w-full pointer-events-none transition-all duration-300">
       <nav
         id="navbar-container"
-        className="pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-3.5 sm:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0"
+        className={`pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-3.5 sm:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0 ${
+          scrolled ? 'md:opacity-0 md:-translate-y-6 md:invisible md:pointer-events-none' : ''
+        }`}
       >
         {/* Left: Brand Logo & Monogram */}
         <a
@@ -154,49 +211,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
             transition={{ duration: 0.2 }}
             className={`pointer-events-auto md:hidden mt-3 max-w-5xl mx-auto rounded-2xl p-6 shadow-2xl backdrop-blur-xl border ${getMobileMenuBg()}`}
           >
-            <div className="flex flex-col space-y-3.5">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => handleLinkClick(e, link.href)}
-                  className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
-                >
-                  <span>{link.label}</span>
-                  <ArrowUpRight size={16} className="opacity-40" />
-                </a>
-              ))}
-
-              <a
-                href="#iletisim"
-                onClick={(e) => handleLinkClick(e, '#iletisim')}
-                className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
-              >
-                <span>İletişim</span>
-                <ArrowUpRight size={16} className="opacity-40" />
-              </a>
-
-              <div className="flex items-center justify-between py-2 border-b border-current/10">
-                <span className="text-sm font-medium">Görünüm Teması</span>
-                <ThemeToggle showLabel={true} />
-              </div>
-
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onOpenBooking();
-                }}
-                className="w-full bg-white text-black font-semibold py-3 rounded-full text-sm mt-2 text-center shadow-md cursor-pointer"
-              >
-                Görüşme Planla
-              </button>
-            </div>
+            <NavMenuContent
+              onLinkClick={handleLinkClick}
+              onBook={() => {
+                setMobileMenuOpen(false);
+                onOpenBooking();
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Web: hamburger menu pinned to the top-left once the page is scrolled */}
+      <CollapsedNavMenu
+        visible={scrolled}
+        links={MENU_LINKS}
+        panelClassName={getMobileMenuBg()}
+        onNavigate={handleLinkClick}
+        onLogoClick={handleLogoClick}
+        onBook={onOpenBooking}
+      />
     </header>
   );
 };
-
-
-
