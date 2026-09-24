@@ -23,6 +23,41 @@ export const authService = {
     return { username: data.username, isLoggedIn: true };
   },
 
+  /**
+   * Changes the signed-in user's password. On success the server keeps this
+   * session alive and signs every other one out.
+   */
+  async changePassword(input: {
+    currentPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<{ success: boolean; message?: string }> {
+    let response: Response;
+    try {
+      response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(input),
+      });
+    } catch {
+      return { success: false, message: 'Sunucuya ulaşamadık. İnternet bağlantınızı kontrol edip tekrar deneyin.' };
+    }
+
+    if (response.ok) return { success: true };
+    if (response.status === 401) {
+      return { success: false, message: 'Oturumunuz sona ermiş. Lütfen sayfayı yenileyip yeniden giriş yapın.' };
+    }
+    if (response.status === 429) {
+      return { success: false, message: 'Kısa sürede çok fazla deneme yaptınız. Lütfen biraz bekleyip tekrar deneyin.' };
+    }
+    if (response.status >= 500) {
+      return { success: false, message: 'Şu anda şifreniz değiştirilemedi. Lütfen birkaç dakika sonra tekrar deneyin.' };
+    }
+    const data = await response.json().catch(() => ({}));
+    return { success: false, message: typeof data.error === 'string' ? data.error : 'Şifre değiştirilemedi. Bilgilerinizi kontrol edin.' };
+  },
+
   async logout(): Promise<void> {
     const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     if (!response.ok) throw new Error('Çıkış yapılamadı.');

@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Clock } from 'lucide-react';
 import { BlogPost, BlogCategory } from '../types';
 import { blogService, formatCoverImage } from '../services/blogService';
 import { authService } from '../services/authService';
 import { AdminLoginModal } from '../components/AdminLoginModal';
-import { BrandLogo } from '../components/BrandLogo';
+import { AdminNavBar } from '../components/AdminNavBar';
+import { AdminPostPreview } from '../components/AdminPostPreview';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { WORDS_PER_MINUTE, countWords, estimateReadingMinutes, formatReadingTime, readingTimeLabel } from '../utils/readingTime';
+import { PostCover } from '../components/PostCover';
 
 interface BlogAdminPageProps {
   onNavigateHome: () => void;
@@ -18,7 +23,6 @@ const CATEGORIES: BlogCategory[] = [
   'İçsel Netlik',
 ];
 
-const DEFAULT_COVER_IMAGE = 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1200&q=80';
 
 export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   onNavigateHome,
@@ -37,11 +41,17 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [readTime, setReadTime] = useState('5 dk okuma');
+  // On: the label is worked out from the text. Off: whatever is typed in the field is kept.
+  const [readTimeAuto, setReadTimeAuto] = useState(true);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [preview, setPreview] = useState<{ post: BlogPost; unsaved: boolean } | null>(null);
+
+  const wordCount = useMemo(() => countWords(content), [content]);
+  const autoReadTime = formatReadingTime(estimateReadingMinutes(wordCount));
   const [coverImage, setCoverImage] = useState('');
   const [isFormattingImage, setIsFormattingImage] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [tagsInput, setTagsInput] = useState('');
-  const [published, setPublished] = useState(true);
   const [featured, setFeatured] = useState(false);
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -94,10 +104,10 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setSummary('');
     setContent('');
     setReadTime('5 dk okuma');
+    setReadTimeAuto(true);
     setCoverImage('');
     setShowUrlInput(false);
     setTagsInput('Yaşam Koçluğu, Farkındalık');
-    setPublished(true);
     setFeatured(false);
     setStatusNotice(null);
     setActiveTab('editor');
@@ -110,37 +120,94 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setSummary(post.summary);
     setContent(post.content);
     setReadTime(post.readTime);
+    // Keep a hand-written value as it was; only follow the text if it already matched it.
+    setReadTimeAuto(post.readTime === readingTimeLabel(post.content));
     setCoverImage(post.coverImage);
     setShowUrlInput(false);
     setTagsInput(post.tags ? post.tags.join(', ') : '');
-    setPublished(post.published);
     setFeatured(post.featured || false);
     setStatusNotice(null);
     setActiveTab('editor');
   };
 
-  const handleSavePost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (saving || isFormattingImage) return;
+  /** What a save does to the article's visibility. `keep` leaves a live article live. */
+  type PublishMode = 'draft' | 'publish' | 'keep';
+
+  const finalReadTime = readTimeAuto || !readTime.trim() ? autoReadTime : readTime.trim();
+  const isLive = Boolean(editingPost?.published);
+  const busy = saving || isFormattingImage;
+
+  const currentFields = () => ({
+    title,
+    category,
+    summary,
+    content,
+    readTime: finalReadTime,
+    coverImage: coverImage.trim(),
+    tags: tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean),
+    featured,
+  });
+
+  /** Saves the editor and returns the stored article, or null after showing why not. */
+  const persist = async (mode: PublishMode): Promise<BlogPost | null> => {
+    if (busy) return null;
     if (!title.trim() || !content.trim()) {
       setStatusNotice({ type: 'error', text: 'Lütfen başlık ve içerik alanlarını doldurun.' });
-      return;
+      return null;
     }
     setSaving(true);
-    const data = { title, category, summary, content, readTime, coverImage: coverImage.trim() || DEFAULT_COVER_IMAGE,
-      tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean), published, featured };
     try {
-      if (editingPost) {
-        const updated = await blogService.updatePost(editingPost.id, data);
-        if (!updated) throw new Error('Makale bulunamadı.');
-      } else {
-        await blogService.createPost(data);
-      }
+      const published = mode === 'publish' ? true : mode === 'draft' ? false : isLive;
+      const data = { ...currentFields(), published };
+      const saved = editingPost
+        ? await blogService.updatePost(editingPost.id, data)
+        : await blogService.createPost(data);
+      if (!saved) throw new Error('Makale bulunamadı.');
       await refreshPosts();
-      setActiveTab('list');
-      setStatusNotice({ type: 'success', text: editingPost ? 'Makale başarıyla güncellendi!' : 'Yeni makale kaydedildi!' });
-    } catch (error) { showError(error); }
-    finally { setSaving(false); }
+      return saved;
+    } catch (error) {
+      showError(error);
+      return null;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveAndReturn = async (mode: PublishMode, message: string) => {
+    if (!(await persist(mode))) return;
+    setPreview(null);
+    setActiveTab('list');
+    setStatusNotice({ type: 'success', text: message });
+  };
+
+  // Pressing Enter in a field submits the form, so it must never publish: it saves safely.
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    void (isLive
+      ? saveAndReturn('keep', 'Değişiklikler kaydedildi.')
+      : saveAndReturn('draft', 'Taslak olarak kaydedildi. Hazır olduğunda “Yayınla” diyebilirsin.'));
+  };
+
+  const handlePublish = () => void saveAndReturn('publish', 'Makale yayına alındı!');
+  const handleUnpublish = () =>
+    void saveAndReturn('draft', 'Makale yayından kaldırıldı ve taslak olarak kaydedildi.');
+
+  /**
+   * A draft is saved first, so nothing typed is lost and the preview shows the
+   * stored article. A live article is never overwritten by a preview: its edits
+   * are shown unsaved instead.
+   */
+  const handlePreview = async () => {
+    if (busy) return;
+    if (editingPost?.published) {
+      setPreview({ post: { ...editingPost, ...currentFields() }, unsaved: true });
+      return;
+    }
+    const saved = await persist('draft');
+    if (!saved) return;
+    setEditingPost(saved);
+    setStatusNotice(null);
+    setPreview({ post: saved, unsaved: false });
   };
 
   const handleDelete = async (id: string, postTitle: string) => {
@@ -182,85 +249,22 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   return (
     <div className="admin-scope bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col w-full selection:bg-neutral-900 selection:text-white font-sans">
-      {activeTab === 'list' && statusNotice && <p role={statusNotice.type === 'error' ? 'alert' : 'status'} className="p-4">{statusNotice.text}</p>}
-      {/* Pristine Light Luxury Top Navigation Header */}
-      <header className="border-b border-neutral-200 bg-white/95 backdrop-blur-md px-6 py-4 flex items-center justify-between sticky top-0 z-40 shadow-xs">
-        <div className="flex items-center gap-5">
-          <button
-            onClick={onNavigateHome}
-            className="btn btn-secondary btn-icon btn-sm"
-            title="Ana Sayfaya Dön"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            <span className="hidden sm:inline">Ana Sayfa</span>
-          </button>
-
-          {/* Brand Logo rendered in sharp contrast Light Mode (isDark=false) */}
-          <div className="flex items-center gap-3">
-            <BrandLogo size="sm" showSubtitle={true} isDark={false} />
-            <span className="hidden md:inline-block text-[11px] font-medium text-neutral-600 bg-neutral-100 px-2.5 py-0.5 rounded-full border border-neutral-200">
-              Yazar Paneli
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onNavigateBlog}
-            className="btn btn-secondary btn-sm"
-          >
-            Blog Sayfası
-          </button>
-
-          <button
-            onClick={handleLogout}
-            className="btn btn-danger btn-sm"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span>Çıkış</span>
-          </button>
-        </div>
-      </header>
+      {statusNotice && (activeTab === 'list' || statusNotice.type === 'error') && <p role={statusNotice.type === 'error' ? 'alert' : 'status'} className="p-4">{statusNotice.text}</p>}
+      <AdminNavBar
+        activeTab={activeTab}
+        onChangeTab={setActiveTab}
+        postCount={posts.length}
+        editingExistingPost={Boolean(editingPost)}
+        busy={isFormattingImage || saving}
+        onNewPost={handleStartNewPost}
+        onOpenSite={onNavigateHome}
+        onOpenBlog={onNavigateBlog}
+        onChangePassword={() => setPasswordModalOpen(true)}
+        onLogout={handleLogout}
+      />
 
       {/* Main Workspace Canvas */}
       <main className="flex-1 max-w-5xl mx-auto w-full py-8 px-4 sm:px-6">
-        {/* Workspace Navigation Tabs */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-neutral-200">
-          <div className="flex gap-2">
-            <button
-              disabled={isFormattingImage || saving}
-              onClick={() => setActiveTab('list')}
-              className="btn btn-chip" data-active={activeTab === 'list'}
-            >
-              Makale Arşivi ({posts.length})
-            </button>
-            <button
-              disabled={isFormattingImage || saving}
-              onClick={() => setActiveTab('editor')}
-              className="btn btn-chip" data-active={activeTab === 'editor'}
-            >
-              {editingPost ? 'Makaleyi Düzenle' : 'Yeni Makale Yaz'}
-            </button>
-          </div>
-
-          {activeTab === 'list' && (
-            <button
-              disabled={isFormattingImage || saving}
-              onClick={handleStartNewPost}
-              className="btn btn-primary btn-sm"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
-              <span>Yeni Makale Yaz</span>
-            </button>
-          )}
-        </div>
-
         {/* Content Views */}
         {activeTab === 'list' ? (
           <div className="space-y-4">
@@ -276,11 +280,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     className="p-5 rounded-2xl bg-white border border-neutral-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="w-20 h-20 rounded-xl object-cover border border-neutral-200 shrink-0 shadow-inner"
-                      />
+                      <PostCover src={post.coverImage} alt={post.title} className="w-20 h-20 rounded-xl object-cover border border-neutral-200 shrink-0 shadow-inner" markSize={26} tone="admin" />
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <span className="px-2.5 py-0.5 rounded text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
@@ -347,7 +347,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
           </div>
         ) : (
           /* Pristine Paper-Style Luxury Article Editor */
-          <form onSubmit={handleSavePost} className="space-y-6 bg-white border border-neutral-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-neutral-200 rounded-3xl p-6 sm:p-10 shadow-sm">
             {statusNotice && (
               <div
                 className={`p-4 rounded-xl text-xs text-center border font-semibold ${
@@ -410,7 +410,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                  Kapak Görseli (16:9 Standart Ölçü - 1200x675px)
+                  Kapak Görseli (İsteğe Bağlı · 16:9 · 1200x675px)
                 </label>
                 <button
                   type="button"
@@ -421,6 +421,12 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   {showUrlInput ? 'Dosya Yükleme Moduna Dön' : 'veya Görsel Bağlantısı (URL) Gir'}
                 </button>
               </div>
+
+              {!coverImage && !isFormattingImage && (
+                <p className="text-xs text-neutral-500">
+                  Görsel eklemezsen makalede senin yerine resim seçilmez; sitenin logo işaretiyle sade bir zemin gösterilir.
+                </p>
+              )}
 
               {showUrlInput ? (
                 <div>
@@ -536,16 +542,58 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wider">
-                  Okuma Süresi Metni
-                </label>
-                <input
-                  type="text"
-                  value={readTime}
-                  onChange={(e) => setReadTime(e.target.value)}
-                  placeholder="Örn: 5 dk okuma"
-                  className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <span className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">Okuma Süresi</span>
+                  <label className="flex items-center gap-2 text-xs font-medium text-neutral-600 cursor-pointer select-none">
+                    <span>Otomatik</span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={readTimeAuto}
+                      aria-label="Okuma süresini metinden otomatik hesapla"
+                      onClick={() => setReadTimeAuto((auto) => !auto)}
+                      className={`relative h-5 w-9 shrink-0 rounded-full border ${
+                        readTimeAuto ? 'bg-neutral-900 border-neutral-900' : 'bg-neutral-200 border-neutral-300'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 h-3.5 w-3.5 rounded-full bg-white ${readTimeAuto ? 'left-[18px]' : 'left-0.5'}`} />
+                    </button>
+                  </label>
+                </div>
+
+                {readTimeAuto ? (
+                  <div className="flex items-center gap-3.5 rounded-xl border border-neutral-200 bg-[#F8F8F9] px-4 py-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-neutral-200 bg-white text-neutral-700">
+                      <Clock size={18} />
+                    </span>
+                    <div className="min-w-0">
+                      <p aria-live="polite" className="text-lg font-semibold leading-tight text-neutral-900 tabular-nums">
+                        {wordCount > 0 ? autoReadTime : 'Yazdıkça hesaplanır'}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {wordCount.toLocaleString('tr-TR')} kelime · dakikada ~{WORDS_PER_MINUTE} kelime hızıyla
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={readTime}
+                      onChange={(e) => setReadTime(e.target.value)}
+                      placeholder="Örn: 5 dk okuma"
+                      className="w-full px-4 py-3 bg-[#F8F8F9] border border-neutral-300 rounded-xl text-neutral-900 placeholder-neutral-400 text-sm focus:bg-white focus:text-neutral-900 focus:outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all"
+                    />
+                    {wordCount > 0 && (
+                      <p className="mt-2 flex flex-wrap items-center gap-x-2 text-xs text-neutral-500">
+                        <span>Metne göre öneri: <strong className="font-semibold text-neutral-700">{autoReadTime}</strong></span>
+                        <button type="button" onClick={() => setReadTime(autoReadTime)} className="btn btn-link text-xs">
+                          Bunu kullan
+                        </button>
+                      </p>
+                    )}
+                  </>
+                )}
               </div>
 
               <div>
@@ -568,8 +616,8 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wider">
                   Makale İçeriği (Markdown / Düz Metin) *
                 </label>
-                <span className="text-[11px] font-medium text-neutral-500">
-                  Rahat Yazma & Kağıt Modu
+                <span className="text-[11px] font-medium text-neutral-500 tabular-nums">
+                  {wordCount.toLocaleString('tr-TR')} kelime
                 </span>
               </div>
               <textarea
@@ -586,16 +634,6 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
               <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-neutral-800">
                 <input
                   type="checkbox"
-                  checked={published}
-                  onChange={(e) => setPublished(e.target.checked)}
-                  className="rounded border-neutral-300 text-neutral-900 focus:ring-0 w-4 h-4"
-                />
-                <span>Hemen Yayınla (Herkes Görebilir)</span>
-              </label>
-
-              <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-neutral-800">
-                <input
-                  type="checkbox"
                   checked={featured}
                   onChange={(e) => setFeatured(e.target.checked)}
                   className="rounded border-neutral-300 text-neutral-900 focus:ring-0 w-4 h-4"
@@ -604,26 +642,59 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
               </label>
             </div>
 
-            {/* Submit Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-6 border-t border-neutral-200">
-              <button
-                type="button"
-                disabled={isFormattingImage || saving}
-                onClick={() => setActiveTab('list')}
-                className="btn btn-ghost"
-              >
-                İptal
-              </button>
-              <button
-                type="submit" disabled={saving || isFormattingImage}
-                className="btn btn-primary"
-              >
-                {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}
-              </button>
+            {/* Actions: saving is always safe (draft, or as-is for a live article); publishing is its own button */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-neutral-200">
+              <p className="text-xs text-neutral-500">
+                {isLive ? 'Bu makale yayında.' : 'Bu makale taslak; yayına alana kadar kimse göremez.'}
+              </p>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <button type="button" disabled={busy} onClick={() => setActiveTab('list')} className="btn btn-ghost">
+                  İptal
+                </button>
+                <button type="button" disabled={busy} onClick={() => void handlePreview()} className="btn btn-secondary">
+                  {saving && !isLive ? 'Kaydediliyor…' : 'Önizleme'}
+                </button>
+                {isLive ? (
+                  <>
+                    <button type="button" disabled={busy} onClick={handleUnpublish} className="btn btn-secondary">
+                      Yayından kaldır
+                    </button>
+                    <button type="submit" disabled={busy} className="btn btn-primary">
+                      {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="submit" disabled={busy} className="btn btn-secondary">
+                      {saving ? 'Kaydediliyor…' : 'Taslak olarak kaydet'}
+                    </button>
+                    <button type="button" disabled={busy} onClick={handlePublish} className="btn btn-primary">
+                      Yayına al
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </form>
         )}
       </main>
+
+      <ChangePasswordModal
+        isOpen={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+        onChanged={() => setStatusNotice({ type: 'success', text: 'Şifren değiştirildi. Diğer cihazlardaki oturumlar kapatıldı.' })}
+      />
+
+      {preview && (
+        <AdminPostPreview
+          post={preview.post}
+          isPublished={preview.post.published}
+          showsUnsavedChanges={preview.unsaved}
+          busy={saving}
+          onClose={() => setPreview(null)}
+          onPublish={handlePublish}
+        />
+      )}
     </div>
   );
 };
