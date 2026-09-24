@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { NavItem } from '../types';
 import { ThemeToggle } from './ThemeToggle';
 import { BrandLogo } from './BrandLogo';
 import { CollapsedNavMenu } from './CollapsedNavMenu';
+import { MenuToggleIcon, NavMenuPanel, useMenuDismiss } from './NavMenu';
 import { useTheme } from '../context/ThemeContext';
 
 interface NavbarProps {
@@ -22,54 +22,20 @@ const NAV_LINKS: NavItem[] = [
 
 const MENU_LINKS: NavItem[] = [...NAV_LINKS, { label: 'İletişim', href: '#iletisim' }];
 
-interface NavMenuContentProps {
-  onLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
-  onBook: () => void;
-}
-
-const NavMenuContent: React.FC<NavMenuContentProps> = ({ onLinkClick, onBook }) => (
-  <div className="flex flex-col space-y-3.5">
-    {NAV_LINKS.map((link) => (
-      <a
-        key={link.label}
-        href={link.href}
-        onClick={(e) => onLinkClick(e, link.href)}
-        className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
-      >
-        <span>{link.label}</span>
-        <ArrowUpRight size={16} className="opacity-40" />
-      </a>
-    ))}
-
-    <a
-      href="#iletisim"
-      onClick={(e) => onLinkClick(e, '#iletisim')}
-      className="py-2 border-b border-current/10 font-medium text-sm sm:text-base transition-colors flex items-center justify-between"
-    >
-      <span>İletişim</span>
-      <ArrowUpRight size={16} className="opacity-40" />
-    </a>
-
-    <div className="flex items-center justify-between py-2 border-b border-current/10">
-      <span className="text-sm font-medium">Görünüm Teması</span>
-      <ThemeToggle showLabel={true} />
-    </div>
-
-    <button
-      onClick={onBook}
-      className="w-full bg-white text-black font-semibold py-3 rounded-full text-sm mt-2 text-center shadow-md cursor-pointer"
-    >
-      Görüşme Planla
-    </button>
-  </div>
-);
-
 const COLLAPSE_SCROLL_THRESHOLD = 80;
+
+const DESKTOP_LINK_CLASS =
+  'relative py-1 cursor-pointer text-white/75 hover:text-white transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100 focus-visible:outline-none focus-visible:after:scale-x-100';
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const compactMenuRef = useRef<HTMLDivElement>(null);
+  const compactTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+
+  useMenuDismiss(mobileMenuOpen, compactMenuRef, compactTriggerRef, closeMobileMenu);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > COLLAPSE_SCROLL_THRESHOLD);
@@ -124,105 +90,108 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] px-2.5 sm:px-12 pt-2.5 sm:pt-6 w-full pointer-events-none transition-all duration-300">
-      <nav
-        id="navbar-container"
-        className={`pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto px-3.5 sm:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0 ${
-          scrolled ? 'md:opacity-0 md:-translate-y-6 md:invisible md:pointer-events-none' : ''
-        }`}
-      >
-        {/* Left: Brand Logo & Monogram */}
-        <a
-          id="nav-brand-logo"
-          href="#"
-          onClick={handleLogoClick}
-          className="cursor-pointer flex items-center shrink transition-opacity hover:opacity-90 min-w-0 overflow-hidden"
+      <div ref={compactMenuRef}>
+        <nav
+          id="navbar-container"
+          aria-label="Ana gezinme"
+          className={`pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto pl-4 pr-2 sm:pl-8 sm:pr-3 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0 ${
+            scrolled ? 'lg:opacity-0 lg:-translate-y-6 lg:invisible lg:pointer-events-none' : ''
+          }`}
         >
-          <BrandLogo size="sm" showSubtitle={true} />
-        </a>
-
-        {/* Center: Desktop Navigation Links */}
-        <div className="hidden md:flex items-center gap-3 lg:gap-9 text-xs sm:text-sm font-medium tracking-wide shrink-0">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              id={`nav-link-${link.label.toLowerCase()}`}
-              href={link.href}
-              onClick={(e) => handleLinkClick(e, link.href)}
-              className="text-white/75 hover:text-white transition-colors py-1 cursor-pointer"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-
-        {/* Right: Contact Link, Theme Selector & Booking CTA */}
-        <div className="hidden md:flex items-center gap-2 lg:gap-5 shrink-0">
           <a
-            id="nav-link-iletisim"
-            href="#iletisim"
-            onClick={(e) => handleLinkClick(e, '#iletisim')}
-            className="text-xs sm:text-sm font-medium text-white/75 hover:text-white transition-colors py-1 cursor-pointer"
+            id="nav-brand-logo"
+            href="#"
+            onClick={handleLogoClick}
+            className="cursor-pointer flex items-center shrink transition-opacity hover:opacity-90 min-w-0 overflow-hidden"
           >
-            İletişim
+            <BrandLogo size="sm" showSubtitle={true} />
           </a>
 
-          <ThemeToggle showLabel={true} />
+          {/* Wide screens: full link row */}
+          <div className="hidden lg:flex items-center gap-9 text-sm font-medium tracking-wide shrink-0">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                id={`nav-link-${link.label.toLowerCase()}`}
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link.href)}
+                className={DESKTOP_LINK_CLASS}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
 
-          <motion.button
-            id="nav-btn-booking"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onOpenBooking}
-            className="bg-white text-black px-4 py-2 lg:px-6 lg:py-2.5 rounded-full text-xs sm:text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
-          >
-            <span className="lg:hidden">Randevu Al</span>
-            <span className="hidden lg:inline">Görüşme Planla</span>
-          </motion.button>
+          <div className="hidden lg:flex items-center gap-5 shrink-0">
+            <a
+              id="nav-link-iletisim"
+              href="#iletisim"
+              onClick={(e) => handleLinkClick(e, '#iletisim')}
+              className={`${DESKTOP_LINK_CLASS} text-sm font-medium tracking-wide`}
+            >
+              İletişim
+            </a>
+
+            <ThemeToggle showLabel={true} />
+
+            <motion.button
+              id="nav-btn-booking"
+              type="button"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={onOpenBooking}
+              className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-white/90 transition-colors cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
+            >
+              Görüşme Planla
+            </motion.button>
+          </div>
+
+          {/* Mobile and tablet: booking shortcut plus the shared hamburger menu */}
+          <div className="flex items-center gap-2 lg:hidden shrink-0">
+            <button
+              id="nav-btn-mobile-booking"
+              type="button"
+              onClick={onOpenBooking}
+              className="bg-white text-black rounded-full px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
+            >
+              Randevu Al
+            </button>
+
+            <button
+              ref={compactTriggerRef}
+              id="btn-mobile-menu-toggle"
+              type="button"
+              onClick={() => setMobileMenuOpen((isOpen) => !isOpen)}
+              aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="compact-nav-panel"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+            >
+              <MenuToggleIcon open={mobileMenuOpen} />
+            </button>
+          </div>
+        </nav>
+
+        <div className="lg:hidden max-w-5xl mx-auto flex justify-end">
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <NavMenuPanel
+                id="compact-nav-panel"
+                links={MENU_LINKS}
+                className="pointer-events-auto mt-3 w-full sm:w-[23rem]"
+                themeClassName={getMobileMenuBg()}
+                showLogo={false}
+                onNavigate={handleLinkClick}
+                onLogoClick={handleLogoClick}
+                onBook={onOpenBooking}
+                onClose={closeMobileMenu}
+              />
+            )}
+          </AnimatePresence>
         </div>
+      </div>
 
-        {/* Mobile View Controls */}
-        <div className="flex items-center gap-1.5 sm:gap-2 md:hidden shrink-0">
-          <button
-            id="nav-btn-mobile-booking"
-            onClick={onOpenBooking}
-            className="bg-white text-black rounded-full px-3 py-1.5 text-xs font-semibold shadow-xs shrink-0 whitespace-nowrap"
-          >
-            Randevu Al
-          </button>
-
-          <button
-            id="btn-mobile-menu-toggle"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 sm:p-2 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors shrink-0"
-            aria-label="Menüyü aç/kapat"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Navigation Drawer */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className={`pointer-events-auto md:hidden mt-3 max-w-5xl mx-auto rounded-2xl p-6 shadow-2xl backdrop-blur-xl border ${getMobileMenuBg()}`}
-          >
-            <NavMenuContent
-              onLinkClick={handleLinkClick}
-              onBook={() => {
-                setMobileMenuOpen(false);
-                onOpenBooking();
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Web: hamburger menu pinned to the top-left once the page is scrolled */}
+      {/* Wide screens: hamburger pinned to the top-left once the page is scrolled */}
       <CollapsedNavMenu
         visible={scrolled}
         links={MENU_LINKS}
