@@ -128,7 +128,7 @@ test('invalid pagination/IDs fail validation and missing likes return 404', asyn
 test('a user-role session cannot access admin posts', async () => {
   const [id] = await db('users').insert({ username: 'posts-test-user', role: 'user', password_hash: 'unused' });
   try {
-    const token = signSession({ userId: id, username: 'posts-test-user', role: 'user' });
+    const token = signSession({ userId: id, sessionVersion: 0 });
     assert.equal((await request(app).get('/api/admin/posts').set('Cookie', `session=${token}`)).status, 403);
   } finally { await db('users').where({ id }).delete(); }
 });
@@ -140,7 +140,7 @@ test('image upload requires authentication and current admin role before parsing
   assert.equal((await request(app).post('/api/admin/images').set('Content-Type', 'image/png').send(png)).status, 401);
   const [id] = await db('users').insert({ username: 'image-test-user', role: 'user', password_hash: 'unused' });
   try {
-    const token = signSession({ userId: id, username: 'image-test-user', role: 'user' });
+    const token = signSession({ userId: id, sessionVersion: 0 });
     assert.equal((await request(app).post('/api/admin/images').set('Cookie', `session=${token}`).set('Content-Type', 'image/png').send(png)).status, 403);
   } finally { await db('users').where({ id }).delete(); }
 });

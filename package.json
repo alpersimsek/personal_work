@@ -22,10 +22,12 @@
     "lint:server": "tsc -p server/tsconfig.json --noEmit",
     "db:migrate": "tsx server/db/migrate.ts",
     "db:seed": "tsx server/db/seed.ts",
+    "admin:set-password": "tsx server/db/setAdminPassword.ts",
     "db:test:reset": "NODE_ENV=test tsx server/db/testReset.ts",
     "test:server": "NODE_ENV=test node --import tsx --test server/test/*.test.ts",
     "db:migrate:prod": "node dist-server/db/migrate.js",
     "db:seed:prod": "node dist-server/db/seed.js",
+    "admin:set-password:prod": "node dist-server/db/setAdminPassword.js",
     "images:migrate": "tsx server/db/migrateImages.ts",
     "images:migrate:prod": "node dist-server/db/migrateImages.js"
   },
