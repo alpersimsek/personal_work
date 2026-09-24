@@ -6,6 +6,7 @@ import { BrandLogo } from './BrandLogo';
 import { CollapsedNavMenu } from './CollapsedNavMenu';
 import { MenuToggleIcon, NavMenuPanel, useMenuDismiss } from './NavMenu';
 import { useTheme } from '../context/ThemeContext';
+import { scrollToSection } from '../utils/scrollToSection';
 
 interface NavbarProps {
   onOpenBooking: () => void;
@@ -50,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
 
     const target = document.querySelector(href);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection(target);
       return;
     }
 

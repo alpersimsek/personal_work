@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { ArrowDown, Focus } from 'lucide-react';
+import { scrollToSection } from '../utils/scrollToSection';
 
 interface FeaturedVideoSectionProps {
   onOpenBooking: () => void;
@@ -20,7 +21,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
     e.preventDefault();
     const el = document.querySelector('#farkindalik-eylem');
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection(el);
     }
   };
 

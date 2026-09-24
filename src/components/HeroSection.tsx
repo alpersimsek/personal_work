@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { useTheme } from '../context/ThemeContext';
+import { scrollToSection } from '../utils/scrollToSection';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
@@ -111,7 +112,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
     e.preventDefault();
     const el = document.querySelector('#yaklasim');
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection(el);
     }
   };
 

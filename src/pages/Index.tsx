@@ -17,6 +17,7 @@ import { Footer } from '../components/Footer';
 import { ConsultationModal } from '../components/ConsultationModal';
 import { FAQModal } from '../components/FAQModal';
 import { BlogPost } from '../types';
+import { scrollToSection } from '../utils/scrollToSection';
 
 interface IndexPageProps {
   onNavigateBlog?: () => void;
@@ -43,7 +44,7 @@ export const IndexPage: React.FC<IndexPageProps> = ({
       const timer = setTimeout(() => {
         const el = document.querySelector(targetSection);
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
+          scrollToSection(el);
         }
       }, 200);
       return () => clearTimeout(timer);

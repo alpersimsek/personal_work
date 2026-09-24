@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, Instagram, Linkedin, Mail } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
+import { scrollToSection } from '../utils/scrollToSection';
 
 interface FooterProps {
   onOpenBooking: () => void;
@@ -14,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking, onNavigateHome, o
     e.preventDefault();
     const el = document.querySelector(href);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection(el);
       return;
     }
 
