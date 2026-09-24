@@ -13,6 +13,14 @@ import {
 } from 'lucide-react';
 import { BookingFormData } from '../types';
 import { submitManualBooking, generateWhatsAppLink } from '../services/calendarService';
+import { LegalNoticeModal } from './LegalNoticeModal';
+import {
+  CONSULTATION_NOTICE_INTRO,
+  CONSULTATION_NOTICE_SECTIONS,
+  CONSULTATION_NOTICE_TITLE,
+  CONSULTATION_NOTICE_UPDATED_LABEL,
+  CONSULTATION_NOTICE_VERSION,
+} from '../legal/consultationNotice';
 
 interface ConsultationModalProps {
   isOpen: boolean;
@@ -42,6 +50,12 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [createdWhatsAppUrl, setCreatedWhatsAppUrl] = useState('');
+  const [noticeOpen, setNoticeOpen] = useState(false);
+
+  // The notice window belongs to this one: it never outlives it.
+  React.useEffect(() => {
+    if (!isOpen) setNoticeOpen(false);
+  }, [isOpen]);
 
   // Sync initial props when opened
   React.useEffect(() => {
@@ -281,6 +295,16 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                       <ShieldCheck size={13} />
                       <span>%100 Gizlilik Garantisi • Doğrudan Koç İle İletişim</span>
                     </div>
+                    <div className="mt-1 text-center">
+                      <button
+                        id="btn-open-consultation-notice"
+                        type="button"
+                        onClick={() => setNoticeOpen(true)}
+                        className="btn btn-link text-[11px] sm:text-xs"
+                      >
+                        Görüşme Talebi Aydınlatma Metni
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
@@ -335,9 +359,21 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
     </AnimatePresence>
   );
 
-  return typeof document !== 'undefined'
-    ? createPortal(modalJSX, document.body)
-    : null;
+  return (
+    <>
+      {typeof document !== 'undefined' ? createPortal(modalJSX, document.body) : null}
+      <LegalNoticeModal
+        isOpen={noticeOpen}
+        onClose={() => setNoticeOpen(false)}
+        title={CONSULTATION_NOTICE_TITLE}
+        updatedLabel={CONSULTATION_NOTICE_UPDATED_LABEL}
+        version={CONSULTATION_NOTICE_VERSION}
+        intro={CONSULTATION_NOTICE_INTRO}
+        sections={CONSULTATION_NOTICE_SECTIONS}
+        closeLabel="Kapat ve forma dön"
+      />
+    </>
+  );
 };
 
 
