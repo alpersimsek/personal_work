@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
+import { ArrowRight, BookOpen } from 'lucide-react';
 import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 
@@ -26,22 +28,24 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
   }, []);
 
   return (
-    <section id="blog" className="py-24 relative bg-black border-t border-white/10 overflow-hidden">
+    <section id="blog" className="py-12 sm:py-16 md:py-20 relative bg-black border-t border-white/10 overflow-hidden">
       {/* Background ambient glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div className="text-center md:text-left flex flex-col items-center md:items-start">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/15 text-xs sm:text-sm text-white/80 font-semibold uppercase tracking-wider mb-4">
-              <svg className="w-4 h-4 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-              <span>DÜŞÜNCE & FARKINDALIK</span>
+        <div className="relative flex flex-col items-center mb-8 md:mb-10 gap-6">
+          <div className="text-center flex flex-col items-center">
+            <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+                <BookOpen size={20} />
+              </div>
+              <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+                DÜŞÜNCE & FARKINDALIK
+              </span>
             </div>
 
-            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl font-normal text-white tracking-tight">
+            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl font-normal text-white tracking-tight leading-[1.15]">
               Son Yazılar
             </h2>
             <p className="text-white/80 text-sm sm:text-base md:text-lg mt-3 max-w-xl font-light leading-relaxed">
@@ -49,20 +53,20 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
             </p>
           </div>
 
-          <button
+          <motion.button
             onClick={onNavigateToBlog}
-            className="self-start md:self-end px-6 py-3 rounded-full bg-white/10 hover:bg-white text-white hover:text-black border border-white/20 text-xs sm:text-sm font-semibold transition-all duration-300 flex items-center gap-2 group cursor-pointer shadow-md"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="hidden md:flex md:absolute md:right-0 md:top-1 rounded-full px-5 py-2.5 bg-white text-black font-semibold text-xs sm:text-sm items-center justify-center gap-2 hover:bg-white/90 transition-all cursor-pointer shadow-md border border-white whitespace-nowrap shrink-0"
           >
-            <span>Tüm Yazıları İncele</span>
-            <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </button>
+            <span className="whitespace-nowrap">Tüm Yazıları İncele</span>
+            <ArrowRight size={14} className="shrink-0" />
+          </motion.button>
         </div>
 
-        {loading && <p role="status" className="text-white/60 mb-6">Yazılar yükleniyor…</p>}
-        {loadError && <p role="alert" className="text-red-300 mb-6">{loadError}</p>}
-        {!loading && !loadError && posts.length === 0 && <p className="text-white/60 mb-6">Henüz yayınlanmış yazı bulunmuyor.</p>}
+        {loading && <p role="status" className="text-center text-white/60 mb-6">Yazılar yükleniyor…</p>}
+        {loadError && <p role="alert" className="text-center text-red-300 mb-6">{loadError}</p>}
+        {!loading && !loadError && posts.length === 0 && <p className="text-center text-white/60 mb-6">Henüz yayınlanmış yazı bulunmuyor.</p>}
         {/* 3 Latest Post Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {posts.map((post) => (

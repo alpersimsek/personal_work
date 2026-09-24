@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowDown, Focus } from 'lucide-react';
 
 interface FeaturedVideoSectionProps {
   onOpenBooking: () => void;
@@ -28,7 +28,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
     <section
       id="yaklasim"
       ref={ref}
-      className="bg-black pt-12 md:pt-16 pb-16 md:pb-24 px-4 sm:px-6 overflow-hidden"
+      className="bg-black py-8 md:py-10 px-4 sm:px-6 overflow-hidden scroll-mt-16"
     >
       <div className="max-w-6xl mx-auto text-left">
         {/* Top Header & Narrative outside the video */}
@@ -36,19 +36,22 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 sm:pb-8 border-b border-white/10"
+          className="relative mb-8 md:mb-10 flex flex-col items-center text-center"
         >
-          <div className="flex-1 max-w-none text-center md:text-left">
-            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
-              YAKLAŞIMIM
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+              <Focus size={20} />
             </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight font-serif max-w-none mb-3 sm:mb-4">
-              Koçluk sana ne yapman gerektiğini söylemek değildir.
-            </h2>
-            <p className="text-white/80 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-4xl">
-              Doğru sorularla kendi cevaplarını daha net görmeni, seni tekrar eden döngüleri fark etmeni ve sana gerçekten ait olan yönü bulmanı sağlar.
-            </p>
+            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+              YAKLAŞIMIM
+            </span>
           </div>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight font-serif max-w-none mb-3 sm:mb-4">
+            Koçluk sana ne yapman gerektiğini söylemek değildir.
+          </h2>
+          <p className="text-white/80 text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-4xl">
+            Doğru sorularla kendi cevaplarını daha net görmeni, seni tekrar eden döngüleri fark etmeni ve sana gerçekten ait olan yönü bulmanı sağlar.
+          </p>
 
           <motion.a
             id="featured-approach-cta"
@@ -56,10 +59,10 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
             onClick={scrollToPhilosophy}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="liquid-glass rounded-full px-7 py-3.5 sm:px-9 sm:py-4 text-sm sm:text-base md:text-lg font-semibold flex items-center justify-center gap-2.5 hover:bg-white/10 transition-colors border border-white/25 cursor-pointer shrink-0 shadow-lg w-full sm:w-auto self-start md:self-end text-white"
+            className="mt-5 md:mt-0 md:absolute md:right-0 md:top-1 rounded-full px-5 py-2.5 bg-white text-black font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all cursor-pointer shadow-md border border-white whitespace-nowrap shrink-0"
           >
             <span>Yaklaşımımı keşfet</span>
-            <ArrowUpRight size={18} />
+            <ArrowDown size={14} className="shrink-0" />
           </motion.a>
         </motion.div>
 
@@ -68,7 +71,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-          className="relative rounded-3xl overflow-hidden aspect-[16/9] border border-white/15 shadow-2xl group"
+          className="relative w-full mx-auto rounded-3xl overflow-hidden aspect-[16/9] max-h-[calc(100svh-25rem)] min-h-[16rem] border border-white/15 shadow-2xl group"
         >
           {/* Background Atmospheric Video */}
           <video

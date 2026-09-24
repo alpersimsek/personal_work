@@ -21,15 +21,19 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
       className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.03)_0%,_transparent_70%)]"
     >
       <div className="max-w-4xl mx-auto text-center">
-        {/* Label */}
+        {/* Icon badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-6 sm:mb-8 flex items-center justify-center gap-2 font-semibold"
+          className="inline-flex items-center gap-3 mb-6 sm:mb-8"
         >
-          <Sparkles size={15} className="text-white/70" />
-          <span>KENDİNE DÖNMEK</span>
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+            <Sparkles size={20} />
+          </div>
+          <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+            KENDİNE DÖNMEK
+          </span>
         </motion.div>
 
         {/* Main Emotional Statement */}
@@ -56,7 +60,7 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           Bazen tek bir doğru soru, uzun süredir baktığın bir şeyi tamamen farklı görmene yeter.
         </motion.p>
 
-        {/* Large CTA Pill */}
+        {/* CTA Button */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
@@ -68,12 +72,10 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
             onClick={onOpenBooking}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="liquid-glass rounded-full pl-7 sm:pl-9 pr-3 py-4 flex items-center justify-between gap-4 text-white text-sm sm:text-base font-semibold hover:bg-white/10 transition-all cursor-pointer border border-white/25 shadow-2xl group w-full max-w-md"
+            className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
           >
-            <span className="text-white/95 font-semibold truncate">Tanışma Görüşmesi Planla</span>
-            <div className="bg-white rounded-full p-2.5 sm:p-3 text-black flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:translate-x-1 shrink-0">
-              <ArrowRight size={18} />
-            </div>
+            <span className="whitespace-nowrap">Tanışma Görüşmesi Planla</span>
+            <ArrowRight size={18} className="shrink-0" />
           </motion.button>
         </motion.div>
       </div>

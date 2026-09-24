@@ -42,42 +42,43 @@ export const ReflectionsSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 relative overflow-hidden bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.02)_0%,_transparent_70%)]">
+    <section className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden bg-[radial-gradient(ellipse_at_bottom,_rgba(255,255,255,0.02)_0%,_transparent_70%)]">
       <div className="max-w-6xl mx-auto text-left">
-        {/* Label & Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-14 gap-4">
-          <div className="text-center md:text-left">
-            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold mb-3 sm:mb-4 flex items-center justify-center md:justify-start gap-2">
-              <Quote size={15} className="text-white/70" />
-              <span>DANIŞAN YANSIMALARI</span>
+        {/* Icon badge & Header */}
+        <div className="flex flex-col items-center text-center mb-8 md:mb-10">
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+              <Quote size={20} />
             </div>
-            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
-              Yolculuğu birlikte yürüyenler ne hissetti?
-            </h2>
+            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+              DANIŞAN YANSIMALARI
+            </span>
           </div>
 
-          <div className="flex items-center justify-between md:justify-end gap-4 shrink-0">
-            <p className="text-white/70 text-sm sm:text-base max-w-md font-light leading-relaxed">
-              Gizlilik prensibi gereği isimler kısaltılmıştır.
-            </p>
+          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
+            Yolculuğu birlikte yürüyenler ne hissetti?
+          </h2>
 
-            {/* Mobile Navigation Controls */}
-            <div className="flex md:hidden items-center gap-2 shrink-0">
-              <button
-                onClick={prevReflection}
-                className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
-                aria-label="Önceki Yansıma"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                onClick={nextReflection}
-                className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
-                aria-label="Sonraki Yansıma"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
+          <p className="text-white/70 text-sm sm:text-base max-w-md font-light leading-relaxed mt-3">
+            Gizlilik prensibi gereği isimler kısaltılmıştır.
+          </p>
+
+          {/* Mobile Navigation Controls */}
+          <div className="flex md:hidden items-center gap-2 shrink-0 mt-5">
+            <button
+              onClick={prevReflection}
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
+              aria-label="Önceki Yansıma"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={nextReflection}
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
+              aria-label="Sonraki Yansıma"
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 

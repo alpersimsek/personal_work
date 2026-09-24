@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
+import { Route } from 'lucide-react';
 
 const STEPS = [
   {
@@ -33,17 +34,22 @@ export const ProcessSection: React.FC = () => {
     <section
       id="surec"
       ref={ref}
-      className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden relative"
+      className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden relative"
     >
-      <div className="max-w-6xl mx-auto text-center sm:text-left">
-        {/* Label */}
+      <div className="max-w-6xl mx-auto text-center">
+        {/* Icon badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold text-center sm:text-left"
+          className="inline-flex items-center gap-3 mb-4 sm:mb-6"
         >
-          SÜREÇ
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+            <Route size={20} />
+          </div>
+          <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+            SÜREÇ
+          </span>
         </motion.div>
 
         {/* Heading */}
@@ -51,7 +57,7 @@ export const ProcessSection: React.FC = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] font-serif mb-12 sm:mb-16 md:mb-20 max-w-none text-center sm:text-left"
+          className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] font-serif mb-8 md:mb-10"
         >
           Her değişimin bir{' '}
           <em className="font-serif italic text-white/60 font-normal">
@@ -72,7 +78,7 @@ export const ProcessSection: React.FC = () => {
                 delay: 0.15 + idx * 0.15,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="border-t border-white/10 py-6 sm:py-10 grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 md:gap-8 items-baseline group hover:bg-white/[0.01] transition-colors"
+              className="border-t border-white/10 py-6 sm:py-8 flex flex-col items-center text-center gap-2 sm:gap-3 md:grid md:grid-cols-12 md:gap-8 md:items-center md:text-center group hover:bg-white/[0.01] transition-colors"
             >
               {/* Step Number */}
               <div className="md:col-span-2 text-white/50 group-hover:text-white/80 transition-colors font-mono text-sm sm:text-base font-semibold tracking-wider">
@@ -80,12 +86,12 @@ export const ProcessSection: React.FC = () => {
               </div>
 
               {/* Step Title */}
-              <div className="md:col-span-4 text-2xl sm:text-3xl md:text-4xl text-white font-serif tracking-tight">
+              <div className="md:col-span-4 text-xl sm:text-2xl md:text-3xl text-white font-serif tracking-tight">
                 {step.title}
               </div>
 
               {/* Step Description */}
-              <div className="md:col-span-6 text-white/80 text-sm sm:text-base md:text-lg leading-relaxed font-light">
+              <div className="md:col-span-6 max-w-2xl md:max-w-none text-white/80 text-sm sm:text-base md:text-lg leading-relaxed font-light">
                 {step.description}
               </div>
             </motion.div>

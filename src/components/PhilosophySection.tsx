@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
+import { Lightbulb } from 'lucide-react';
 
 const PHILOSOPHY_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4';
@@ -17,15 +18,20 @@ export const PhilosophySection: React.FC = () => {
       ref={ref}
       className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden relative"
     >
-      <div className="max-w-6xl mx-auto text-left">
-        {/* Sub-label Header */}
+      <div className="max-w-6xl mx-auto text-center">
+        {/* Icon badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold"
+          className="inline-flex items-center gap-3 mb-4 sm:mb-6"
         >
-          FELSEFEM
+          <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+            <Lightbulb size={20} />
+          </div>
+          <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+            FELSEFEM
+          </span>
         </motion.div>
 
         {/* Main Section Heading */}
@@ -33,7 +39,7 @@ export const PhilosophySection: React.FC = () => {
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight mb-8 sm:mb-12 md:mb-16 font-serif"
+          className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] mb-8 md:mb-10 font-serif"
         >
           <span className="italic">Farkındalık</span>{' '}
           <span className="font-serif italic text-white/40 px-1 sm:px-2 font-normal">×</span>{' '}
@@ -58,7 +64,6 @@ export const PhilosophySection: React.FC = () => {
               preload="auto"
               className="w-full h-full object-cover scale-100 group-hover:scale-103 transition-transform duration-700"
             />
-            <div className="absolute inset-0 bg-black/20 pointer-events-none" />
           </motion.div>
 
           {/* Right Text Blocks */}

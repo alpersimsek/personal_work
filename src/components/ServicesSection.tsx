@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Compass } from 'lucide-react';
 
 interface ServicesSectionProps {
   onSelectTopic: (topic: 'netlik' | 'donusum' | 'diger') => void;
@@ -55,16 +55,19 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-14 gap-3 sm:gap-4"
+          className="flex flex-col items-center text-center mb-8 md:mb-10"
         >
-          <div className="text-center md:text-left">
-            <div className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase mb-3 sm:mb-4 font-semibold">
-              KOÇLUK ALANLARI
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+              <Compass size={20} />
             </div>
-            <h2 className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
-              Birlikte neyin üzerinde çalışabiliriz?
-            </h2>
+            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+              KOÇLUK ALANLARI
+            </span>
           </div>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
+            Birlikte neyin üzerinde çalışabiliriz?
+          </h2>
         </motion.div>
 
         {/* Coaching Cards (3-Column Layout on Desktop) */}

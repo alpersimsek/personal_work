@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Compass, Sparkles, ArrowRight, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { Timer, Sparkles, ArrowRight, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { ReflectionQuestion, ReflectionResult } from '../types';
 
 const QUESTIONS: ReflectionQuestion[] = [
@@ -133,18 +133,22 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
   const result = currentStep >= QUESTIONS.length ? computeResult() : null;
 
   return (
-    <section id="ic-kesif" className="bg-black py-16 sm:py-24 md:py-32 px-4 sm:px-6 relative overflow-hidden">
+    <section id="ic-kesif" className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="text-center sm:text-left mb-10 sm:mb-14">
-          <div className="flex items-center justify-center sm:justify-start gap-2 text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-3">
-            <Compass size={16} className="text-white/70" />
-            <span>3 DAKİKALIK İÇSEL FARKINDALIK</span>
+        <div className="text-center mb-8 md:mb-10">
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+              <Timer size={20} />
+            </div>
+            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+              3 DAKİKALIK İÇSEL FARKINDALIK
+            </span>
           </div>
-          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight max-w-2xl">
+          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
             Şu an hangi aşamadasın?
           </h2>
-          <p className="text-white/80 text-sm sm:text-base md:text-lg max-w-none mt-3 sm:mt-4 font-light leading-relaxed">
+          <p className="text-white/80 text-sm sm:text-base md:text-lg max-w-2xl mx-auto mt-3 sm:mt-4 font-light leading-relaxed">
             Doğru ve yanlış yanıt yok. 3 kısa soruyla nerede olduğunu ve koçluğun sana en çok nerede alan açabileceğini gör.
           </p>
         </div>
@@ -162,7 +166,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 className="space-y-8"
               >
                 {/* Progress bar & Step indicator */}
-                <div className="flex items-center justify-between text-sm sm:text-base md:text-lg text-white/90 pb-4 border-b border-white/10 font-mono font-bold tracking-wider">
+                <div className="flex items-center justify-between text-xs sm:text-sm md:text-base text-white/90 pb-4 border-b border-white/10 font-mono font-bold tracking-wider">
                   <span>SORU {currentStep + 1} / 3</span>
                   <div className="flex gap-2">
                     {[0, 1, 2].map((i) => (
@@ -177,10 +181,10 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
 
                 {/* Question */}
                 <div className="text-center sm:text-left">
-                  <h3 className="serif-font text-2xl sm:text-3xl md:text-4xl text-white tracking-tight mb-2.5">
+                  <h3 className="serif-font text-xl sm:text-2xl md:text-3xl text-white tracking-tight mb-2.5">
                     {QUESTIONS[currentStep].question}
                   </h3>
-                  <p className="text-white/80 text-sm sm:text-base md:text-lg font-light mt-1">
+                  <p className="text-white/80 text-sm md:text-base font-light mt-1">
                     {QUESTIONS[currentStep].subtitle}
                   </p>
                 </div>
@@ -194,10 +198,10 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                       className="w-full text-left p-4 sm:p-6 rounded-2xl liquid-glass border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group cursor-pointer flex items-start justify-between gap-4"
                     >
                       <div>
-                        <div className="text-white text-sm sm:text-base md:text-lg font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
+                        <div className="text-white text-sm md:text-base font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
                           {opt.label}
                         </div>
-                        <div className="text-white/80 text-base sm:text-lg font-light leading-relaxed mt-1">
+                        <div className="text-white/80 text-sm md:text-base font-light leading-relaxed mt-1">
                           {opt.description}
                         </div>
                       </div>

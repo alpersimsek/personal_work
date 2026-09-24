@@ -9,6 +9,7 @@ import {
   GraduationCap,
   Sparkles,
   UserCheck,
+  MessagesSquare,
 } from 'lucide-react';
 import coachPhotoDefault from '../assets/profil_test.jpg';
 
@@ -18,12 +19,16 @@ export const CoachProfileSection: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header Title Badge */}
-        <div className="text-center sm:text-left mb-10 sm:mb-14">
-          <div className="text-white/40 text-xs sm:text-sm tracking-[0.25em] uppercase font-medium mb-2 flex items-center justify-center sm:justify-start gap-2">
-            <Compass size={16} className="text-white/70" />
-            <span>DANIŞMANLIK & YOL ARKADAŞLIĞI</span>
+        <div className="text-center mb-8 md:mb-10">
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+              <MessagesSquare size={20} />
+            </div>
+            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+              DANIŞMANLIK & YOL ARKADAŞLIĞI
+            </span>
           </div>
-          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight">
+          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
             Koçun Hikayesi & Yaklaşımı
           </h2>
         </div>

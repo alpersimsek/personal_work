@@ -573,12 +573,16 @@ export const MindfulPause: React.FC = () => {
         {/* Top Header Row with High-Visibility Countdown Badge */}
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 sm:pb-8 border-b border-white/10 text-center md:text-left">
           <div className="max-w-xl flex flex-col items-center md:items-start mx-auto md:mx-0">
-            <div className="flex items-center justify-center md:justify-start gap-2.5 text-white/50 text-[11px] sm:text-sm tracking-[0.2em] sm:tracking-[0.25em] uppercase font-medium mb-2 sm:mb-3">
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse shrink-0" />
-              <Wind size={15} className="text-white/80 shrink-0" />
-              <span>BİR DAKİKALIK DİNGİNLİK REHBERİ</span>
+            <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+              <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+                <Wind size={20} />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-current animate-pulse" />
+              </div>
+              <span className="text-white/50 text-xs sm:text-sm tracking-[0.2em] sm:tracking-[0.25em] uppercase font-semibold text-left">
+                BİR DAKİKALIK DİNGİNLİK REHBERİ
+              </span>
             </div>
-            <h3 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-tight">
+            <h3 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
               Sayfayı incelemeden önce zihnini dinlendir.
             </h3>
           </div>
