@@ -15,12 +15,12 @@ import coachPhotoDefault from '../assets/profil_test.jpg';
 
 export const CoachProfileSection: React.FC = () => {
   return (
-    <section id="hakkimda" className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden">
+    <section id="hakkimda" className="bg-black py-12 sm:py-16 md:py-20 lg:py-14 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header Title Badge */}
-        <div className="text-center mb-8 md:mb-10">
-          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+        <div className="text-center mb-8 md:mb-10 lg:mb-8">
+          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6 lg:mb-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
               <MessagesSquare size={20} />
             </div>
@@ -34,7 +34,7 @@ export const CoachProfileSection: React.FC = () => {
         </div>
 
         {/* Main 3-Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-6 items-stretch">
           
           {/* COLUMN 1: Portrait & Credentials */}
           <div className="relative flex flex-col">
@@ -70,24 +70,24 @@ export const CoachProfileSection: React.FC = () => {
           </div>
 
           {/* COLUMN 2 (MIDDLE): Koçun Hikayesi & Kısa Özgeçmiş (Bio) */}
-          <div className="liquid-glass rounded-3xl p-6 sm:p-8 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6">
+          <div className="liquid-glass rounded-3xl p-6 sm:p-8 lg:p-5 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6 lg:space-y-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4 lg:mb-3">
                 <UserCheck size={14} className="text-white/80" />
                 <span>KOÇUN HİKAYESİ & ÖZGEÇMİŞİ</span>
               </div>
 
-              <h3 className="serif-font text-xl sm:text-2xl text-white mb-3 font-medium leading-snug">
+              <h3 className="serif-font text-xl sm:text-2xl lg:text-xl text-white mb-3 lg:mb-2 font-medium leading-snug">
                 Kurumsal Dünyadan İçsel Dönüşüme
               </h3>
 
-              <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light mb-6">
+              <p className="text-white/70 text-xs sm:text-sm lg:text-[13px] leading-relaxed font-light mb-6 lg:mb-4">
                 Finans ve yönetim alanındaki 10+ yıllık kurumsal deneyimimin ardından, sürdürülebilir başarının dışsal hedeflerden önce içsel dinginlikle başladığını fark ettim. Bugün, danışanlarıma zihinsel berraklık ve özgün yaşam ritimleri kurma yolunda eşlik ediyorum.
               </p>
 
               {/* Resume / Bio Timeline Cards */}
-              <div className="space-y-3">
-                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+              <div className="space-y-3 lg:space-y-2">
+                <div className="p-3.5 lg:p-3 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
                     <Briefcase size={15} />
                   </div>
@@ -101,7 +101,7 @@ export const CoachProfileSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+                <div className="p-3.5 lg:p-3 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
                     <GraduationCap size={15} />
                   </div>
@@ -115,7 +115,7 @@ export const CoachProfileSection: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
+                <div className="p-3.5 lg:p-3 rounded-2xl border border-white/10 bg-white/[0.02] flex items-start gap-3">
                   <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0 mt-0.5">
                     <Sparkles size={15} />
                   </div>
@@ -131,30 +131,30 @@ export const CoachProfileSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/10 text-[11px] text-white/40 font-mono">
+            <div className="pt-4 lg:pt-3 border-t border-white/10 text-[11px] text-white/40 font-mono">
               BİREBİR SEANSLAR • YÖNETİCİ KOÇLUĞU • MİNDFULNESS
             </div>
           </div>
 
           {/* COLUMN 3: Koçun Yaklaşımı & Etik İlkeler */}
-          <div className="liquid-glass rounded-3xl p-6 sm:p-8 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6">
+          <div className="liquid-glass rounded-3xl p-6 sm:p-8 lg:p-5 border border-white/15 bg-white/[0.02] flex flex-col justify-between text-left space-y-6 lg:space-y-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-4 lg:mb-3">
                 <Compass size={14} className="text-white/80" />
                 <span>KOÇLUK YAKLAŞIMI</span>
               </div>
 
-              <blockquote className="serif-font text-lg sm:text-xl text-white italic leading-snug mb-4 border-l-2 border-white/30 pl-4">
+              <blockquote className="serif-font text-lg sm:text-xl lg:text-lg text-white italic leading-snug mb-4 lg:mb-3 border-l-2 border-white/30 pl-4">
                 "Cevapları sana vermek için değil, senin zaten bildiklerini hatırlatmak için buradayım."
               </blockquote>
 
-              <p className="text-white/70 text-xs sm:text-sm leading-relaxed font-light mb-6">
+              <p className="text-white/70 text-xs sm:text-sm lg:text-[13px] leading-relaxed font-light mb-6 lg:mb-4">
                 Her seansı; yargılanma korkusunun olmadığı, kendi doğrularını masaya yatırabileceğin ve düşüncelerden kalıcı eylemlere adım atabileceğin güvenli bir duraklama alanı olarak tasarlıyorum.
               </p>
 
               {/* Ethics & Principles Grid */}
-              <div className="space-y-3">
-                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02]">
+              <div className="space-y-3 lg:space-y-2">
+                <div className="p-3.5 lg:p-3 rounded-2xl border border-white/10 bg-white/[0.02]">
                   <div className="flex items-center gap-2 text-white text-xs font-medium mb-1">
                     <ShieldCheck size={16} className="text-white/80 shrink-0" />
                     <span>%100 Gizlilik & Etik Standartlar</span>
@@ -164,7 +164,7 @@ export const CoachProfileSection: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02]">
+                <div className="p-3.5 lg:p-3 rounded-2xl border border-white/10 bg-white/[0.02]">
                   <div className="flex items-center gap-2 text-white text-xs font-medium mb-1">
                     <HeartHandshake size={16} className="text-white/80 shrink-0" />
                     <span>Yargısız & Eşlikçi Alan</span>
@@ -176,7 +176,7 @@ export const CoachProfileSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/10 text-[11px] text-white/40 font-mono">
+            <div className="pt-4 lg:pt-3 border-t border-white/10 text-[11px] text-white/40 font-mono">
               GÜVENLİ & AÇIK İLETİŞİM • YARGI ALANINDAN UZAK
             </div>
           </div>
