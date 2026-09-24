@@ -128,15 +128,13 @@ export const SubscribeSection: React.FC = () => {
                 </p>
               )}
 
-              <motion.button
+              <button
                 type="submit"
                 disabled={submitting}
-                whileHover={{ scale: submitting ? 1 : 1.02 }}
-                whileTap={{ scale: submitting ? 1 : 0.98 }}
-                className="w-full rounded-full px-8 py-3.5 bg-white text-black font-semibold text-sm sm:text-base hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn btn-primary btn-lg w-full"
               >
                 {submitting ? 'Gönderiliyor…' : 'Bültene Katıl'}
-              </motion.button>
+              </button>
             </form>
           </div>
         </motion.div>

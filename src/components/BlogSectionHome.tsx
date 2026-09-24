@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
 import { ArrowRight, BookOpen } from 'lucide-react';
 import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
@@ -53,15 +52,13 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
             </p>
           </div>
 
-          <motion.button
+          <button
             onClick={onNavigateToBlog}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="hidden md:flex md:absolute md:right-0 md:top-1 rounded-full px-5 py-2.5 bg-white text-black font-semibold text-xs sm:text-sm items-center justify-center gap-2 hover:bg-white/90 transition-all cursor-pointer shadow-md border border-white whitespace-nowrap shrink-0"
+            className="btn btn-secondary hidden md:inline-flex md:absolute md:right-0 md:top-1 shrink-0"
           >
             <span className="whitespace-nowrap">Tüm Yazıları İncele</span>
-            <ArrowRight size={14} className="shrink-0" />
-          </motion.button>
+            <ArrowRight size={14} className="btn-arrow" />
+          </button>
         </div>
 
         {loading && <p role="status" className="text-center text-white/60 mb-6">Yazılar yükleniyor…</p>}
@@ -123,7 +120,7 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
         <div className="mt-8 text-center md:hidden">
           <button
             onClick={onNavigateToBlog}
-            className="w-full py-3 rounded-xl bg-white/10 text-white text-xs font-medium border border-white/15"
+            className="btn btn-secondary btn-sm w-full"
           >
             Tüm Yazıları İncele ({total})
           </button>

@@ -73,7 +73,7 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
               <button
                 id="btn-close-faq"
                 onClick={onClose}
-                className="p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-20 border border-white/10 bg-black/40"
+                className="btn btn-secondary btn-icon btn-sm z-20"
                 aria-label="Kapat"
               >
                 <X size={20} />
@@ -142,10 +142,10 @@ export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooki
                   onClose();
                   onOpenBooking();
                 }}
-                className="bg-white text-black hover:bg-white/90 text-xs font-semibold px-6 py-2.5 rounded-full flex items-center gap-2 cursor-pointer transition-all shrink-0 shadow-lg"
+                className="btn btn-primary btn-sm shrink-0"
               >
                 <span>Görüşme Planla</span>
-                <ArrowRight size={14} />
+                <ArrowRight size={14} className="btn-arrow" />
               </button>
             </div>
           </motion.div>

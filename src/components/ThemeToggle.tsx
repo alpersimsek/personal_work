@@ -64,12 +64,10 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
 
   return (
     <div className={`relative inline-block text-left z-50 ${className}`} ref={dropdownRef}>
-      <motion.button
+      <button
         id="theme-toggle-btn"
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="liquid-glass rounded-full px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center gap-2 border transition-all cursor-pointer shadow-xs text-xs sm:text-sm font-medium"
+        className="btn btn-secondary btn-sm sm:text-sm"
         aria-expanded={isOpen}
         aria-haspopup="true"
         title="Tema Değiştir"
@@ -87,7 +85,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
         >
           <ChevronDown size={14} />
         </motion.span>
-      </motion.button>
+      </button>
 
       <AnimatePresence>
         {isOpen && (

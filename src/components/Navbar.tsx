@@ -134,16 +134,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
 
             <ThemeToggle showLabel={true} />
 
-            <motion.button
+            <button
               id="nav-btn-booking"
               type="button"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
               onClick={onOpenBooking}
-              className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-white/90 transition-colors cursor-pointer shadow-sm shrink-0 whitespace-nowrap"
+              className="btn btn-primary btn-sm text-sm"
             >
               Görüşme Planla
-            </motion.button>
+            </button>
           </div>
 
           {/* Mobile and tablet: booking shortcut plus the shared hamburger menu */}
@@ -152,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
               id="nav-btn-mobile-booking"
               type="button"
               onClick={onOpenBooking}
-              className="bg-white text-black rounded-full px-3.5 py-2 text-xs sm:text-sm font-semibold shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
+              className="btn btn-primary btn-sm shrink-0"
             >
               Randevu Al
             </button>
@@ -165,7 +163,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
               aria-label={mobileMenuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
               aria-expanded={mobileMenuOpen}
               aria-controls="compact-nav-panel"
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white/90 hover:text-white bg-white/10 hover:bg-white/15 border border-white/15 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current"
+              className="btn btn-secondary btn-icon btn-sm"
             >
               <MenuToggleIcon open={mobileMenuOpen} />
             </button>

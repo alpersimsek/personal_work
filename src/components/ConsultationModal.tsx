@@ -120,7 +120,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
             <button
               id="btn-close-modal"
               onClick={onClose}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer z-20 border border-white/10 bg-black/40"
+              className="btn btn-secondary btn-icon btn-sm absolute top-4 right-4 sm:top-6 sm:right-6 z-20"
               aria-label="Kapat"
             >
               <X size={18} />
@@ -157,10 +157,10 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                         onClose();
                         onOpenFAQ();
                       }}
-                      className="text-[11px] sm:text-xs font-semibold text-white hover:text-white/90 bg-white/10 hover:bg-white/20 border border-white/15 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                      className="btn btn-secondary btn-sm shrink-0"
                     >
                       <span>Sıkça Sorulan Sorular</span>
-                      <ArrowRight size={12} />
+                      <ArrowRight size={12} className="btn-arrow" />
                     </button>
                   </div>
                 )}
@@ -261,11 +261,11 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                       id="btn-submit-consultation"
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-white text-black hover:bg-white/90 font-medium py-3 sm:py-3.5 px-4 sm:px-6 rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer text-xs sm:text-sm shadow-xl"
+                      className="btn btn-primary w-full"
                     >
                       {isSubmitting ? (
                         <span className="flex items-center gap-2">
-                          <Loader2 size={16} className="animate-spin text-black" /> Talep Gönderiliyor...
+                          <Loader2 size={16} className="animate-spin" /> Talep Gönderiliyor...
                         </span>
                       ) : (
                         <>
@@ -273,7 +273,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                           <span className="truncate">
                             Talebi Gönder & WhatsApp'ta Görüş
                           </span>
-                          <ArrowRight size={16} className="shrink-0" />
+                          <ArrowRight size={16} className="btn-arrow" />
                         </>
                       )}
                     </button>
@@ -311,7 +311,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                     href={createdWhatsAppUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2.5 bg-white text-black hover:bg-white/90 font-medium px-8 py-3.5 rounded-full text-xs sm:text-sm transition-all shadow-xl hover:scale-105"
+                    className="btn btn-primary btn-lg"
                   >
                     <MessageCircle size={18} />
                     <span>Koç ile WhatsApp Sohbetini Başlat</span>
@@ -323,7 +323,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                 <button
                   id="btn-modal-done"
                   onClick={handleReset}
-                  className="liquid-glass px-8 py-2.5 rounded-full text-white text-xs sm:text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer border border-white/20"
+                  className="btn btn-secondary"
                 >
                   Tamamla ve Kapat
                 </button>

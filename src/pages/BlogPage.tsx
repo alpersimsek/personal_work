@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
@@ -84,16 +83,14 @@ export const BlogPage: React.FC<BlogPageProps> = ({
       <main className="flex-1 pt-28 sm:pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         {/* Back Link & Header */}
         <div className="mb-8">
-          <motion.button
+          <button
             id="btn-navigate-home"
             onClick={onNavigateHome}
-            whileHover={{ scale: 1.03, x: -3 }}
-            whileTap={{ scale: 0.92 }}
-            className="liquid-glass rounded-full px-5 py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/35 text-white border border-white/20 hover:border-white/40 active:border-white/70 active:ring-2 active:ring-white/40 shadow-lg text-xs sm:text-sm font-semibold transition-all inline-flex items-center gap-2.5 group cursor-pointer mb-6 select-none"
+            className="btn btn-secondary mb-6"
           >
-            <ArrowLeft size={16} className="text-white/80 group-hover:text-white transition-transform group-hover:-translate-x-1" />
+            <ArrowLeft size={16} className="btn-arrow-back" />
             <span>Ana Sayfaya Dön</span>
-          </motion.button>
+          </button>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/10">
             <div>
@@ -112,9 +109,9 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               {isAdmin ? (
                 <button
                   onClick={onNavigateAdmin}
-                  className="px-4.5 py-2.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-base font-medium transition-all shadow-md flex items-center gap-2"
+                  className="btn btn-primary"
                 >
-                  <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                   <span>Yazar Paneline Git</span>
@@ -122,7 +119,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               ) : (
                 <button
                   onClick={onOpenLogin}
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-base text-white/70 hover:text-white transition-colors flex items-center gap-2"
+                  className="btn btn-secondary"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -142,11 +139,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`px-3 py-1.5 sm:px-4.5 sm:py-2.5 rounded-xl text-xs sm:text-base font-semibold transition-all cursor-pointer ${
-                  selectedCategory === cat
-                    ? 'bg-white !text-neutral-950 font-bold shadow-lg scale-105 border border-white'
-                    : 'bg-white/10 text-white/80 hover:text-white hover:bg-white/20 border border-white/15'
-                }`}
+                className="btn btn-chip" data-active={selectedCategory === cat}
               >
                 {cat}
               </button>
@@ -232,7 +225,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-base text-white/70 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="btn btn-chip"
             >
               Önceki
             </button>
@@ -241,11 +234,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <button
                 key={pageNum}
                 onClick={() => setCurrentPage(pageNum)}
-                className={`w-10 h-10 rounded-xl text-base font-semibold transition-all cursor-pointer ${
-                  currentPage === pageNum
-                    ? 'bg-white !text-neutral-950 font-bold shadow-md'
-                    : 'bg-white/10 text-white/70 hover:text-white hover:bg-white/20 border border-white/15'
-                }`}
+                className="btn btn-chip btn-square" data-active={currentPage === pageNum}
               >
                 {pageNum}
               </button>
@@ -254,7 +243,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
             <button
               onClick={() => setCurrentPage((p) => Math.min(postsData.totalPages, p + 1))}
               disabled={currentPage === postsData.totalPages}
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-base text-white/70 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="btn btn-chip"
             >
               Sonraki
             </button>

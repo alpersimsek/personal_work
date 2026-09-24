@@ -53,17 +53,15 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
             Doğru sorularla kendi cevaplarını daha net görmeni, seni tekrar eden döngüleri fark etmeni ve sana gerçekten ait olan yönü bulmanı sağlar.
           </p>
 
-          <motion.a
+          <a
             id="featured-approach-cta"
             href="#farkindalik-eylem"
             onClick={scrollToPhilosophy}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="mt-5 md:mt-0 md:absolute md:right-0 md:top-1 rounded-full px-5 py-2.5 bg-white text-black font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 hover:bg-white/90 transition-all cursor-pointer shadow-md border border-white whitespace-nowrap shrink-0"
+            className="btn btn-secondary mt-5 md:mt-0 md:absolute md:right-0 md:top-1 shrink-0"
           >
             <span>Yaklaşımımı keşfet</span>
-            <ArrowDown size={14} className="shrink-0" />
-          </motion.a>
+            <ArrowDown size={14} className="btn-arrow-down" />
+          </a>
         </motion.div>
 
         {/* Clean, 100% Unobstructed Cinematic Video Below */}

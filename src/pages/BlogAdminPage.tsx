@@ -188,7 +188,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         <div className="flex items-center gap-5">
           <button
             onClick={onNavigateHome}
-            className="p-2 rounded-xl bg-neutral-100 text-neutral-700 transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+            className="btn btn-secondary btn-icon btn-sm"
             title="Ana Sayfaya Dön"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -209,14 +209,14 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onNavigateBlog}
-            className="px-3.5 py-2 rounded-xl bg-neutral-100 text-xs font-semibold text-neutral-800 border border-neutral-200 cursor-pointer"
+            className="btn btn-secondary btn-sm"
           >
             Blog Sayfası
           </button>
 
           <button
             onClick={handleLogout}
-            className="px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-700 flex items-center gap-1.5 cursor-pointer"
+            className="btn btn-danger btn-sm"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -234,22 +234,14 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
             <button
               disabled={isFormattingImage || saving}
               onClick={() => setActiveTab('list')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
-                activeTab === 'list'
-                  ? 'bg-stone-200 text-stone-900 border border-stone-300 shadow-xs'
-                  : 'bg-white text-stone-600 border border-stone-200 font-semibold'
-              }`}
+              className="btn btn-chip" data-active={activeTab === 'list'}
             >
               Makale Arşivi ({posts.length})
             </button>
             <button
               disabled={isFormattingImage || saving}
               onClick={() => setActiveTab('editor')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer ${
-                activeTab === 'editor'
-                  ? 'bg-stone-200 text-stone-900 border border-stone-300 shadow-xs'
-                  : 'bg-white text-stone-600 border border-stone-200 font-semibold'
-              }`}
+              className="btn btn-chip" data-active={activeTab === 'editor'}
             >
               {editingPost ? 'Makaleyi Düzenle' : 'Yeni Makale Yaz'}
             </button>
@@ -259,7 +251,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
             <button
               disabled={isFormattingImage || saving}
               onClick={handleStartNewPost}
-              className="px-5 py-2.5 rounded-xl bg-stone-200 text-stone-900 text-xs font-bold border border-stone-300 flex items-center gap-2 shadow-xs cursor-pointer"
+              className="btn btn-primary btn-sm"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -326,25 +318,21 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                     <div className="flex items-center gap-2.5 self-end md:self-center shrink-0">
                       <button
                         onClick={() => handleTogglePublish(post.id)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-semibold cursor-pointer ${
-                          post.published
-                            ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                            : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                        }`}
+                        className={`btn btn-sm ${post.published ? 'btn-caution' : 'btn-positive'}`}
                       >
                         {post.published ? 'Taslağa Al' : 'Yayınla'}
                       </button>
 
                       <button
                         onClick={() => handleStartEdit(post)}
-                        className="px-3.5 py-2 rounded-xl bg-neutral-100 text-neutral-800 text-xs border border-neutral-200 font-semibold cursor-pointer"
+                        className="btn btn-secondary btn-sm"
                       >
                         Düzenle
                       </button>
 
                       <button
                         onClick={() => handleDelete(post.id, post.title)}
-                        className="p-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 cursor-pointer"
+                        className="btn btn-danger btn-icon btn-sm"
                         title="Sil"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -428,7 +416,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                   type="button"
                   disabled={isFormattingImage || saving}
                   onClick={() => setShowUrlInput(!showUrlInput)}
-                  className="text-[11px] font-semibold text-stone-600 underline cursor-pointer"
+                  className="btn btn-link text-[11px]"
                 >
                   {showUrlInput ? 'Dosya Yükleme Moduna Dön' : 'veya Görsel Bağlantısı (URL) Gir'}
                 </button>
@@ -499,7 +487,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                             type="button"
                             disabled={isFormattingImage || saving}
                             onClick={() => setCoverImage('')}
-                            className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200 cursor-pointer"
+                            className="btn btn-danger btn-sm"
                           >
                             Görseli Kaldır
                           </button>
@@ -622,13 +610,13 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 type="button"
                 disabled={isFormattingImage || saving}
                 onClick={() => setActiveTab('list')}
-                className="px-6 py-3 rounded-xl bg-neutral-100 text-neutral-700 text-xs font-semibold cursor-pointer"
+                className="btn btn-ghost"
               >
                 İptal
               </button>
               <button
                 type="submit" disabled={saving || isFormattingImage}
-                className="px-8 py-3 rounded-xl bg-stone-200 text-stone-900 font-bold border border-stone-300 text-xs shadow-xs cursor-pointer"
+                className="btn btn-primary"
               >
                 {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}
               </button>

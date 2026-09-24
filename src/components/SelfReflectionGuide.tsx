@@ -195,17 +195,17 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                     <button
                       key={idx}
                       onClick={() => handleSelectOption(opt.focus)}
-                      className="w-full text-left p-4 sm:p-6 rounded-2xl liquid-glass border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all group cursor-pointer flex items-start justify-between gap-4"
+                      className="btn btn-option group"
                     >
                       <div>
-                        <div className="text-white text-sm md:text-base font-semibold mb-1.5 group-hover:text-white transition-colors leading-snug">
+                        <div className="text-sm md:text-base font-semibold mb-1.5 leading-snug">
                           {opt.label}
                         </div>
-                        <div className="text-white/80 text-sm md:text-base font-light leading-relaxed mt-1">
+                        <div className="text-sm md:text-base font-normal leading-relaxed mt-1 opacity-75">
                           {opt.description}
                         </div>
                       </div>
-                      <div className="p-2.5 rounded-full border border-white/20 group-hover:bg-white group-hover:text-black transition-colors shrink-0 mt-1">
+                      <div className="p-2.5 rounded-full border border-current/15 group-hover:bg-[var(--btn-solid)] group-hover:text-[var(--btn-solid-fg)] group-hover:border-transparent transition-colors shrink-0 mt-1">
                         <ArrowRight size={16} />
                       </div>
                     </button>
@@ -256,7 +256,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                         `İçsel netlik aracından gelen odak: ${result.title}`
                       )
                     }
-                    className="liquid-glass bg-white text-black hover:bg-white/90 px-8 sm:px-10 py-4 rounded-full text-sm sm:text-base md:text-lg font-semibold flex items-center gap-2.5 cursor-pointer shadow-xl transition-all w-full sm:w-auto justify-center"
+                    className="btn btn-primary btn-lg w-full sm:w-auto"
                   >
                     <span>Bu Odakla Ön Görüşme Planla</span>
                     <ArrowRight size={18} />
@@ -264,7 +264,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
 
                   <button
                     onClick={handleReset}
-                    className="text-white/60 hover:text-white text-xs sm:text-sm flex items-center gap-1.5 py-2 px-4 cursor-pointer transition-colors font-medium"
+                    className="btn btn-ghost btn-sm"
                   >
                     <RotateCcw size={15} />
                     <span>Yeniden Başlat</span>

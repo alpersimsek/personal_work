@@ -170,10 +170,10 @@ export const NavMenuPanel: React.FC<NavMenuPanelProps> = ({
             onClose();
             onBook();
           }}
-          className="bg-white text-black font-semibold rounded-full px-5 py-2.5 text-sm flex items-center gap-2 shadow-md hover:bg-white/90 transition-colors cursor-pointer whitespace-nowrap"
+          className="btn btn-primary btn-sm"
         >
           <span>Görüşme Planla</span>
-          <ArrowRight size={14} className="shrink-0" />
+          <ArrowRight size={14} className="btn-arrow" />
         </button>
         <ThemeToggle showLabel={true} />
       </div>

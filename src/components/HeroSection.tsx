@@ -191,27 +191,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           className="flex flex-col items-center gap-4 sm:gap-6 w-full max-w-md px-2"
         >
           {/* Primary Consultation Pill */}
-          <motion.button
+          <button
             id="hero-primary-cta"
             type="button"
             onClick={onOpenBooking}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+            className="btn btn-primary btn-lg shrink-0"
           >
             <span className="whitespace-nowrap">İlk görüşmeni planla</span>
-            <ArrowRight size={18} className="shrink-0" />
-          </motion.button>
+            <ArrowRight size={18} className="btn-arrow" />
+          </button>
 
           {/* Secondary CTA */}
           <a
             id="hero-secondary-cta"
             href="#yaklasim"
             onClick={scrollToApproach}
-            className="text-white/70 text-sm sm:text-base font-semibold hover:text-white transition-colors flex items-center gap-2 cursor-pointer py-1"
+            className="btn btn-ghost"
           >
             <span>Nasıl çalışıyorum?</span>
             <svg
+              className="btn-arrow-down"
               width="16"
               height="16"
               viewBox="0 0 24 24"
@@ -239,7 +238,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           href="https://instagram.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          className="btn btn-secondary btn-icon"
           aria-label="Instagram"
         >
           <Instagram size={20} />
@@ -249,7 +248,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           href="https://linkedin.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          className="btn btn-secondary btn-icon"
           aria-label="LinkedIn"
         >
           <Linkedin size={20} />
@@ -257,7 +256,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
         <a
           id="social-link-email"
           href="mailto:iletisim@tugbaergunersimsek.com"
-          className="liquid-glass rounded-full p-4 hover:bg-white/5 transition-all cursor-pointer text-white/70 hover:text-white"
+          className="btn btn-secondary btn-icon"
           aria-label="E-posta Gönder"
         >
           <Mail size={20} />

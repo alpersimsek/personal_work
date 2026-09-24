@@ -118,7 +118,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
         {/* Floating Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2.5 bg-black/60 hover:bg-black/90 text-white/70 hover:text-white rounded-full transition-all border border-white/15 shadow-lg backdrop-blur-md"
+          className="btn btn-secondary btn-icon btn-sm absolute top-4 right-4 z-20"
           aria-label="Kapat"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -195,14 +195,10 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                 onClick={handleLike}
                   disabled={likePending || hasLiked}
                   title={likeError || undefined}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all ${
-                  hasLiked
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                    : 'bg-white/5 hover:bg-white/10 text-white/80 border border-white/10'
-                }`}
+                className={`btn btn-sm ${hasLiked ? 'btn-danger' : 'btn-secondary'}`}
               >
                 <svg
-                  className={`w-4 h-4 ${hasLiked ? 'fill-rose-400 text-rose-400' : 'none'}`}
+                  className={`w-4 h-4 ${hasLiked ? 'fill-current' : 'none'}`}
                   fill={hasLiked ? 'currentColor' : 'none'}
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -220,7 +216,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 border border-white/10 text-xs font-medium transition-all"
+                className="btn btn-secondary btn-sm"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -242,7 +238,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                   onClose();
                   onOpenBooking();
                 }}
-                className="px-6 py-3 rounded-xl bg-white text-black hover:bg-neutral-200 font-medium text-xs tracking-wider uppercase transition-all shadow-lg hover:shadow-white/10"
+                className="btn btn-primary"
               >
                 Ön Görüşme Randevusu Alın
               </button>

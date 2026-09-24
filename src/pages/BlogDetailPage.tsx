@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
@@ -62,7 +61,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
           <p className="text-white/60">Makale bulunamadı veya kaldırılmış olabilir.</p>
           <button
             onClick={onNavigateBack}
-            className="mt-4 px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-semibold cursor-pointer shadow-sm transition-all"
+            className="btn btn-secondary mt-4"
           >
             Blog Listesine Dön
           </button>
@@ -154,15 +153,13 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
     <div className="bg-black text-white min-h-screen flex flex-col w-full selection:bg-white/20 font-sans blog-scope">
       <main className="flex-1 pt-28 sm:pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
         {/* Back Link */}
-        <motion.button
+        <button
           onClick={onNavigateBack}
-          whileHover={{ scale: 1.02, x: -3 }}
-          whileTap={{ scale: 0.95 }}
-          className="liquid-glass rounded-full px-5 py-2.5 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white border border-white/20 hover:border-white/40 shadow-lg text-xs sm:text-sm font-semibold transition-all inline-flex items-center gap-2.5 group cursor-pointer mb-8 select-none"
+          className="btn btn-secondary mb-8"
         >
-          <ArrowLeft size={16} className="text-white/80 group-hover:text-white transition-transform group-hover:-translate-x-1" />
+          <ArrowLeft size={16} className="btn-arrow-back" />
           <span>Tüm Yazılara Dön</span>
-        </motion.button>
+        </button>
 
         {/* Article Header & Title Box */}
         <header className="mb-8">
@@ -259,14 +256,10 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
               onClick={handleLike}
                   disabled={likePending || hasLiked}
                   title={likeError || undefined}
-              className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer w-full sm:w-auto ${
-                hasLiked
-                  ? 'bg-rose-500/20 text-rose-200 border border-rose-500/40 shadow-sm'
-                  : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
-              }`}
+              className={`btn w-full sm:w-auto ${hasLiked ? 'btn-danger' : 'btn-secondary'}`}
             >
               <svg
-                className={`w-4 h-4 shrink-0 ${hasLiked ? 'fill-rose-400 text-rose-400' : 'none'}`}
+                className={`w-4 h-4 shrink-0 ${hasLiked ? 'fill-current' : 'none'}`}
                 fill={hasLiked ? 'currentColor' : 'none'}
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -284,9 +277,9 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
 
             <button
               onClick={handleShare}
-              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/15 text-xs sm:text-sm font-semibold transition-all cursor-pointer w-full sm:w-auto"
+              className="btn btn-secondary w-full sm:w-auto"
             >
-              <svg className="w-4 h-4 text-white/60 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
               <span className="truncate">{copied ? 'Bağlantı Kopyalandı!' : 'Makaleyi Paylaş'}</span>
@@ -303,12 +296,12 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
             </p>
             <button
               onClick={handleOpenBookingModal}
-              className="px-8 py-3.5 rounded-full bg-white text-black hover:bg-white/90 font-semibold text-xs sm:text-sm tracking-wider uppercase transition-all shadow-md cursor-pointer inline-flex items-center justify-center gap-2.5"
+              className="btn btn-primary btn-lg"
             >
-              <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span className="text-black font-semibold">Ön Görüşme Randevusu Alın</span>
+              <span>Ön Görüşme Randevusu Alın</span>
             </button>
           </div>
         </div>

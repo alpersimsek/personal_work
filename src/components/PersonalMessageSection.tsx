@@ -67,16 +67,14 @@ export const PersonalMessageSection: React.FC<PersonalMessageSectionProps> = ({
           transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex justify-center px-2"
         >
-          <motion.button
+          <button
             id="personal-message-booking-cta"
             onClick={onOpenBooking}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+            className="btn btn-primary btn-lg shrink-0"
           >
             <span className="whitespace-nowrap">Tanışma Görüşmesi Planla</span>
-            <ArrowRight size={18} className="shrink-0" />
-          </motion.button>
+            <ArrowRight size={18} className="btn-arrow" />
+          </button>
         </motion.div>
       </div>
     </section>

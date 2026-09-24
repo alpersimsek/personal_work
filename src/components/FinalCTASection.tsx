@@ -61,25 +61,23 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 w-full max-w-xl mx-auto">
               {/* Primary CTA button */}
-              <motion.button
+              <button
                 id="final-cta-booking-btn"
                 onClick={onOpenBooking}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="rounded-full px-8 sm:px-10 py-4 bg-white text-black font-semibold text-sm sm:text-base flex items-center justify-center gap-2.5 sm:gap-3 hover:bg-white/90 transition-all cursor-pointer shadow-xl border border-white whitespace-nowrap shrink-0"
+                className="btn btn-primary btn-lg shrink-0"
               >
                 <span className="whitespace-nowrap">Görüşme Planla</span>
-                <ArrowRight size={18} className="shrink-0" />
-              </motion.button>
+                <ArrowRight size={18} className="btn-arrow" />
+              </button>
 
               {/* Secondary text link */}
               <button
                 id="final-cta-faq-btn"
                 type="button"
                 onClick={onOpenFAQ}
-                className="text-white/70 hover:text-white text-sm sm:text-base font-medium transition-colors flex items-center justify-center gap-2 py-2 px-3 cursor-pointer underline underline-offset-4 decoration-white/20 hover:decoration-white whitespace-nowrap"
+                className="btn btn-link"
               >
-                <HelpCircle size={16} className="text-white/50 shrink-0" />
+                <HelpCircle size={16} />
                 <span className="whitespace-nowrap">Önce merak ettiklerimi soracağım</span>
               </button>
             </div>

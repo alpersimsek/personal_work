@@ -170,7 +170,7 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
 
             <button
               onClick={handleLogoutClick}
-              className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs text-red-300 transition-colors flex items-center gap-1.5"
+              className="btn btn-danger btn-sm"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -180,7 +180,7 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors ml-2"
+              className="btn btn-ghost btn-icon btn-sm ml-2"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -194,21 +194,13 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('list')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeTab === 'list'
-                  ? 'bg-white text-black font-semibold shadow-md'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-              }`}
+              className="btn btn-chip btn-sm" data-active={activeTab === 'list'}
             >
               Makale Listesi ({posts.length})
             </button>
             <button
               onClick={() => setActiveTab('editor')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                activeTab === 'editor'
-                  ? 'bg-white text-black font-semibold shadow-md'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
-              }`}
+              className="btn btn-chip btn-sm" data-active={activeTab === 'editor'}
             >
               {editingPost ? 'Makaleyi Düzenle' : 'Yeni Makale Yaz'}
             </button>
@@ -217,7 +209,7 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
           {activeTab === 'list' && (
             <button
               onClick={handleStartNewPost}
-              className="px-3.5 py-1.5 rounded-lg bg-white text-black hover:bg-neutral-200 text-xs font-medium transition-all flex items-center gap-1.5"
+              className="btn btn-primary btn-sm"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -285,25 +277,21 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
                       <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                         <button
                           onClick={() => handleTogglePublish(post.id)}
-                          className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${
-                            post.published
-                              ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20'
-                              : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20'
-                          }`}
+                          className={`btn btn-sm ${post.published ? 'btn-caution' : 'btn-positive'}`}
                         >
                           {post.published ? 'Taslağa Al' : 'Yayınla'}
                         </button>
 
                         <button
                           onClick={() => handleStartEdit(post)}
-                          className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs border border-white/15 transition-colors"
+                          className="btn btn-secondary btn-sm"
                         >
                           Düzenle
                         </button>
 
                         <button
                           onClick={() => handleDelete(post.id, post.title)}
-                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors"
+                          className="btn btn-danger btn-icon btn-sm"
                           title="Sil"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -397,11 +385,7 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
                       key={i}
                       type="button"
                       onClick={() => setCoverImage(img.url)}
-                      className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
-                        coverImage === img.url
-                          ? 'bg-white text-black border-white font-medium'
-                          : 'bg-white/5 text-white/60 border-white/10 hover:text-white'
-                      }`}
+                      className="btn btn-chip btn-sm" data-active={coverImage === img.url}
                     >
                       {img.label}
                     </button>
@@ -479,13 +463,13 @@ export const BlogAdminModal: React.FC<BlogAdminModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('list')}
-                  className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-xs font-medium transition-colors"
+                  className="btn btn-ghost"
                 >
                   İptal
                 </button>
                 <button
                   type="submit" disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-medium transition-all shadow-lg hover:shadow-white/10"
+                  className="btn btn-primary"
                 >
                   {editingPost ? 'Güncellemeleri Kaydet' : 'Makaleyi Kaydet'}
                 </button>

@@ -47,7 +47,7 @@ export const CollapsedNavMenu: React.FC<CollapsedNavMenuProps> = ({
         aria-label={open ? 'Menüyü kapat' : 'Menüyü aç'}
         aria-expanded={open}
         aria-controls="collapsed-nav-panel"
-        className="liquid-glass rounded-full w-12 h-12 flex items-center justify-center text-white/90 hover:text-white shadow-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+        className="btn btn-secondary btn-icon"
       >
         <MenuToggleIcon open={open} />
       </button>

@@ -67,14 +67,14 @@ export const ReflectionsSection: React.FC = () => {
           <div className="flex md:hidden items-center gap-2 shrink-0 mt-5">
             <button
               onClick={prevReflection}
-              className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
+              className="btn btn-secondary btn-icon"
               aria-label="Önceki Yansıma"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               onClick={nextReflection}
-              className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white hover:bg-white/20 transition-all cursor-pointer active:scale-95"
+              className="btn btn-secondary btn-icon"
               aria-label="Sonraki Yansıma"
             >
               <ChevronRight size={20} />
@@ -197,11 +197,7 @@ export const ReflectionsSection: React.FC = () => {
                 <button
                   key={idx}
                   onClick={() => setActiveIndex(idx)}
-                  className={`h-2 rounded-full transition-all cursor-pointer ${
-                    activeIndex === idx
-                      ? 'w-6 bg-white'
-                      : 'w-2 bg-white/20 hover:bg-white/40'
-                  }`}
+                  className="btn btn-dot" data-active={activeIndex === idx}
                   aria-label={`Yansıma ${idx + 1}`}
                 />
               ))}

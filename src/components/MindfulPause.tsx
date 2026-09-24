@@ -621,11 +621,7 @@ export const MindfulPause: React.FC = () => {
                       setPhaseProgress(0);
                     }
                   }}
-                  className={`py-1.5 sm:py-2 px-1.5 sm:px-2.5 rounded-xl text-[11px] sm:text-sm font-semibold transition-all text-center cursor-pointer ${
-                    selectedPattern === patternKey
-                      ? 'bg-white text-black font-semibold shadow-md'
-                      : 'text-white/70 hover:text-white hover:bg-white/5'
-                  }`}
+                  className="btn btn-chip btn-sm min-w-0 px-2" data-active={selectedPattern === patternKey}
                 >
                   {PATTERNS[patternKey].name.split(' ')[0]}
                 </button>
@@ -658,13 +654,9 @@ export const MindfulPause: React.FC = () => {
                     key={scape.id}
                     onClick={() => handleSoundscapeChange(scape.id)}
                     title={scape.desc}
-                    className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-[11px] sm:text-sm font-medium transition-all cursor-pointer border ${
-                      isSelected
-                        ? 'bg-white/20 border-white/40 text-white shadow-lg backdrop-blur-md font-semibold'
-                        : 'bg-white/[0.03] border-white/10 text-white/70 hover:text-white hover:bg-white/10'
-                    }`}
+                    className="btn btn-chip btn-sm min-w-0 px-2 sm:px-3.5" data-active={isSelected}
                   >
-                    <IconComponent size={13} className={isSelected ? 'text-white shrink-0' : 'text-white/70 shrink-0'} />
+                    <IconComponent size={13} className="shrink-0" />
                     <span className="truncate">{scape.name}</span>
                   </button>
                 );
@@ -741,7 +733,7 @@ export const MindfulPause: React.FC = () => {
                 <button
                   id="btn-mindful-pause-toggle"
                   onClick={togglePlay}
-                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-9 py-3 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer shadow-2xl w-full sm:w-auto"
+                  className="btn btn-primary btn-lg w-full sm:w-auto"
                 >
                   {isPlaying ? (
                     <>
@@ -758,7 +750,7 @@ export const MindfulPause: React.FC = () => {
               ) : (
                 <button
                   onClick={startSession}
-                  className="bg-white text-black hover:bg-white/90 px-6 sm:px-9 py-3 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-semibold transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer shadow-2xl w-full sm:w-auto"
+                  className="btn btn-primary btn-lg w-full sm:w-auto"
                 >
                   <RefreshCw size={17} />
                   <span>Tekrar 1 Dakika Başlat</span>
@@ -768,7 +760,7 @@ export const MindfulPause: React.FC = () => {
               {isPlaying && (
                 <button
                   onClick={toggleMute}
-                  className="p-2.5 sm:p-3 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors border border-white/15 cursor-pointer"
+                  className="btn btn-secondary btn-icon"
                   aria-label={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
                   title={isMuted ? 'Sesi Aç' : 'Sesi Kapat'}
                 >
@@ -779,7 +771,7 @@ export const MindfulPause: React.FC = () => {
               {isPlaying && (
                 <button
                   onClick={resetSession}
-                  className="p-2.5 sm:p-3 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors border border-white/10 cursor-pointer"
+                  className="btn btn-secondary btn-icon"
                   aria-label="Sıfırla"
                   title="Sıfırla"
                 >
