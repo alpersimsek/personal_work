@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sun, Moon, Leaf, Compass, Flame, ChevronDown, Check } from 'lucide-react';
+import { Leaf, Compass, Flame, ChevronDown, Check } from 'lucide-react';
 import { useTheme, Theme } from '../context/ThemeContext';
 
 interface ThemeToggleProps {
@@ -19,12 +19,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', showLa
       label: 'Adaçayı',
       subLabel: 'Doğal Yeşil',
       icon: <Leaf size={14} className="text-[#31574b]" />
-    },
-    {
-      id: 'light',
-      label: 'Toprak Beji',
-      subLabel: 'Sıcak Krem',
-      icon: <Sun size={14} className="text-[#8A5A44]" />
     },
     {
       id: 'lacivert',

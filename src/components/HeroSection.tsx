@@ -142,15 +142,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
             <div className="absolute inset-0 bg-gradient-to-b from-[#fffdf9]/80 via-[#f8f5ef]/50 to-[#fffdf9]/90 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,_rgba(223,150,112,0.22),_transparent_38%),radial-gradient(circle_at_85%_80%,_rgba(196,154,58,0.15),_transparent_35%)] pointer-events-none" />
           </>
-        ) : theme === 'adacayi' ? (
+        ) : (
           <>
             <div className="absolute inset-0 bg-gradient-to-b from-[#fdfaf5]/80 via-[#f7f1e8]/50 to-[#fdfaf5]/90 pointer-events-none" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(253,250,245,0.65)_85%)] pointer-events-none" />
-          </>
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#F4EDE3]/75 via-[#F4EDE3]/45 to-[#F4EDE3]/90 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(244,237,227,0.6)_85%)] pointer-events-none" />
           </>
         )}
       </div>

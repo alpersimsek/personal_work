@@ -77,8 +77,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
     switch (theme) {
       case 'adacayi':
         return 'bg-[#fdfaf5]/95 border-[#ddd5ca] text-[#26332e]';
-      case 'light':
-        return 'bg-[#F4EDE3]/95 border-[#D7C5B3] text-[#33261F]';
       case 'lacivert':
         return 'bg-[#fffdf9]/95 border-[#e2ddd4] text-[#172536]';
       case 'kiremit':

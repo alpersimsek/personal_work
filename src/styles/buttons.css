@@ -15,14 +15,6 @@
   --btn-glow: 16 42 35;
 }
 
-[data-theme="light"] {
-  --btn-solid: #8a5a44;
-  --btn-solid-fg: #fff9f1;
-  --btn-ink: #33261f;
-  --btn-surface: #fff9f1;
-  --btn-glow: 74 50 38;
-}
-
 [data-theme="lacivert"] {
   --btn-solid: #12283d;
   --btn-solid-fg: #fffdf9;
