@@ -48,11 +48,20 @@ DB_USER=<provisioned database user>
 DB_PASSWORD=<production database password>
 JWT_SECRET=<new random secret>
 ADMIN_USERNAME=<production admin username>
-ADMIN_PASSWORD=<new production admin password>
+ADMIN_PASSWORD=<new production admin password, 12+ characters>
 UPLOADS_DIR=/home/<cpanel-user>/app-data/tugba/uploads
 ```
 
 Use `PORT` if supplied by the host, or set `API_PORT` according to the host's app manager instructions. Startup prefers `PORT`, then `API_PORT`, then 3001. Generate a fresh JWT secret with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. Production must use HTTPS because the session cookie is Secure.
+
+### Session security
+
+- The server refuses to start if `JWT_SECRET` is missing, shorter than 32 characters, repetitive, or still the example placeholder, so a weak secret can never go live silently.
+- Tokens are HS256 only, carry just the user id and a session version (no name or role), and expire after 12 hours. Issuer, audience, lifetime and every claim are checked on each request, and the user's role is always read from the database.
+- The session cookie is `HttpOnly`, `Secure`, `SameSite=Strict` and, in production, named `__Host-session` so a sibling subdomain cannot plant one. Logging in on a `www` or other subdomain would not receive it; serve the site and API from the same host.
+- Logging out bumps the user's `session_version`, which kills the token everywhere, even a copied one. Bump it the same way (`UPDATE users SET session_version = session_version + 1`) after a password change or a suspected leak.
+- To rotate the secret without signing the admin out: set `JWT_SECRET_PREVIOUS` to the old value, `JWT_SECRET` to a new one, restart, and remove `JWT_SECRET_PREVIOUS` after 12 hours. To force everyone out at once, just change `JWT_SECRET`.
+- Run `npm run db:migrate:prod` after deploying this version: it adds the `session_version` column.
 
 Set the application startup file to `dist-server/index.js`; verify the chosen host's Node app manager accepts this ESM entry. If it requires a provider-specific launcher, adapt and validate that after access is available. Do not guess a reverse-proxy trust setting; configure it only against the provider's actual proxy setup and verify rate limiting.
 
@@ -66,7 +75,11 @@ npm run db:seed:prod
 npm run images:migrate:prod
 ```
 
-These commands run compiled JavaScript and need no `tsx` or TypeScript compiler. Migration records keep stable original `.ts` names in both source and compiled runs; a locally migrated database can be imported without renaming its migration history. The seed only creates an admin if that username does not already exist; changing ADMIN_PASSWORD and reseeding does not rotate an existing user's password. Do not run `db:test:reset` in production.
+These commands run compiled JavaScript and need no `tsx` or TypeScript compiler. Migration records keep stable original `.ts` names in both source and compiled runs; a locally migrated database can be imported without renaming its migration history. The seed only creates an admin if that username does not already exist; changing ADMIN_PASSWORD and reseeding does not rotate an existing user's password. To change a password, run `npm run admin:set-password` locally or `npm run admin:set-password:prod` on the host: it asks for the new value at a hidden prompt (or reads `NEW_ADMIN_PASSWORD`), stores its hash and signs the account out everywhere.
+
+### Admin password policy
+
+The seed and the password tool both refuse a password that is shorter than 12 characters, has no digit or symbol, contains the username, is very repetitive, or is one that has been made public. `UlkuTe2391!`, the password that once sat in the client bundle and is still in the repository's commit history, is on that list: treat it as compromised and never use it anywhere. Use a fresh, unique password in production. Do not run `db:test:reset` in production.
 
 Restart the app through the hosting control panel after environment or code changes.
 
@@ -111,3 +124,11 @@ Use the panel’s dependency installer if its CloudLinux Node environment requir
 Sources: [Veridyen Node.js hosting](https://www.veridyen.com/nodejs-hosting), [cPanel Git Version Control](https://docs.cpanel.net/cpanel/files/git-version-control/), [private repository deploy keys](https://docs.cpanel.net/knowledge-base/web-services/guide-to-git-set-up-access-to-private-repositories/).
 
 Node 22 replaces the earlier Node 20 target after hosting-readiness review. Node 20 is end-of-life; Node 22 is supported LTS. Select Node 22 for both build and app runtime. Source: [Node.js release status](https://nodejs.org/en/about/previous-releases).
+
+## Newsletter consent (KVKK)
+
+- The privacy notice and consent wording live in `src/legal/kvkk.ts` and are served at `/kvkk`. `KVKK_VERSION` there must equal `CURRENT_CONSENT_VERSION` in `server/config/consent.ts` (a test fails otherwise). Every sign-up stores that version in `subscribers.consent_version`, together with `consent_at`, as proof of which wording the person agreed to. Bump both whenever the text changes.
+- Fill in `DATA_CONTROLLER.address` in `src/legal/kvkk.ts` if a postal address should appear in the notice.
+- Have a lawyer review the notice before the first send: the legal bases, the retention wording and, once a sending service is chosen, cross-border transfer (KVKK article 9) if that service stores data abroad.
+- Before sending any newsletter every message needs a working, free unsubscribe link (Law 6563 and its regulation), and the sender may need to be registered with İYS. The site has an "Bültenden çık" button (`POST /api/subscribe/unsubscribe`) that marks `subscribers.unsubscribed_at`; **never mail a row where `unsubscribed_at` is set**. Point the unsubscribe link in each message at the site (or use the mailing-list service's own), and keep the two lists in sync. Signing up again clears `unsubscribed_at` and records the new consent.
+- Run `npm run db:migrate:prod` on deploy: it adds `users.session_version` and `subscribers.consent_version`.

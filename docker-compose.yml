@@ -1,3 +1,8 @@
+# A fixed project name keeps one database volume no matter which checkout or
+# worktree runs `npm run db:up`. Without it Compose names the project after the
+# folder, and a different folder silently starts a second, empty database.
+name: personal_work
+
 services:
   mariadb:
     image: mariadb:10.6
