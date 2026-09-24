@@ -44,9 +44,10 @@ const RAYS = [
 /**
  * The brand mark: a horizon with its reflection, waiting for the sun.
  *
- * With a pointer, only the horizon shows at rest; on hover the sun rises and
- * its rays open one after another. Touch screens have no hover, so they show
- * the risen sun (no rays): the site's "new beginning".
+ * On a desktop pointer only the horizon shows at rest; on hover the sun rises
+ * and its rays open one after another. Phones and touch screens have no hover,
+ * so below the md breakpoint (and on any touch device) the risen sun and its
+ * rays are always shown: the site's "new beginning".
  */
 const Emblem: React.FC<{ size: number }> = ({ size }) => {
   const clipId = useId();
@@ -63,19 +64,19 @@ const Emblem: React.FC<{ size: number }> = ({ size }) => {
       <path {...stroke} strokeWidth="1.75" d="M6 32 H42" />
       <g
         style={{ transformOrigin: '24px 36.5px' }}
-        className={`scale-x-[0.8] [@media(hover:none)]:scale-x-100 group-hover:scale-x-100 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}
+        className={`scale-x-[0.8] max-md:scale-x-100 [@media(hover:none)]:scale-x-100 group-hover:scale-x-100 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}
       >
         <path {...stroke} strokeWidth="1.5" opacity="0.5" d="M14 36.5 H34" />
       </g>
       <g
         style={{ transformOrigin: '24px 40.5px' }}
-        className={`scale-x-[0.7] [@media(hover:none)]:scale-x-100 group-hover:scale-x-100 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}
+        className={`scale-x-[0.7] max-md:scale-x-100 [@media(hover:none)]:scale-x-100 group-hover:scale-x-100 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}
       >
         <path {...stroke} strokeWidth="1.5" opacity="0.3" d="M18 40.5 H30" />
       </g>
 
       <g clipPath={`url(#${clipId})`}>
-        <g className={`translate-y-[10px] [@media(hover:none)]:translate-y-0 group-hover:translate-y-0 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}>
+        <g className={`translate-y-[10px] max-md:translate-y-0 [@media(hover:none)]:translate-y-0 group-hover:translate-y-0 transition-transform duration-[900ms] ${EASE} motion-reduce:transition-none`}>
           <circle {...stroke} strokeWidth="1.75" cx="24" cy="32" r="9" />
           <circle {...stroke} strokeWidth="1.5" opacity="0.5" cx="24" cy="32" r="4.6" />
         </g>
@@ -88,7 +89,7 @@ const Emblem: React.FC<{ size: number }> = ({ size }) => {
           strokeWidth="1.75"
           d={path}
           style={{ transformOrigin: '24px 32px', transitionDelay: delay }}
-          className={`opacity-0 scale-[0.82] group-hover:opacity-100 group-hover:scale-[1.08] transition-[opacity,scale] duration-700 ${EASE} motion-reduce:transition-none`}
+          className={`opacity-0 scale-[0.82] max-md:opacity-100 max-md:scale-100 [@media(hover:none)]:opacity-100 [@media(hover:none)]:scale-100 group-hover:opacity-100 group-hover:scale-[1.08] transition-[opacity,scale] duration-700 ${EASE} motion-reduce:transition-none`}
         />
       ))}
     </svg>
