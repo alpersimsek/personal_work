@@ -88,7 +88,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
               className="liquid-glass rounded-3xl overflow-hidden group border border-white/10 cursor-pointer shadow-xl flex flex-col justify-between"
             >
               {/* Video Area */}
-              <div className="aspect-video overflow-hidden relative bg-black/60">
+              <div className="aspect-video md:aspect-auto md:h-[clamp(7rem,18svh,11rem)] overflow-hidden relative bg-black/60">
                 <video
                   src={card.video}
                   muted
@@ -102,9 +102,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
               </div>
 
               {/* Body */}
-              <div className="p-6 md:p-8 flex-1 flex flex-col justify-between bg-black/30">
+              <div className="p-6 md:p-5 lg:p-6 flex-1 flex flex-col justify-between bg-black/30">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 md:mb-3">
                     <span className="text-white/80 text-xs sm:text-sm uppercase tracking-widest font-semibold px-3.5 py-1 rounded-full bg-white/5 border border-white/15">
                       {card.tag}
                     </span>
@@ -113,15 +113,15 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
                     </div>
                   </div>
 
-                  <h3 className="text-white text-2xl sm:text-3xl mb-3 tracking-tight font-serif">
+                  <h3 className="text-white text-2xl sm:text-3xl md:text-2xl lg:text-[1.65rem] mb-3 md:mb-2 tracking-tight font-serif">
                     {card.title}
                   </h3>
-                  <p className="text-white/80 text-base sm:text-lg leading-relaxed font-light">
+                  <p className="text-white/80 text-base sm:text-lg md:text-sm lg:text-base leading-relaxed md:leading-normal font-light">
                     {card.description}
                   </p>
                 </div>
 
-                <div className="pt-6 mt-6 border-t border-white/5 flex items-center text-xs sm:text-sm text-white/60 group-hover:text-white/90 transition-colors font-medium">
+                <div className="pt-6 mt-6 md:pt-4 md:mt-4 border-t border-white/5 flex items-center text-xs sm:text-sm text-white/60 group-hover:text-white/90 transition-colors font-medium">
                   <span>Bu alanda görüşme başlat</span>
                   <span className="ml-2 font-serif">→</span>
                 </div>
