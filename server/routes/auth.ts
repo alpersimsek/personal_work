@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { findByUsername, findById, bumpSessionVersion } from '../repositories/usersRepo.js';
-import { verifyPassword } from '../utils/password.js';
+import { findByUsername, findById, bumpSessionVersion, changePassword } from '../repositories/usersRepo.js';
+import { hashPassword, verifyPassword } from '../utils/password.js';
+import { adminPasswordProblem } from '../utils/adminPassword.js';
 import { signSession, verifySession } from '../utils/jwt.js';
 import {
   sessionCookieName,
@@ -9,12 +10,18 @@ import {
   SESSION_COOKIE_MAX_AGE_MS,
 } from '../utils/sessionCookie.js';
 import { requireAuth } from '../middleware/requireAuth.js';
-import { loginRateLimit } from '../middleware/rateLimit.js';
+import { changePasswordRateLimit, loginRateLimit } from '../middleware/rateLimit.js';
 import { HttpError } from '../middleware/errorHandler.js';
 
 const loginSchema = z.object({
   username: z.string().trim().min(1),
   password: z.string().min(1),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(1),
+  confirmPassword: z.string().min(1),
 });
 
 export const authRouter = Router();
@@ -66,4 +73,38 @@ authRouter.post('/logout', async (req, res) => {
 
 authRouter.get('/me', requireAuth, (req, res) => {
   res.json({ username: req.user!.username, role: req.user!.role });
+});
+
+/**
+ * Changes the signed-in user's password.
+ *
+ * Every other login is ended (the version number moves on), and this one is
+ * re-issued so the person changing it is not thrown out of the panel.
+ */
+authRouter.post('/change-password', changePasswordRateLimit, requireAuth, async (req, res) => {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw new HttpError(400, 'Mevcut şifre, yeni şifre ve yeni şifre tekrarı gereklidir.');
+  }
+  const { currentPassword, newPassword, confirmPassword } = parsed.data;
+
+  const user = await findById(req.user!.userId);
+  if (!user) throw new HttpError(401, 'Oturum geçersiz.');
+
+  if (!(await verifyPassword(currentPassword, user.password_hash))) {
+    throw new HttpError(400, 'Mevcut şifre yanlış.');
+  }
+  if (newPassword !== confirmPassword) {
+    throw new HttpError(400, 'Yeni şifre ile tekrarı eşleşmiyor.');
+  }
+  if (newPassword === currentPassword) {
+    throw new HttpError(400, 'Yeni şifre mevcut şifreden farklı olmalıdır.');
+  }
+  const problem = adminPasswordProblem(newPassword, user.username);
+  if (problem) throw new HttpError(400, problem);
+
+  const sessionVersion = await changePassword(user.id, await hashPassword(newPassword));
+  const token = signSession({ userId: user.id, sessionVersion });
+  res.cookie(sessionCookieName(), token, { ...sessionCookieOptions(), maxAge: SESSION_COOKIE_MAX_AGE_MS });
+  res.json({ success: true });
 });

@@ -1,4 +1,6 @@
 const MIN_LENGTH = 12;
+/** bcrypt ignores everything past 72 bytes, so a longer password would be silently cut short. */
+const MAX_BYTES = 72;
 
 /** Passwords known to be public, e.g. once committed to the repository's history. */
 const COMPROMISED = new Set(['ulkute2391!']);
@@ -11,6 +13,7 @@ const COMPROMISED = new Set(['ulkute2391!']);
 export function adminPasswordProblem(password: string, username: string): string | undefined {
   if (COMPROMISED.has(password.toLowerCase())) return 'Bu şifre daha önce açığa çıktı, kullanılamaz.';
   if (password.length < MIN_LENGTH) return `Şifre en az ${MIN_LENGTH} karakter olmalıdır.`;
+  if (Buffer.byteLength(password) > MAX_BYTES) return `Şifre en fazla ${MAX_BYTES} karakter olabilir.`;
   if (password !== password.trim()) return 'Şifre boşlukla başlayıp bitemez.';
   if (password.toLowerCase().includes(username.toLowerCase())) return 'Şifre kullanıcı adını içeremez.';
   if (new Set(password).size < 6) return 'Şifre çok tekrarlı.';
