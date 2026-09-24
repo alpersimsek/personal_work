@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { IndexPage } from './pages/Index';
 import { BlogPage } from './pages/BlogPage';
@@ -12,16 +12,21 @@ import { ThemeProvider } from './context/ThemeContext';
 import type { BlogPost } from './types';
 import { blogService } from './services/blogService';
 import { authService } from './services/authService';
+import { parseRoute, pathForRoute, type Route } from './routes';
 import './styles/blog.css';
 import './styles/admin.css';
 
-type CurrentView = 'home' | 'blog-list' | 'blog-detail' | 'blog-admin';
+type CurrentView = Route['view'];
+
+const SITE_TITLE = 'Tuğba Ergüner Şimşek';
 
 export default function App() {
+  const initialRoute = useRef(parseRoute(window.location.pathname)).current;
   const selectionRequest = useRef(0);
   const [navigationError, setNavigationError] = useState('');
-  const [currentView, setCurrentView] = useState<CurrentView>('home');
+  const [currentView, setCurrentView] = useState<CurrentView>(initialRoute.view === 'blog-admin' ? 'home' : initialRoute.view);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [postLoading, setPostLoading] = useState(initialRoute.view === 'blog-detail');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [faqModalOpen, setFaqModalOpen] = useState(false);
@@ -34,41 +39,93 @@ export default function App() {
     }
   }, []);
 
-  const handleNavigateHome = (sectionHref?: string) => {
-    if (typeof sectionHref === 'string' && sectionHref.startsWith('#')) {
-      setTargetSection(sectionHref);
-    } else {
-      setTargetSection(null);
-    }
-    selectionRequest.current++;
-    setNavigationError('');
-    setCurrentView('home');
-  };
-
-  const handleNavigateBlog = () => {
-    selectionRequest.current++;
-    setNavigationError('');
-    setCurrentView('blog-list');
-  };
-
-  const handleSelectPost = async (post: BlogPost) => {
+  /**
+   * Shows a route without touching the address bar.
+   *
+   * Resolves to false when the route could not be shown (missing session,
+   * failed request), so callers know not to update the URL.
+   */
+  const showRoute = useCallback(async (route: Route): Promise<boolean> => {
     const requestId = ++selectionRequest.current;
+    const isStale = () => requestId !== selectionRequest.current;
     setNavigationError('');
-    try {
-      const latest = await blogService.getPostBySlug(post.slug);
-      if (requestId !== selectionRequest.current) return;
-      setSelectedPost(latest ?? null);
-      setCurrentView('blog-detail');
-    } catch (error) {
-      if (requestId === selectionRequest.current) setNavigationError(error instanceof Error ? error.message : 'Makale yüklenemedi.');
+
+    switch (route.view) {
+      case 'home':
+      case 'blog-list':
+        setCurrentView(route.view);
+        return true;
+      case 'blog-detail':
+        try {
+          const post = await blogService.getPostBySlug(route.slug);
+          if (isStale()) return false;
+          setSelectedPost(post ?? null);
+          setCurrentView('blog-detail');
+          return true;
+        } catch (error) {
+          if (!isStale()) setNavigationError(error instanceof Error ? error.message : 'Makale yüklenemedi.');
+          return false;
+        } finally {
+          setPostLoading(false);
+        }
+      case 'blog-admin':
+        try {
+          if (!(await authService.getSession()).isLoggedIn) {
+            setLoginModalOpen(true);
+            return false;
+          }
+          if (isStale()) return false;
+          setCurrentView('blog-admin');
+          return true;
+        } catch (error) {
+          setNavigationError(error instanceof Error ? error.message : 'Oturum kontrol edilemedi.');
+          return false;
+        }
     }
+  }, []);
+
+  const navigate = useCallback(async (route: Route) => {
+    if (!(await showRoute(route))) return;
+    const path = pathForRoute(route);
+    if (window.location.pathname !== path) window.history.pushState(null, '', path);
+  }, [showRoute]);
+
+  // Open the page the address bar points at, and follow back/forward buttons.
+  useEffect(() => {
+    if (initialRoute.view === 'home' && window.location.pathname !== '/') {
+      window.history.replaceState(null, '', '/');
+    }
+    void showRoute(initialRoute);
+    const handlePopState = () => {
+      setTargetSection(null);
+      void showRoute(parseRoute(window.location.pathname));
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [showRoute, initialRoute]);
+
+  useEffect(() => {
+    if (currentView === 'blog-detail' && selectedPost) document.title = `${selectedPost.title} | ${SITE_TITLE}`;
+    else if (currentView === 'blog-list') document.title = `Blog | ${SITE_TITLE}`;
+    else document.title = SITE_TITLE;
+  }, [currentView, selectedPost]);
+
+  const handleNavigateHome = (sectionHref?: string) => {
+    setTargetSection(typeof sectionHref === 'string' && sectionHref.startsWith('#') ? sectionHref : null);
+    void navigate({ view: 'home' });
   };
 
-  const handleNavigateAdmin = async () => {
-    try {
-      if ((await authService.getSession()).isLoggedIn) setCurrentView('blog-admin');
-      else setLoginModalOpen(true);
-    } catch (error) { setNavigationError(error instanceof Error ? error.message : 'Oturum kontrol edilemedi.'); }
+  const handleNavigateBlog = () => void navigate({ view: 'blog-list' });
+
+  const handleSelectPost = (post: BlogPost) => void navigate({ view: 'blog-detail', slug: post.slug });
+
+  const handleNavigateAdmin = () => void navigate({ view: 'blog-admin' });
+
+  const handleCloseLogin = () => {
+    setLoginModalOpen(false);
+    if (window.location.pathname === '/admin' && currentView !== 'blog-admin') {
+      window.history.replaceState(null, '', '/');
+    }
   };
 
   return (
@@ -126,7 +183,7 @@ export default function App() {
           </motion.div>
         )}
 
-        {currentView === 'blog-detail' && (
+        {currentView === 'blog-detail' && !postLoading && (
           <motion.div
             key={`blog-detail-${selectedPost?.id || 'post'}`}
             initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
@@ -162,10 +219,10 @@ export default function App() {
 
       <AdminLoginModal
         isOpen={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
+        onClose={handleCloseLogin}
         onSuccess={() => {
           setLoginModalOpen(false);
-          setCurrentView('blog-admin');
+          void navigate({ view: 'blog-admin' });
         }}
       />
 

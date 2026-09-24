@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { randomUUID } from 'node:crypto';
 import { requireAdmin } from '../middleware/requireAdmin.js';
 import {
   listPublished,
@@ -16,6 +15,7 @@ import {
 import { createPostSchema, updatePostSchema } from '../validation/schemas.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { HttpError } from '../middleware/errorHandler.js';
+import { uniqueSlug } from '../utils/slug.js';
 
 export const postsRouter = Router();
 export const adminPostsRouter = Router();
@@ -25,15 +25,6 @@ function positiveInteger(value: unknown): number {
     throw new HttpError(400, 'Geçersiz sayısal değer.');
   }
   return Number(value);
-}
-
-function buildSlug(title: string): string {
-  const base = title
-    .toLowerCase()
-    .replace(/[^a-z0-9ğüşıöç\s-]/g, '')
-    .trim()
-    .replace(/\s+/g, '-');
-  return `${base.slice(0, 210) || 'makale'}-${randomUUID()}`;
 }
 
 postsRouter.get('/', async (req, res) => {
@@ -75,7 +66,10 @@ adminPostsRouter.post('/', async (req, res) => {
   if (!parsed.success) {
     throw new HttpError(400, 'Geçersiz yazı verisi.');
   }
-  const post = await createPost(buildSlug(parsed.data.title), parsed.data);
+  const post = await createPost(
+    await uniqueSlug(parsed.data.title, async (slug) => Boolean(await findBySlug(slug))),
+    parsed.data,
+  );
   res.status(201).json(post);
 });
 
