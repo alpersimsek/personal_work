@@ -4,6 +4,7 @@ import { IndexPage } from './pages/Index';
 import { BlogPage } from './pages/BlogPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { BlogAdminPage } from './pages/BlogAdminPage';
+import { KvkkPage } from './pages/KvkkPage';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { Navbar } from './components/Navbar';
 import { ConsultationModal } from './components/ConsultationModal';
@@ -12,7 +13,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import type { BlogPost } from './types';
 import { blogService } from './services/blogService';
 import { authService } from './services/authService';
-import { parseRoute, pathForRoute, type Route } from './routes';
+import { parseRoute, pathForRoute, type ReturnState, type Route } from './routes';
 import './styles/blog.css';
 import './styles/admin.css';
 
@@ -53,6 +54,7 @@ export default function App() {
     switch (route.view) {
       case 'home':
       case 'blog-list':
+      case 'kvkk':
         setCurrentView(route.view);
         return true;
       case 'blog-detail':
@@ -96,8 +98,8 @@ export default function App() {
       window.history.replaceState(null, '', '/');
     }
     void showRoute(initialRoute);
-    const handlePopState = () => {
-      setTargetSection(null);
+    const handlePopState = (event: PopStateEvent) => {
+      setTargetSection((event.state as ReturnState | null)?.returnTo ?? null);
       void showRoute(parseRoute(window.location.pathname));
     };
     window.addEventListener('popstate', handlePopState);
@@ -107,6 +109,7 @@ export default function App() {
   useEffect(() => {
     if (currentView === 'blog-detail' && selectedPost) document.title = `${selectedPost.title} | ${SITE_TITLE}`;
     else if (currentView === 'blog-list') document.title = `Blog | ${SITE_TITLE}`;
+    else if (currentView === 'kvkk') document.title = `Bülten Aydınlatma Metni | ${SITE_TITLE}`;
     else document.title = SITE_TITLE;
   }, [currentView, selectedPost]);
 
@@ -197,6 +200,22 @@ export default function App() {
               onOpenBooking={handleNavigateHome}
               onSelectPost={handleSelectPost}
               onNavigateHome={handleNavigateHome}
+            />
+          </motion.div>
+        )}
+
+        {currentView === 'kvkk' && (
+          <motion.div
+            key="kvkk"
+            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <KvkkPage
+              onNavigateHome={handleNavigateHome}
+              onNavigateBlog={handleNavigateBlog}
+              onOpenBooking={() => setBookingModalOpen(true)}
             />
           </motion.div>
         )}

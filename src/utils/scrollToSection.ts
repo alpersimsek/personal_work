@@ -25,12 +25,15 @@ function headerOffset(): number {
  * section stopped short with part of the previous one still in view. Once the
  * scroll settles this re-measures and nudges the section into place. Any
  * wheel, touch or key input cancels it so it never fights the visitor.
+ *
+ * `instant` jumps without animating, for arriving from another page while it
+ * is still fading in.
  */
-export function scrollToSection(target: Element): void {
+export function scrollToSection(target: Element, options: { instant?: boolean } = {}): void {
   const scrollToTarget = () =>
     window.scrollTo({
       top: window.scrollY + target.getBoundingClientRect().top - headerOffset(),
-      behavior: 'smooth',
+      behavior: options.instant ? 'instant' : 'smooth',
     });
 
   let cancelled = false;

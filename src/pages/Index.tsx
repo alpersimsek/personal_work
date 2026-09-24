@@ -41,12 +41,15 @@ export const IndexPage: React.FC<IndexPageProps> = ({
 
   useEffect(() => {
     if (targetSection) {
+      // Arriving from another page: jump while the page is still fading in,
+      // after the app has reset the scroll position, instead of scrolling
+      // down the whole page in view.
       const timer = setTimeout(() => {
         const el = document.querySelector(targetSection);
         if (el) {
-          scrollToSection(el);
+          scrollToSection(el, { instant: true });
         }
-      }, 200);
+      }, 60);
       return () => clearTimeout(timer);
     }
   }, [targetSection]);

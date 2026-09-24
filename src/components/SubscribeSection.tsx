@@ -1,35 +1,60 @@
 import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Mail } from 'lucide-react';
-import { subscribe } from '../services/subscribeService';
+import { isPlausibleEmail, subscribe } from '../services/subscribeService';
+import { UnsubscribeModal } from './UnsubscribeModal';
+import { CONSENT_STATEMENT, KVKK_PATH, KVKK_VERSION } from '../legal/kvkk';
+import { navigateToPath } from '../routes';
+
+const DRAFT_KEY = 'tugba-subscribe-draft';
+
+/** Name and e-mail survive a trip to the notice page. Consent never does: it must be given fresh. */
+function readDraft(): { name: string; email: string } {
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? '{}');
+    return { name: typeof draft.name === 'string' ? draft.name : '', email: typeof draft.email === 'string' ? draft.email : '' };
+  } catch {
+    return { name: '', email: '' };
+  }
+}
 
 export const SubscribeSection: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(() => readDraft().name);
+  const [email, setEmail] = useState(() => readDraft().email);
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [unsubscribeOpen, setUnsubscribeOpen] = useState(false);
   const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      setNotice({ type: 'error', text: 'Lütfen adınızı ve soyadınızı yazın.' });
+      return;
+    }
+    if (!isPlausibleEmail(email)) {
+      setNotice({ type: 'error', text: 'Lütfen geçerli bir e-posta adresi girin, örneğin ad@eposta.com.' });
+      return;
+    }
     if (!consent) {
-      setNotice({ type: 'error', text: 'Devam etmek için lütfen onay kutusunu işaretleyin.' });
+      setNotice({ type: 'error', text: 'Bültene katılmak için lütfen onay kutusunu işaretleyin.' });
       return;
     }
 
     setSubmitting(true);
     setNotice(null);
     try {
-      const result = await subscribe({ name, email, consent, honeypot });
+      const result = await subscribe({ name, email, consent, consentVersion: KVKK_VERSION, honeypot });
       if (result.success) {
         setNotice({ type: 'success', text: 'Kaydınız alındı, teşekkürler!' });
         setName('');
         setEmail('');
         setConsent(false);
+        sessionStorage.removeItem(DRAFT_KEY);
       } else {
         setNotice({ type: 'error', text: result.message || 'Kaydınız şu anda alınamadı.' });
       }
@@ -39,7 +64,7 @@ export const SubscribeSection: React.FC = () => {
   };
 
   return (
-    <section className="bg-black px-4 sm:px-6 pt-6 sm:pt-10 md:pt-12 pb-6 sm:pb-10 md:pb-12 relative" ref={ref}>
+    <section id="bulten" className="bg-black px-4 sm:px-6 pt-6 sm:pt-10 md:pt-12 pb-6 sm:pb-10 md:pb-12 relative" ref={ref}>
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -107,17 +132,35 @@ export const SubscribeSection: React.FC = () => {
                 </div>
               </div>
 
-              {/* Placeholder consent wording — needs a lawyer-reviewed KVKK-compliant
-                  text and privacy notice link before this goes live. */}
-              <label className="flex items-start gap-2.5 cursor-pointer text-xs text-white/70 pt-1">
+              {/* Unticked by default and separate from the notice: consent must be an active, specific choice. */}
+              <label className="flex items-start gap-2.5 cursor-pointer text-xs leading-relaxed text-white/70 pt-1">
                 <input
                   type="checkbox"
                   checked={consent}
                   onChange={(e) => setConsent(e.target.checked)}
                   className="mt-0.5 rounded border-white/20 bg-black/50 text-white focus:ring-0 shrink-0"
                 />
-                <span>Adımı ve e-posta adresimi bülten gönderimi amacıyla işlenmesine onay veriyorum.</span>
+                <span>{CONSENT_STATEMENT}</span>
               </label>
+              <p className="text-xs leading-relaxed text-white/50">
+                Kişisel verilerinizin işlenmesine ilişkin{' '}
+                <a
+                  href={KVKK_PATH}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    try {
+                      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ name, email }));
+                    } catch {
+                      // Storage can be unavailable (private mode); the form simply starts empty on return.
+                    }
+                    navigateToPath(KVKK_PATH, { returnTo: '#bulten' });
+                  }}
+                  className="underline underline-offset-4 decoration-white/30 hover:text-white/80 transition-colors"
+                >
+                  Aydınlatma Metni
+                </a>
+                &apos;ni inceleyebilirsiniz.
+              </p>
 
               {notice && (
                 <p
@@ -135,10 +178,18 @@ export const SubscribeSection: React.FC = () => {
               >
                 {submitting ? 'Gönderiliyor…' : 'Bültene Katıl'}
               </button>
+
+              <div className="text-center">
+                <button type="button" onClick={() => setUnsubscribeOpen(true)} className="btn btn-link text-xs sm:text-sm">
+                  Bültenden çık
+                </button>
+              </div>
             </form>
           </div>
         </motion.div>
       </div>
+
+      <UnsubscribeModal isOpen={unsubscribeOpen} onClose={() => setUnsubscribeOpen(false)} initialEmail={email} />
     </section>
   );
 };

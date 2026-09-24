@@ -22,9 +22,14 @@ export const createPostSchema = z.object({
 
 export const updatePostSchema = createPostSchema.partial();
 
+export const unsubscribeSchema = z.object({
+  email: z.string().trim().email().max(255),
+});
+
 export const subscribeSchema = z.object({
   name: z.string().trim().min(1).max(255),
   email: z.string().trim().email().max(255),
   consent: z.literal(true),
+  consentVersion: z.string().trim().min(1).max(32),
   honeypot: z.string().optional(),
 });

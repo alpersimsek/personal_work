@@ -2,6 +2,8 @@ import React from 'react';
 import { Sparkles, Instagram, Linkedin, Mail } from 'lucide-react';
 import { BrandLogo } from './BrandLogo';
 import { scrollToSection } from '../utils/scrollToSection';
+import { KVKK_PATH } from '../legal/kvkk';
+import { navigateToPath } from '../routes';
 
 interface FooterProps {
   onOpenBooking: () => void;
@@ -108,9 +110,18 @@ export const Footer: React.FC<FooterProps> = ({ onOpenBooking, onNavigateHome, o
 
         {/* Bottom row */}
         <div className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
-          <p className="text-white/40">
-            © 2026 Tuğba Şimşek. Tüm hakları saklıdır.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-white/40">
+            <p>© 2026 Tuğba Şimşek. Tüm hakları saklıdır.</p>
+            <a
+              href={KVKK_PATH}
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToPath(KVKK_PATH, { returnTo: '#bulten' });
+              }}
+              className="hover:text-white/70 transition-colors underline underline-offset-4 decoration-white/20">
+              KVKK Aydınlatma Metni
+            </a>
+          </div>
 
           {/* Subtle Disclaimer */}
           <p className="pt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs">
