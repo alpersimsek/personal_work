@@ -23,6 +23,7 @@
     "db:migrate": "tsx server/db/migrate.ts",
     "db:seed": "tsx server/db/seed.ts",
     "admin:set-password": "tsx server/db/setAdminPassword.ts",
+    "db:seed:mock-posts": "tsx server/db/seedMockPosts.ts",
     "db:test:reset": "NODE_ENV=test tsx server/db/testReset.ts",
     "test:server": "NODE_ENV=test node --import tsx --test server/test/*.test.ts",
     "db:migrate:prod": "node dist-server/db/migrate.js",
