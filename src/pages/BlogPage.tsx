@@ -100,7 +100,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               <h1 className="serif-font text-3xl sm:text-6xl md:text-7xl font-light text-white tracking-tight">
                 Tüm Yazılar & Keşifler
               </h1>
-              <p className="text-white/60 text-sm sm:text-xl mt-2 max-w-2xl font-sans font-light">
+              <p className="text-white/60 text-sm sm:text-xl lg:text-base xl:text-lg mt-2 max-w-2xl lg:max-w-none lg:whitespace-nowrap font-sans font-light">
                 Farkındalık, dönüşüm ve içsel netlik üzerine hazırlanan tüm makaleleri keşfedin.
               </p>
             </div>
