@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
 import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
 import { authService } from '../services/authService';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import '../styles/blog.css';
+import { PostCover } from '../components/PostCover';
 
 interface BlogPageProps {
   onSelectPost: (post: BlogPost) => void;
@@ -81,17 +81,8 @@ export const BlogPage: React.FC<BlogPageProps> = ({
     <div className="bg-black text-white min-h-screen flex flex-col w-full selection:bg-white/20">
       {/* Main Container */}
       <main className="flex-1 pt-28 sm:pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        {/* Back Link & Header */}
+        {/* Header */}
         <div className="mb-8">
-          <button
-            id="btn-navigate-home"
-            onClick={onNavigateHome}
-            className="btn btn-secondary mb-6"
-          >
-            <ArrowLeft size={16} className="btn-arrow-back" />
-            <span>Ana Sayfaya Dön</span>
-          </button>
-
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/10">
             <div>
               <span className="text-xs sm:text-base uppercase tracking-widest text-white/50 font-medium block mb-2">
@@ -176,11 +167,7 @@ export const BlogPage: React.FC<BlogPageProps> = ({
               >
                 {/* Image Header */}
                 <div className="relative h-56 w-full overflow-hidden bg-neutral-900">
-                  <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
-                  />
+                  <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
                   <span className="absolute top-3.5 left-3.5 px-3.5 py-1 rounded-full text-sm font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">

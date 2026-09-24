@@ -4,8 +4,10 @@ import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
+import { BrandMark } from '../components/BrandLogo';
 import { ConsultationModal } from '../components/ConsultationModal';
 import '../styles/blog.css';
+import { PostCover } from '../components/PostCover';
 
 interface BlogDetailPageProps {
   post: BlogPost | null;
@@ -13,6 +15,8 @@ interface BlogDetailPageProps {
   onOpenBooking: () => void;
   onSelectPost: (post: BlogPost) => void;
   onNavigateHome?: (sectionHref?: string) => void;
+  /** Shows the article as visitors will see it without touching live data: no likes, related posts or footer. */
+  isPreview?: boolean;
 }
 
 export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
@@ -21,6 +25,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
   onOpenBooking,
   onSelectPost,
   onNavigateHome,
+  isPreview = false,
 }) => {
   const [likesCount, setLikesCount] = useState(0);
   const [hasLiked, setHasLiked] = useState(false);
@@ -38,7 +43,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    if (post) {
+    if (post && !isPreview) {
       setLikesCount(post.likes || 0);
       setHasLiked(false);
       setLikeError('');
@@ -152,20 +157,22 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
   return (
     <div className="bg-black text-white min-h-screen flex flex-col w-full selection:bg-white/20 font-sans blog-scope">
       <main className="flex-1 pt-28 sm:pt-32 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full">
-        {/* Back Link */}
-        <button
-          onClick={onNavigateBack}
-          className="btn btn-secondary mb-8"
-        >
-          <ArrowLeft size={16} className="btn-arrow-back" />
-          <span>Tüm Yazılara Dön</span>
-        </button>
-
         {/* Article Header & Title Box */}
         <header className="mb-8">
-          <h1 className="serif-font text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-6">
-            {post.title}
-          </h1>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-8 mb-6">
+            {/* Back link: above the title on small screens, its own column beside it on wider ones */}
+            <button
+              onClick={onNavigateBack}
+              className="btn btn-secondary order-first md:order-last self-start md:self-center shrink-0"
+            >
+              <ArrowLeft size={16} className="btn-arrow-back" />
+              <span>Tüm Yazılara Dön</span>
+            </button>
+
+            <h1 className="serif-font min-w-0 md:flex-1 text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight">
+              {post.title}
+            </h1>
+          </div>
 
           {/* Author & Metadata Bar (Desktop view: Top position) */}
           <div className="hidden md:flex px-6 sm:px-8 py-4 bg-white/[0.04] border border-white/10 rounded-2xl flex-wrap items-center justify-between gap-4 text-sm text-white/60 font-medium mb-6 shadow-sm font-sans backdrop-blur-md">
@@ -174,7 +181,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
                 {post.category}
               </span>
               <div className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
-                TÊ
+                <BrandMark size={22} />
               </div>
               <div>
                 <span className="text-white font-semibold block text-base">{post.author}</span>
@@ -193,11 +200,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
 
           {/* Cover Image Container */}
           <div className="w-full aspect-[16/9] max-h-[480px] rounded-3xl overflow-hidden border border-white/15 shadow-lg bg-neutral-900">
-            <img
-              src={post.coverImage}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
+            <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
           </div>
         </header>
 
@@ -213,7 +216,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
               <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                    TÊ
+                    <BrandMark size={20} />
                   </div>
                   <div>
                     <span className="text-white font-semibold block text-sm">{post.author}</span>
@@ -254,8 +257,8 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
           <div className="mt-8 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 font-sans">
             <button
               onClick={handleLike}
-                  disabled={likePending || hasLiked}
-                  title={likeError || undefined}
+                  disabled={likePending || hasLiked || isPreview}
+                  title={isPreview ? 'Önizlemede beğeni kapalıdır' : likeError || undefined}
               className={`btn w-full sm:w-auto ${hasLiked ? 'btn-danger' : 'btn-secondary'}`}
             >
               <svg
@@ -292,7 +295,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
               Bu konuda zihninizi berraklaştırmak ister misiniz?
             </h4>
             <p className="text-sm sm:text-base text-white/70 max-w-lg mx-auto mb-6 font-sans leading-relaxed">
-              Tuğba Ergüner Şimşek ile 15 dakikalık tanışma seansında hedeflerinizi konuşalım.
+              Tuğba Ergüner Şimşek ile 30 dakikalık tanışma seansında hedeflerinizi konuşalım.
             </p>
             <button
               onClick={handleOpenBookingModal}
@@ -319,11 +322,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
                   onClick={() => onSelectPost(rel)}
                   className="group cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 rounded-2xl p-5 transition-all flex items-center gap-4 shadow-sm"
                 >
-                  <img
-                    src={rel.coverImage}
-                    alt={rel.title}
-                    className="w-20 h-20 rounded-xl object-cover shrink-0 border border-white/15"
-                  />
+                  <PostCover src={rel.coverImage} alt={rel.title} className="w-20 h-20 rounded-xl object-cover shrink-0 border border-white/15" markSize={26} />
                   <div>
                     <span className="text-xs text-white/50 font-semibold uppercase tracking-wider block mb-1">
                       {rel.category}
@@ -339,7 +338,9 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
         )}
       </main>
 
-      <Footer onOpenBooking={handleOpenBookingModal} onNavigateHome={onNavigateHome} onNavigateBlog={onNavigateBack} />
+      {!isPreview && (
+        <Footer onOpenBooking={handleOpenBookingModal} onNavigateHome={onNavigateHome} onNavigateBlog={onNavigateBack} />
+      )}
 
       {/* Consultation Booking Modal - 100% Viewport Centered */}
       <ConsultationModal

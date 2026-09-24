@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
 import { authService } from '../services/authService';
+import { PostCover } from './PostCover';
 
 interface BlogSectionProps {
   onSelectPost: (post: BlogPost) => void;
@@ -164,11 +165,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
               >
                 {/* Image Header */}
                 <div className="relative h-48 w-full overflow-hidden bg-neutral-900">
-                  <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
-                  />
+                  <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
                   <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">

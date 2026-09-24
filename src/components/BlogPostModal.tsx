@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { BlogPost } from '../types';
 import { blogService } from '../services/blogService';
+import { PostCover } from './PostCover';
 
 interface BlogPostModalProps {
   post: BlogPost | null;
@@ -130,11 +131,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
         <div className="overflow-y-auto flex-1">
           {/* Cover Header */}
           <div className="relative h-64 sm:h-80 w-full overflow-hidden">
-            <img
-              src={post.coverImage}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
+            <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/60 to-transparent" />
 
             <div className="absolute bottom-6 left-6 right-6">
@@ -231,7 +228,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
                 Bu konuda zihninizi berraklaştırmak ister misiniz?
               </h4>
               <p className="text-xs text-white/60 max-w-md mx-auto mb-4 font-sans">
-                Tuğba Ergüner Şimşek ile 15 dakikalık tanışma seansında hedeflerinizi konuşalım.
+                Tuğba Ergüner Şimşek ile 30 dakikalık tanışma seansında hedeflerinizi konuşalım.
               </p>
               <button
                 onClick={() => {
