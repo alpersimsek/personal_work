@@ -50,6 +50,7 @@ JWT_SECRET=<new random secret>
 ADMIN_USERNAME=<production admin username>
 ADMIN_PASSWORD=<new production admin password, 12+ characters>
 UPLOADS_DIR=/home/<cpanel-user>/app-data/tugba/uploads
+PUBLIC_SITE_URL=https://www.tugbasimsek.com.tr
 ```
 
 Use `PORT` if supplied by the host, or set `API_PORT` according to the host's app manager instructions. Startup prefers `PORT`, then `API_PORT`, then 3001. Generate a fresh JWT secret with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`. Production must use HTTPS because the session cookie is Secure.
@@ -132,3 +133,10 @@ Node 22 replaces the earlier Node 20 target after hosting-readiness review. Node
 - Have a lawyer review the notice before the first send: the legal bases, the retention wording and, once a sending service is chosen, cross-border transfer (KVKK article 9) if that service stores data abroad.
 - Before sending any newsletter every message needs a working, free unsubscribe link (Law 6563 and its regulation), and the sender may need to be registered with İYS. The site has an "Bültenden çık" button (`POST /api/subscribe/unsubscribe`) that marks `subscribers.unsubscribed_at`; **never mail a row where `unsubscribed_at` is set**. Point the unsubscribe link in each message at the site (or use the mailing-list service's own), and keep the two lists in sync. Signing up again clears `unsubscribed_at` and records the new consent.
 - Run `npm run db:migrate:prod` on deploy: it adds `users.session_version` and `subscribers.consent_version`.
+
+## Public address and search engines
+
+- Set `PUBLIC_SITE_URL=https://www.tugbasimsek.com.tr` (no trailing slash). Canonical links, `sitemap.xml`, `robots.txt` and Open Graph URLs all use it; if it is unset they fall back to the address of each request, which is fine locally but must not be relied on behind a proxy.
+- Redirect the bare domain (`tugbasimsek.com.tr`) to `www` at the host or DNS level, so there is a single canonical address.
+- Page addresses the server knows: `/`, `/blog`, `/blog/<slug>`, `/hakkimda`, `/programlar`, `/programlar/<slug>`, `/kvkk`, `/admin`. Anything else answers 404. A new page needs an entry in `server/seo/pages.ts`, the sitemap in `server/routes/seo.ts` and `src/routes.ts`.
+- The coaching areas and the FAQ live in `server/content/` and are read by both the site and the server, so the page and what crawlers see cannot drift.
