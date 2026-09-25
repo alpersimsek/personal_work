@@ -2,16 +2,16 @@
 
 Status: prepared locally; live deployment awaits a purchased hosting account, domain, and access details.
 
-Use the backend worktree branch `worktree-backend-implementation`. `main` does not yet include these backend changes. Node 22 is specified in `.nvmrc` and package engines. The app needs a MariaDB database and same-origin HTTPS frontend/API.
+Deploy from `main`, which holds the backend, the admin panel and the SEO layer. Node 22 is specified in `.nvmrc` and package engines. The app needs a MariaDB database and same-origin HTTPS frontend/API.
 
 ## Deployment flow selected by the owner
 
 Pull source from GitHub and build on the hosting server. The production Node backend serves the generated dist frontend, /api endpoints and persistent /uploads images on the same domain. Set the Node application root to the repository root and startup file to dist-server/index.js; dist is the frontend asset directory served by Express, not a separate Node application root. No Vite development/preview server is needed in production.
 
-Deploy the reviewed worktree-backend-implementation branch from GitHub; main still contains the earlier app. Clone the deployment branch:
+Deploy the `main` branch from GitHub. Clone it:
 
 ```bash
-git clone --branch worktree-backend-implementation git@github.com:alpersimsek/personal_work.git tugba-app
+git clone --branch main git@github.com:alpersimsek/personal_work.git tugba-app
 cd tugba-app
 ```
 
@@ -107,7 +107,7 @@ Add live checks: upload an admin cover, save the post, confirm an independent br
 
 Veridyen advertises cPanel and Terminal. cPanel supports cloning/pulling GitHub repositories through Git Version Control or an enabled terminal; confirm these features for the purchased account. For a private repository, configure a read-only GitHub deploy key using the host’s SSH/Terminal access. No personal token should be committed or embedded in a clone URL.
 
-Use GitHub repository alpersimsek/personal_work, deployment branch worktree-backend-implementation and release commit hosting_ready. Clone into a private app directory, select that deployment branch, and point the Node app manager at that directory with startup dist-server/index.js. Deployment itself still awaits hosting access.
+Use GitHub repository alpersimsek/personal_work, deployment branch main. Clone into a private app directory, select that deployment branch, and point the Node app manager at that directory with startup dist-server/index.js. Deployment itself still awaits hosting access.
 
 From the app’s Node-enabled terminal, with production database/environment variables active, updates follow this sequence:
 
