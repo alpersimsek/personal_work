@@ -5,6 +5,7 @@ import { BlogPage } from './pages/BlogPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { BlogAdminPage } from './pages/BlogAdminPage';
 import { KvkkPage } from './pages/KvkkPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { Navbar } from './components/Navbar';
 import { ConsultationModal } from './components/ConsultationModal';
@@ -20,6 +21,8 @@ import './styles/admin.css';
 type CurrentView = Route['view'];
 
 const SITE_TITLE = 'Tuğba Ergüner Şimşek';
+// The full keyword-rich title from index.html: the home page keeps it, other pages prefix theirs.
+const HOME_TITLE = document.title;
 
 export default function App() {
   const initialRoute = useRef(parseRoute(window.location.pathname)).current;
@@ -55,6 +58,7 @@ export default function App() {
       case 'home':
       case 'blog-list':
       case 'kvkk':
+      case 'not-found':
         setCurrentView(route.view);
         return true;
       case 'blog-detail':
@@ -94,9 +98,6 @@ export default function App() {
 
   // Open the page the address bar points at, and follow back/forward buttons.
   useEffect(() => {
-    if (initialRoute.view === 'home' && window.location.pathname !== '/') {
-      window.history.replaceState(null, '', '/');
-    }
     void showRoute(initialRoute);
     const handlePopState = (event: PopStateEvent) => {
       setTargetSection((event.state as ReturnState | null)?.returnTo ?? null);
@@ -110,7 +111,8 @@ export default function App() {
     if (currentView === 'blog-detail' && selectedPost) document.title = `${selectedPost.title} | ${SITE_TITLE}`;
     else if (currentView === 'blog-list') document.title = `Blog | ${SITE_TITLE}`;
     else if (currentView === 'kvkk') document.title = `Bülten Aydınlatma Metni | ${SITE_TITLE}`;
-    else document.title = SITE_TITLE;
+    else if (currentView === 'not-found') document.title = `Sayfa bulunamadı | ${SITE_TITLE}`;
+    else document.title = HOME_TITLE;
   }, [currentView, selectedPost]);
 
   const handleNavigateHome = (sectionHref?: string) => {
@@ -200,6 +202,22 @@ export default function App() {
               onOpenBooking={handleNavigateHome}
               onSelectPost={handleSelectPost}
               onNavigateHome={handleNavigateHome}
+            />
+          </motion.div>
+        )}
+
+        {currentView === 'not-found' && (
+          <motion.div
+            key="not-found"
+            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <NotFoundPage
+              onNavigateHome={handleNavigateHome}
+              onNavigateBlog={handleNavigateBlog}
+              onOpenBooking={() => setBookingModalOpen(true)}
             />
           </motion.div>
         )}

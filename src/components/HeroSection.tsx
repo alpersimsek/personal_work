@@ -164,7 +164,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="serif-font text-5xl sm:text-7xl md:text-8xl lg:text-[100px] text-white tracking-tight leading-[0.95] sm:leading-[0.9] mb-6 sm:mb-8"
         >
-          Kendine yeniden
+          Kendine yeniden{' '}
           <br />
           <span className="italic text-white/80">yaklaş.</span>
         </motion.h1>
@@ -259,8 +259,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
         </a>
       </motion.div>
 
-      {/* Background texture overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] z-20" />
     </section>
   );
 };

@@ -4,7 +4,8 @@ export type Route =
   | { view: 'blog-list' }
   | { view: 'blog-detail'; slug: string }
   | { view: 'blog-admin' }
-  | { view: 'kvkk' };
+  | { view: 'kvkk' }
+  | { view: 'not-found' };
 
 const decodeSegment = (segment: string): string => {
   try {
@@ -14,7 +15,7 @@ const decodeSegment = (segment: string): string => {
   }
 };
 
-/** Maps a URL path to a route. Unknown paths fall back to the home page. */
+/** Maps a URL path to a route. Addresses the site does not have map to `not-found`. */
 export function parseRoute(pathname: string): Route {
   const [first, second, ...rest] = pathname.split('/').filter(Boolean).map(decodeSegment);
 
@@ -22,7 +23,8 @@ export function parseRoute(pathname: string): Route {
   if (first === 'blog' && second && rest.length === 0) return { view: 'blog-detail', slug: second };
   if (first === 'admin' && !second) return { view: 'blog-admin' };
   if (first === 'kvkk' && !second) return { view: 'kvkk' };
-  return { view: 'home' };
+  if (!first) return { view: 'home' };
+  return { view: 'not-found' };
 }
 
 /** Builds the URL path for a route, e.g. `/blog/kendine-donus`. */
@@ -36,6 +38,8 @@ export function pathForRoute(route: Route): string {
       return '/admin';
     case 'kvkk':
       return '/kvkk';
+    case 'not-found':
+      return '/404';
     case 'home':
       return '/';
   }

@@ -8,6 +8,7 @@ import { BrandMark } from '../components/BrandLogo';
 import { ConsultationModal } from '../components/ConsultationModal';
 import '../styles/blog.css';
 import { PostCover } from '../components/PostCover';
+import { followInPage } from '../utils/followInPage';
 
 interface BlogDetailPageProps {
   post: BlogPost | null;
@@ -319,8 +320,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
               {relatedPosts.map((rel) => (
                 <div
                   key={rel.id}
-                  onClick={() => onSelectPost(rel)}
-                  className="group cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 rounded-2xl p-5 transition-all flex items-center gap-4 shadow-sm"
+                  className="group relative cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 rounded-2xl p-5 transition-all flex items-center gap-4 shadow-sm"
                 >
                   <PostCover src={rel.coverImage} alt={rel.title} className="w-20 h-20 rounded-xl object-cover shrink-0 border border-white/15" markSize={26} />
                   <div>
@@ -328,8 +328,14 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
                       {rel.category}
                     </span>
                     <h4 className="serif-font text-base sm:text-lg font-normal text-white group-hover:text-white/80 line-clamp-2">
-                      {rel.title}
-                    </h4>
+<a
+  href={`/blog/${encodeURIComponent(rel.slug)}`}
+  onClick={followInPage(() => onSelectPost(rel))}
+  className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+>
+  {rel.title}
+</a>
+</h4>
                   </div>
                 </div>
               ))}

@@ -3,6 +3,7 @@ import type { BlogPost, BlogCategory } from '../types';
 import { blogService } from '../services/blogService';
 import { authService } from '../services/authService';
 import { PostCover } from './PostCover';
+import { followInPage } from '../utils/followInPage';
 
 interface BlogSectionProps {
   onSelectPost: (post: BlogPost) => void;
@@ -160,8 +161,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
             {postsData.posts.map((post) => (
               <article
                 key={post.id}
-                onClick={() => onSelectPost(post)}
-                className="group cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm"
+                className="group relative cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-white/25 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col h-full shadow-sm"
               >
                 {/* Image Header */}
                 <div className="relative h-48 w-full overflow-hidden bg-neutral-900">
@@ -182,8 +182,14 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   </div>
 
                   <h3 className="serif-font text-lg font-light text-white group-hover:text-white/90 transition-colors line-clamp-2 mb-3 leading-snug">
-                    {post.title}
-                  </h3>
+<a
+  href={`/blog/${encodeURIComponent(post.slug)}`}
+  onClick={followInPage(() => onSelectPost(post))}
+  className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
+>
+  {post.title}
+</a>
+</h3>
 
                   <p className="text-white/60 text-xs line-clamp-3 mb-6 flex-1 font-sans leading-relaxed">
                     {post.summary}

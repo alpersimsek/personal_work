@@ -582,9 +582,9 @@ export const MindfulPause: React.FC = () => {
                 BİR DAKİKALIK DİNGİNLİK REHBERİ
               </span>
             </div>
-            <h3 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
+            <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
               Sayfayı incelemeden önce zihnini dinlendir.
-            </h3>
+            </h2>
           </div>
 
           {/* 1-Minute Live Prominent Countdown Display & Pattern Switcher */}
