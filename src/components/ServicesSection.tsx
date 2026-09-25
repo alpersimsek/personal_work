@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { ArrowUpRight, Compass } from 'lucide-react';
+import { LazyVideo } from './LazyVideo';
 
 interface ServicesSectionProps {
   onSelectTopic: (topic: 'netlik' | 'donusum' | 'diger') => void;
@@ -89,15 +90,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
             >
               {/* Video Area */}
               <div className="aspect-video md:aspect-auto md:h-[clamp(7rem,18svh,11rem)] overflow-hidden relative bg-black/60">
-                <video
-                  src={card.video}
-                  muted
-                  autoPlay
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                <LazyVideo src={card.video} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
               </div>
 

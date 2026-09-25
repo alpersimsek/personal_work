@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { ArrowDown, Focus } from 'lucide-react';
 import { scrollToSection } from '../utils/scrollToSection';
+import { LazyVideo } from './LazyVideo';
 
 interface FeaturedVideoSectionProps {
   onOpenBooking: () => void;
@@ -73,15 +74,7 @@ export const FeaturedVideoSection: React.FC<FeaturedVideoSectionProps> = ({ onOp
           className="relative w-full mx-auto rounded-3xl overflow-hidden aspect-[16/9] max-h-[calc(100svh-25rem)] min-h-[16rem] border border-white/15 shadow-2xl group"
         >
           {/* Background Atmospheric Video */}
-          <video
-            src={FEATURED_VIDEO_URL}
-            muted
-            autoPlay
-            loop
-            playsInline
-            preload="auto"
-            className="w-full h-full object-cover scale-100 group-hover:scale-102 transition-transform duration-1000"
-          />
+          <LazyVideo src={FEATURED_VIDEO_URL} className="w-full h-full object-cover scale-100 group-hover:scale-102 transition-transform duration-1000" />
         </motion.div>
       </div>
     </section>

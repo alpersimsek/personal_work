@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Lightbulb } from 'lucide-react';
+import { LazyVideo } from './LazyVideo';
 
 const PHILOSOPHY_VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4';
@@ -55,15 +56,7 @@ export const PhilosophySection: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="rounded-3xl overflow-hidden aspect-[4/3] border border-white/10 shadow-2xl relative group bg-neutral-950"
           >
-            <video
-              src={PHILOSOPHY_VIDEO_URL}
-              muted
-              autoPlay
-              loop
-              playsInline
-              preload="auto"
-              className="w-full h-full object-cover scale-100 group-hover:scale-103 transition-transform duration-700"
-            />
+            <LazyVideo src={PHILOSOPHY_VIDEO_URL} className="w-full h-full object-cover scale-100 group-hover:scale-103 transition-transform duration-700" />
           </motion.div>
 
           {/* Right Text Blocks */}
