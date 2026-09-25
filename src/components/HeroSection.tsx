@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
 import { Navbar } from './Navbar';
@@ -19,96 +19,44 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
   const { theme } = useTheme();
   const motionAllowed = useMotionAllowed();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isFadingOutRef = useRef<boolean>(false);
-  const animFrameRef = useRef<number | null>(null);
-
-  const animateVideoOpacity = (
-    targetOpacity: number,
-    durationMs: number = 500,
-    onComplete?: () => void
-  ) => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-    }
-
-    const startOpacity = parseFloat(video.style.opacity || '0');
-    const startTime = performance.now();
-
-    const step = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / durationMs, 1);
-      // Smooth linear or ease interpolation
-      const current = startOpacity + (targetOpacity - startOpacity) * progress;
-      if (video) {
-        video.style.opacity = current.toString();
-      }
-
-      if (progress < 1) {
-        animFrameRef.current = requestAnimationFrame(step);
-      } else {
-        if (onComplete) onComplete();
-      }
-    };
-
-    animFrameRef.current = requestAnimationFrame(step);
-  };
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Start with opacity 0
-    video.style.opacity = '0';
+    // WebKit / Safari strict autoplay compliance
+    video.muted = true;
+    video.defaultMuted = true;
 
-    const handleCanPlay = () => {
-      video.play().catch(() => { });
-      isFadingOutRef.current = false;
-      animateVideoOpacity(1, 500);
-    };
-
-    const handleTimeUpdate = () => {
-      if (!video.duration || isNaN(video.duration)) return;
-      const remainingTime = video.duration - video.currentTime;
-
-      if (remainingTime <= 0.55 && !isFadingOutRef.current) {
-        isFadingOutRef.current = true;
-        animateVideoOpacity(0, 500);
-      }
-    };
-
-    const handleEnded = () => {
-      if (video) {
-        video.style.opacity = '0';
-      }
-      setTimeout(() => {
-        if (!video) return;
-        video.currentTime = 0;
-        video.play().then(() => {
-          isFadingOutRef.current = false;
-          animateVideoOpacity(1, 500);
-        }).catch(() => { });
-      }, 100);
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    video.addEventListener('ended', handleEnded);
-
-    // If already ready
-    if (video.readyState >= 3) {
-      handleCanPlay();
+    if (video.readyState >= 2) {
+      setIsVideoLoaded(true);
     }
 
-    return () => {
-      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('timeupdate', handleTimeUpdate);
-      video.removeEventListener('ended', handleEnded);
+    const playVideo = () => {
+      const promise = video.play();
+      if (promise !== undefined) {
+        promise
+          .then(() => setIsVideoLoaded(true))
+          .catch(() => {
+            // If browser blocks autoplay (e.g. Safari low power mode), play on first user interaction
+            const handleFirstInteraction = () => {
+              if (videoRef.current) {
+                videoRef.current.play().then(() => setIsVideoLoaded(true)).catch(() => {});
+              }
+              window.removeEventListener('touchstart', handleFirstInteraction);
+              window.removeEventListener('scroll', handleFirstInteraction);
+              window.removeEventListener('click', handleFirstInteraction);
+            };
+            window.addEventListener('touchstart', handleFirstInteraction, { passive: true, once: true });
+            window.addEventListener('scroll', handleFirstInteraction, { passive: true, once: true });
+            window.addEventListener('click', handleFirstInteraction, { passive: true, once: true });
+          });
+      }
     };
-  }, [theme]);
+
+    playVideo();
+  }, [theme, motionAllowed]);
 
   const scrollToApproach = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -132,8 +80,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
             playsInline
             loop
             preload="auto"
-            className="w-full h-full object-cover object-center"
-            style={{ opacity: 0 }}
+            onLoadedData={() => setIsVideoLoaded(true)}
+            className={`w-full h-full object-cover object-center transition-opacity duration-1000 ${
+              isVideoLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           />
         )}
         {/* Theme-specific Overlays */}
