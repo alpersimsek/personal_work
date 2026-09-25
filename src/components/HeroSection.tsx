@@ -13,7 +13,7 @@ interface HeroSectionProps {
 }
 
 const LIGHT_HERO_VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260826_124724_bc041163-d651-425f-aea3-2acc1efc2c96.mp4';
+  '/videos/hero.mp4';
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();

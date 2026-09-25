@@ -24,7 +24,7 @@ const CONTENT_SECURITY_POLICY = {
     'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
     'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
     'img-src': ["'self'", 'data:', 'blob:', 'https:'],
-    'media-src': ["'self'", 'https://d8j0ntlcm91z4.cloudfront.net'],
+    'media-src': ["'self'"],
     'connect-src': ["'self'"],
     'frame-ancestors': ["'none'"],
     'base-uri': ["'self'"],

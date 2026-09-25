@@ -127,7 +127,7 @@ test('responses are compressed and carry security headers without X-Powered-By',
   assert.equal(page.headers['x-content-type-options'], 'nosniff');
   assert.equal(page.headers['referrer-policy'], 'no-referrer');
   const csp = page.headers['content-security-policy'];
-  for (const directive of ["frame-ancestors 'none'", "object-src 'none'", "script-src 'self'", 'https://fonts.googleapis.com', 'https://d8j0ntlcm91z4.cloudfront.net']) {
+  for (const directive of ["frame-ancestors 'none'", "object-src 'none'", "script-src 'self'", "media-src 'self'", 'https://fonts.googleapis.com']) {
     assert.ok(csp.includes(directive), directive);
   }
 });
