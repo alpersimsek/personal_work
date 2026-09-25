@@ -255,7 +255,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
         </a>
         <a
           id="social-link-email"
-          href="mailto:iletisim@tugbaergunersimsek.com"
+          href="mailto:tugba.erguner@gmail.com"
           className="btn btn-secondary btn-icon"
           aria-label="E-posta Gönder"
         >

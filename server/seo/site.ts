@@ -6,7 +6,7 @@ export const SITE = {
   language: 'tr',
   locale: 'tr_TR',
   jobTitle: 'Yaşam Koçu',
-  email: 'iletisim@tugbaergunersimsek.com',
+  email: 'tugba.erguner@gmail.com',
   homeTitle: 'Tuğba Ergüner Şimşek — Kendine Yeniden Yaklaş | Yaşam Koçluğu',
   description:
     'Hayatındaki gürültüyü azaltıp ne istediğini duymaya başladığında, değişim doğal bir yerden başlar. Tuğba Ergüner Şimşek Yaşam Koçluğu.',

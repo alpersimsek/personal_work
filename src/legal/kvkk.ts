@@ -15,7 +15,7 @@ export const KVKK_PATH = '/kvkk';
 /** Fill in `address` to have it shown in the notice; it is left out while empty. */
 export const DATA_CONTROLLER = {
   name: 'Tuğba Ergüner Şimşek',
-  email: 'iletisim@tugbaergunersimsek.com',
+  email: 'tugba.erguner@gmail.com',
   address: '',
 } as const;
 
