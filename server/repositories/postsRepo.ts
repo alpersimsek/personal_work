@@ -96,6 +96,20 @@ export async function incrementLikes(id: number): Promise<number> {
   return row?.likes ?? 0;
 }
 
+/** The columns crawlers need for a published post: enough for links, previews and the sitemap. */
+export type PublishedPostSummary = Pick<
+  BlogPostRow,
+  'slug' | 'title' | 'summary' | 'category' | 'cover_image' | 'created_at' | 'updated_at'
+>;
+
+/** Every published post, newest first. */
+export async function listAllPublished(): Promise<PublishedPostSummary[]> {
+  return db<BlogPostRow>('blog_posts')
+    .where({ published: true })
+    .orderBy('created_at', 'desc')
+    .select('slug', 'title', 'summary', 'category', 'cover_image', 'created_at', 'updated_at');
+}
+
 export async function createPost(slug: string, input: PostInput): Promise<BlogPostRow> {
   const [id] = await db('blog_posts').insert({
     slug,

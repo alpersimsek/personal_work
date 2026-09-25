@@ -11,3 +11,6 @@ video_library/
 dist-server/
 .superpowers/
 uploads/
+
+# SEO sprint planning and audit reports: kept out of version control on purpose
+/SEO/

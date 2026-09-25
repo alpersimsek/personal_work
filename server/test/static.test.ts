@@ -13,10 +13,15 @@ fs.writeFileSync(path.join(dir, 'index.html'), '<html><body>fixture</body></html
 fs.writeFileSync(path.join(dir, 'asset.js'), 'fixtureAsset');
 after(async () => { fs.rmSync(dir, { recursive: true }); await db.destroy(); });
 
-test('serves SPA fallback and static assets when enabled', async () => {
+test('serves the app shell for known pages and static assets when enabled', async () => {
   const app = createApp({ serveStatic: true, staticDir: dir });
-  assert.match((await request(app).get('/some/frontend/route').expect(200)).text, /fixture/);
+  assert.match((await request(app).get('/kvkk').expect(200)).text, /fixture/);
   assert.equal((await request(app).get('/asset.js').expect(200)).text, 'fixtureAsset');
+});
+
+test('unknown frontend routes are a real 404 (the SEO tests cover the details)', async () => {
+  const app = createApp({ serveStatic: true, staticDir: dir });
+  assert.equal((await request(app).get('/some/frontend/route')).status, 404);
 });
 
 test('unknown API paths return JSON 404 for GET and POST, never the SPA', async () => {
