@@ -6,6 +6,7 @@ import { resolvePage } from '../seo/pages.js';
 import { renderShell } from '../seo/template.js';
 import { siteOrigin } from '../seo/site.js';
 import { escapeHtml } from '../seo/html.js';
+import { PROGRAMS } from '../content/programs.js';
 
 const HOUR_SECONDS = 60 * 60;
 
@@ -42,6 +43,9 @@ export function createSeoRouter(staticDir: string): Router {
     const urls = [
       entry(`${origin}/`, newest),
       entry(`${origin}/blog`, newest),
+      entry(`${origin}/hakkimda`),
+      entry(`${origin}/programlar`),
+      ...PROGRAMS.map((program) => entry(`${origin}/programlar/${program.slug}`)),
       entry(`${origin}/kvkk`),
       ...posts.map((post) =>
         entry(`${origin}/blog/${encodeURIComponent(post.slug)}`, new Date(post.updated_at).toISOString()),

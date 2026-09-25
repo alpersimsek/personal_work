@@ -139,24 +139,67 @@ test('the API and uploads are not touched by the page router', async () => {
   assert.match((await request(app).get('/api/nope')).headers['content-type'], /json/);
 });
 
-test('the home page copy for crawlers still matches the live page text', async () => {
-  const { SERVICES, COACH, HERO_TEXT } = await import('../seo/homeContent.js');
+test('the crawler copy of the coach text still matches the live page text', async () => {
+  const { COACH, HERO_TEXT } = await import('../seo/homeContent.js');
   const read = (file: string) => fs.readFileSync(new URL(`../../src/components/${file}`, import.meta.url), 'utf8');
-  const services = read('ServicesSection.tsx');
   const coach = read('CoachProfileSection.tsx');
   const hero = read('HeroSection.tsx');
 
-  for (const service of SERVICES) {
-    assert.ok(services.includes(service.title), `ServicesSection no longer has "${service.title}"`);
-    assert.ok(services.includes(service.description), `ServicesSection changed the text of "${service.title}"`);
-  }
-  for (const text of [COACH.heading, COACH.storyTitle, COACH.story]) {
-    assert.ok(coach.includes(text), `CoachProfileSection no longer has "${text.slice(0, 40)}…"`);
-  }
-  assert.ok(coach.includes(COACH.quote.replace(/^/, '')), 'CoachProfileSection quote changed');
+  const coachTexts = [
+    COACH.heading, COACH.storyTitle, COACH.story, COACH.quote, COACH.approach,
+    ...COACH.highlights.flatMap((item) => [item.title, item.text]),
+    ...COACH.principles.flatMap((item) => [item.title, item.text]),
+  ];
+  for (const text of coachTexts) assert.ok(coach.includes(text), `CoachProfileSection no longer has "${text.slice(0, 40)}…"`);
   assert.ok(hero.includes(HERO_TEXT), 'HeroSection subtitle changed');
+});
 
+test('the home page copy has the story, the coaching areas as links, and the FAQ with the 30-minute answer', async () => {
   const html = (await request(app).get('/').expect(200)).text;
-  assert.ok(html.includes('<h3>Kendini ve Yönünü Keşfet</h3>'));
   assert.ok(html.includes('Finans ve yönetim alanındaki 10+ yıllık'));
+  assert.ok(html.includes('<a href="/programlar/dusunceden-eyleme">Düşünceden Eyleme</a>'));
+  assert.ok(html.includes('<a href="/hakkimda">Hikâyemin tamamını oku</a>'));
+  assert.match(html, /<dt>İlk tanışma görüşmesinde ne konuşuyoruz\?<\/dt><dd>30 dakikalık/);
+  assert.ok(!html.includes('15 dakikalık'));
+});
+
+test('the about page has its own head, breadcrumb and the full coach text', async () => {
+  const html = (await request(app).get('/hakkimda').expect(200)).text;
+  assert.match(html, /<title>Hakkımda \| Tuğba Ergüner Şimşek<\/title>/);
+  assert.ok(html.includes(`<link rel="canonical" href="${ORIGIN}/hakkimda" />`));
+  assert.ok(html.includes('"@type":"AboutPage"') && html.includes('"@type":"BreadcrumbList"'));
+  assert.ok(html.includes('<h1>Koçun Hikayesi &amp; Yaklaşımı</h1>'));
+  assert.ok(html.includes('Yargısız &amp; Eşlikçi Alan'));
+});
+
+test('the programs index and each program page are real pages with Service data', async () => {
+  const index = (await request(app).get('/programlar').expect(200)).text;
+  assert.match(index, /<title>Koçluk Alanları \| Tuğba Ergüner Şimşek<\/title>/);
+  assert.ok(index.includes('"@type":"ItemList"'));
+  for (const slug of ['kendini-ve-yonunu-kesfet', 'dusunceden-eyleme', 'zihinsel-denge-mindfulness']) {
+    assert.ok(index.includes(`<a href="/programlar/${slug}">`), slug);
+  }
+
+  const html = (await request(app).get('/programlar/dusunceden-eyleme').expect(200)).text;
+  assert.match(html, /<title>Düşünceden Eyleme \| Tuğba Ergüner Şimşek<\/title>/);
+  assert.ok(html.includes(`<link rel="canonical" href="${ORIGIN}/programlar/dusunceden-eyleme" />`));
+  assert.ok(html.includes('"@type":"Service"') && html.includes('"@type":"BreadcrumbList"'));
+  for (const heading of ['Bu alan kimler için?', 'Birlikte neler yaparız?', 'Süreç nasıl işler?']) {
+    assert.ok(html.includes(`<h2>${heading}</h2>`), heading);
+  }
+  assert.ok(html.includes('Yaşam koçluğu; psikoterapi'), 'the disclaimer is on every program page');
+  assert.ok(html.includes('<a href="/programlar/kendini-ve-yonunu-kesfet">'), 'other programs are linked');
+});
+
+test('an unknown program is a real 404', async () => {
+  const response = await request(app).get('/programlar/olmayan-program');
+  assert.equal(response.status, 404);
+  assert.ok(response.text.includes('noindex'));
+});
+
+test('the sitemap lists the about, programs and every program page', async () => {
+  const xml = (await request(app).get('/sitemap.xml').expect(200)).text;
+  for (const location of ['/hakkimda', '/programlar', '/programlar/kendini-ve-yonunu-kesfet', '/programlar/dusunceden-eyleme', '/programlar/zihinsel-denge-mindfulness']) {
+    assert.ok(xml.includes(`<loc>${ORIGIN}${location}</loc>`), location);
+  }
 });

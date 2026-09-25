@@ -1,29 +1,16 @@
+import { PROGRAMS } from '../content/programs.js';
+
 /**
  * The home page copy that crawlers get in the raw HTML.
  *
- * Each string is a copy of text on the live page. A test checks that every one
- * still appears in the source file named next to it, so a change to the page
- * that is not mirrored here fails loudly instead of leaving the copy stale.
+ * The coaching areas and the FAQ come from the shared content modules that the
+ * page itself reads, so they cannot drift. The coach's story and the hero line
+ * are copies of text in a component; a test checks each still appears in the
+ * source file named next to it.
  */
 
-/** From src/components/ServicesSection.tsx */
-export const SERVICES = [
-  {
-    title: 'Kendini ve Yönünü Keşfet',
-    description:
-      'Ne istediğini bilmediğin dönemlerde zihindeki karmaşayı sadeleştirir, değerlerini ve gerçekten önemli olanı görünür hâle getiririz.',
-  },
-  {
-    title: 'Düşünceden Eyleme',
-    description:
-      'Seni aynı yerde tutan alışkanlıkları ve tekrar eden kalıpları fark eder, sana uygun gerçekçi adımlarla sürdürülebilir değişim oluştururuz.',
-  },
-  {
-    title: 'Zihinsel Denge & Mindfulness',
-    description:
-      'Günlük hayatın yoğun telaşı içinde kendi merkezinde kalmayı, tükenmişliği önleyip sakin ve sürdürülebilir bir içsel denge kurmayı deneyimlersin.',
-  },
-] as const;
+/** The coaching areas: the home cards and the program pages read the same list. */
+export const SERVICES = PROGRAMS.map(({ slug, title, description }) => ({ slug, title, description }));
 
 /** From src/components/CoachProfileSection.tsx */
 export const COACH = {
@@ -32,6 +19,17 @@ export const COACH = {
   story:
     'Finans ve yönetim alanındaki 10+ yıllık kurumsal deneyimimin ardından, sürdürülebilir başarının dışsal hedeflerden önce içsel dinginlikle başladığını fark ettim. Bugün, danışanlarıma zihinsel berraklık ve özgün yaşam ritimleri kurma yolunda eşlik ediyorum.',
   quote: 'Cevapları sana vermek için değil, senin zaten bildiklerini hatırlatmak için buradayım.',
+  highlights: [
+    { title: '10+ Yıl Kurumsal Deneyim', text: 'Üst düzey yöneticilik, stratejik liderlik ve takım danışmanlığı birikimi.' },
+    { title: 'ICF PCC & Mindfulness', text: 'Uluslararası koçluk akreditasyonu, MBSR eğitmenliği ve 1000+ saat seans.' },
+    { title: 'Bütüncül Yaşam Metodu', text: 'Farkındalık, zihinsel netlik ve eyleme dayalı sürdürülebilir gelişim.' },
+  ],
+  approach:
+    'Her seansı; yargılanma korkusunun olmadığı, kendi doğrularını masaya yatırabileceğin ve düşüncelerden kalıcı eylemlere adım atabileceğin güvenli bir duraklama alanı olarak tasarlıyorum.',
+  principles: [
+    { title: '%100 Gizlilik & Etik Standartlar', text: 'Tüm seanslar ICF etik tüzüğü kapsamında tam gizlilik ve güven altındadır.' },
+    { title: 'Yargısız & Eşlikçi Alan', text: 'Tavsiye vermek yerine kendi sezgilerini güçlendiren derinlikli içgörü alanı.' },
+  ],
 } as const;
 
 /** From src/components/HeroSection.tsx */

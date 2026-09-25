@@ -2,6 +2,8 @@ import { findBySlug, listAllPublished } from '../repositories/postsRepo.js';
 import { absoluteUrl, SITE } from './site.js';
 import { escapeHtml, renderArticleHtml } from './html.js';
 import { COACH, HERO_TEXT, SERVICES } from './homeContent.js';
+import { COACHING_DISCLAIMER, PROCESS_STEPS, PROGRAMS, PROGRAMS_HEADING, findProgram } from '../content/programs.js';
+import { FAQS } from '../content/faqs.js';
 
 /** Everything the server tells a crawler about one address. */
 export interface SeoPage {
@@ -52,8 +54,12 @@ async function homePage(origin: string): Promise<SeoPage> {
   const posts = (await listAllPublished()).slice(0, 6);
   const person = { '@id': `${origin}/#person` };
   const services = `<ul>${SERVICES.map(
-    (service) => `<li><h3>${escapeHtml(service.title)}</h3><p>${escapeHtml(service.description)}</p></li>`,
+    (service) =>
+      `<li><h3><a href="/programlar/${service.slug}">${escapeHtml(service.title)}</a></h3><p>${escapeHtml(service.description)}</p></li>`,
   ).join('')}</ul>`;
+  const faq = `<h2>Sıkça sorulan sorular</h2><dl>${FAQS.map(
+    (item) => `<dt>${escapeHtml(item.question)}</dt><dd>${escapeHtml(item.answer)}</dd>`,
+  ).join('')}</dl>`;
   const postLinks = posts
     .map((post) => `<li><a href="/blog/${encodeURIComponent(post.slug)}">${escapeHtml(post.title)}</a></li>`)
     .join('');
@@ -100,10 +106,13 @@ async function homePage(origin: string): Promise<SeoPage> {
 <h3>${escapeHtml(COACH.storyTitle)}</h3>
 <p>${escapeHtml(COACH.story)}</p>
 <blockquote>${escapeHtml(COACH.quote)}</blockquote>
-<h2>Birlikte neyin üzerinde çalışabiliriz?</h2>
+<p><a href="/hakkimda">Hikâyemin tamamını oku</a></p>
+<h2>${escapeHtml(PROGRAMS_HEADING)}</h2>
 ${services}
+<p><a href="/programlar">Tüm koçluk alanları</a></p>
+${faq}
 ${posts.length ? `<h2>Son yazılar</h2><ul>${postLinks}</ul>` : ''}
-<nav aria-label="Site"><a href="/blog">Blog</a> · <a href="/kvkk">KVKK Aydınlatma Metni</a></nav>
+<nav aria-label="Site"><a href="/hakkimda">Hakkımda</a> · <a href="/programlar">Programlar</a> · <a href="/blog">Blog</a> · <a href="/kvkk">KVKK Aydınlatma Metni</a></nav>
 <p>İletişim: <a href="mailto:${SITE.email}">${SITE.email}</a></p>
 </main>`,
   });
@@ -188,6 +197,130 @@ ${renderArticleHtml(post.content ?? '')}
   });
 }
 
+const breadcrumbs = (origin: string, trail: Array<{ name: string; path: string }>) => ({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [{ name: 'Ana Sayfa', path: '/' }, ...trail].map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: `${origin}${item.path === '/' ? '/' : item.path}`,
+  })),
+});
+
+function aboutPage(origin: string): SeoPage {
+  const highlights = COACH.highlights
+    .map((item) => `<li><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.text)}</p></li>`)
+    .join('');
+  const principles = COACH.principles
+    .map((item) => `<li><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.text)}</p></li>`)
+    .join('');
+
+  return base('/hakkimda', {
+    title: `Hakkımda | ${SITE.name}`,
+    description: limit(COACH.story),
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'AboutPage',
+        name: `Hakkımda | ${SITE.name}`,
+        url: `${origin}/hakkimda`,
+        inLanguage: SITE.language,
+        mainEntity: { '@id': `${origin}/#person` },
+      },
+      breadcrumbs(origin, [{ name: 'Hakkımda', path: '/hakkimda' }]),
+    ],
+    bodyHtml: `<main>
+<h1>${escapeHtml(COACH.heading)}</h1>
+<h2>${escapeHtml(COACH.storyTitle)}</h2>
+<p>${escapeHtml(COACH.story)}</p>
+<ul>${highlights}</ul>
+<blockquote>${escapeHtml(COACH.quote)}</blockquote>
+<p>${escapeHtml(COACH.approach)}</p>
+<ul>${principles}</ul>
+<p><a href="/programlar">Koçluk alanları</a> · <a href="/">Ana sayfa</a></p>
+</main>`,
+  });
+}
+
+function programsPage(origin: string): SeoPage {
+  const description = 'Kendini ve yönünü keşfetmekten düşünceden eyleme, zihinsel denge ve mindfulness’a: üç koçluk alanı.';
+  const items = PROGRAMS.map(
+    (program) =>
+      `<li><h2><a href="/programlar/${program.slug}">${escapeHtml(program.title)}</a></h2><p>${escapeHtml(program.description)}</p></li>`,
+  ).join('');
+
+  return base('/programlar', {
+    title: `Koçluk Alanları | ${SITE.name}`,
+    description,
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: `Koçluk Alanları | ${SITE.name}`,
+        url: `${origin}/programlar`,
+        inLanguage: SITE.language,
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: PROGRAMS.map((program, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            url: `${origin}/programlar/${program.slug}`,
+            name: program.title,
+          })),
+        },
+      },
+      breadcrumbs(origin, [{ name: 'Programlar', path: '/programlar' }]),
+    ],
+    bodyHtml: `<main><h1>${escapeHtml(PROGRAMS_HEADING)}</h1><ul>${items}</ul></main>`,
+  });
+}
+
+function programPage(slug: string, origin: string): SeoPage | null {
+  const program = findProgram(slug);
+  if (!program) return null;
+
+  const path = `/programlar/${program.slug}`;
+  const list = (items: readonly string[]) => `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const steps = PROCESS_STEPS.map(
+    (step) => `<li><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.description)}</p></li>`,
+  ).join('');
+  const others = PROGRAMS.filter((other) => other.slug !== program.slug)
+    .map((other) => `<li><a href="/programlar/${other.slug}">${escapeHtml(other.title)}</a></li>`)
+    .join('');
+
+  return base(path, {
+    title: `${program.title} | ${SITE.name}`,
+    description: limit(program.description),
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Service',
+        name: program.title,
+        description: program.description,
+        url: `${origin}${path}`,
+        serviceType: 'Yaşam koçluğu',
+        inLanguage: SITE.language,
+        provider: { '@id': `${origin}/#person` },
+      },
+      breadcrumbs(origin, [
+        { name: 'Programlar', path: '/programlar' },
+        { name: program.title, path },
+      ]),
+    ],
+    bodyHtml: `<main>
+<nav aria-label="Konum"><a href="/">Ana Sayfa</a> › <a href="/programlar">Programlar</a> › ${escapeHtml(program.title)}</nav>
+<h1>${escapeHtml(program.title)}</h1>
+<p>${escapeHtml(program.description)}</p>
+<h2>Bu alan kimler için?</h2>${list(program.forWhom)}
+<h2>Birlikte neler yaparız?</h2>${list(program.whatWeDo)}
+<h2>Süreç nasıl işler?</h2><ol>${steps}</ol>
+<h2>Diğer koçluk alanları</h2><ul>${others}</ul>
+<p>${escapeHtml(COACHING_DISCLAIMER)}</p>
+</main>`,
+  });
+}
+
 const notFoundPage = (path: string): SeoPage =>
   base(path, {
     status: 404,
@@ -215,6 +348,11 @@ export async function resolvePage(pathname: string, origin: string): Promise<Seo
   if (first === 'blog' && !second) return blogListPage(origin);
   if (first === 'blog' && second && rest.length === 0) {
     return (await postPage(second, origin)) ?? notFoundPage(normalized);
+  }
+  if (first === 'hakkimda' && !second) return aboutPage(origin);
+  if (first === 'programlar' && !second) return programsPage(origin);
+  if (first === 'programlar' && second && rest.length === 0) {
+    return programPage(second, origin) ?? notFoundPage(normalized);
   }
   if (first === 'kvkk' && !second) {
     return base('/kvkk', {
