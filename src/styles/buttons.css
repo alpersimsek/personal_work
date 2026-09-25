@@ -300,6 +300,38 @@
     border-color: color-mix(in srgb, var(--tone) 50%, transparent);
   }
 
+  /* Touch screens: small buttons keep their look but get a 44px-tall touch area.
+     The extra area is an invisible ::after, so nothing shifts in the layout. */
+  @media (pointer: coarse) {
+    .btn-sm,
+    .btn-chip,
+    .btn-icon,
+    .btn-link,
+    .btn-dot {
+      position: relative;
+    }
+
+    .btn-sm::after,
+    .btn-chip::after,
+    .btn-icon::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+    }
+
+    .btn-link::after {
+      content: '';
+      position: absolute;
+      inset: -8px -4px;
+    }
+
+    .btn-dot::after {
+      content: '';
+      position: absolute;
+      inset: -18px -3px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .btn,
     .btn .btn-arrow,

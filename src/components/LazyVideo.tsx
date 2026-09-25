@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useMotionAllowed } from '../utils/useMotionAllowed';
 
 interface LazyVideoProps {
   src: string;
@@ -17,10 +18,11 @@ interface LazyVideoProps {
 export const LazyVideo: React.FC<LazyVideoProps> = ({ src, className, rootMargin = '300px' }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(false);
+  const motionAllowed = useMotionAllowed();
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !motionAllowed) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) setNear(true);
@@ -34,7 +36,10 @@ export const LazyVideo: React.FC<LazyVideoProps> = ({ src, className, rootMargin
     );
     observer.observe(video);
     return () => observer.disconnect();
-  }, [rootMargin]);
+  }, [rootMargin, motionAllowed]);
+
+  // Reduced motion or data saver: no download at all, the section's own background shows.
+  if (!motionAllowed) return <div aria-hidden="true" className={className} />;
 
   return (
     <video

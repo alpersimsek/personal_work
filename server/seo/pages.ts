@@ -1,6 +1,7 @@
 import { findBySlug, listAllPublished } from '../repositories/postsRepo.js';
 import { absoluteUrl, SITE } from './site.js';
 import { escapeHtml, renderArticleHtml } from './html.js';
+import { COACH, HERO_TEXT, SERVICES } from './homeContent.js';
 
 /** Everything the server tells a crawler about one address. */
 export interface SeoPage {
@@ -50,6 +51,9 @@ function base(path: string, overrides: Partial<SeoPage>): SeoPage {
 async function homePage(origin: string): Promise<SeoPage> {
   const posts = (await listAllPublished()).slice(0, 6);
   const person = { '@id': `${origin}/#person` };
+  const services = `<ul>${SERVICES.map(
+    (service) => `<li><h3>${escapeHtml(service.title)}</h3><p>${escapeHtml(service.description)}</p></li>`,
+  ).join('')}</ul>`;
   const postLinks = posts
     .map((post) => `<li><a href="/blog/${encodeURIComponent(post.slug)}">${escapeHtml(post.title)}</a></li>`)
     .join('');
@@ -91,9 +95,13 @@ async function homePage(origin: string): Promise<SeoPage> {
     ],
     bodyHtml: `<main>
 <h1>Kendine yeniden yaklaş.</h1>
-<p>Hayatındaki gürültüyü biraz azaltıp ne istediğini gerçekten duymaya başladığında, değişim çok daha doğal bir yerden başlar.</p>
-<h2>Koçluk alanları</h2>
-<ul><li>Kendini ve Yönünü Keşfet</li><li>Düşünceden Eyleme</li><li>Zihinsel Denge &amp; Mindfulness</li></ul>
+<p>${escapeHtml(HERO_TEXT)}</p>
+<h2>${escapeHtml(COACH.heading)}</h2>
+<h3>${escapeHtml(COACH.storyTitle)}</h3>
+<p>${escapeHtml(COACH.story)}</p>
+<blockquote>${escapeHtml(COACH.quote)}</blockquote>
+<h2>Birlikte neyin üzerinde çalışabiliriz?</h2>
+${services}
 ${posts.length ? `<h2>Son yazılar</h2><ul>${postLinks}</ul>` : ''}
 <nav aria-label="Site"><a href="/blog">Blog</a> · <a href="/kvkk">KVKK Aydınlatma Metni</a></nav>
 <p>İletişim: <a href="mailto:${SITE.email}">${SITE.email}</a></p>

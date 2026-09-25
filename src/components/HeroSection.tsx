@@ -4,6 +4,7 @@ import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { useTheme } from '../context/ThemeContext';
 import { scrollToSection } from '../utils/scrollToSection';
+import { useMotionAllowed } from '../utils/useMotionAllowed';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
@@ -16,6 +17,7 @@ const LIGHT_HERO_VIDEO_URL =
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
   const { theme } = useTheme();
+  const motionAllowed = useMotionAllowed();
   const videoRef = useRef<HTMLVideoElement>(null);
   const isFadingOutRef = useRef<boolean>(false);
   const animFrameRef = useRef<number | null>(null);
@@ -120,18 +122,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
     <section className="min-h-screen relative overflow-hidden flex flex-col justify-between bg-black select-none transition-colors duration-500">
       {/* Background Video Layer */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
-        <video
-          key={theme}
-          ref={videoRef}
-          src={LIGHT_HERO_VIDEO_URL}
-          muted
-          autoPlay
-          playsInline
-          loop
-          preload="auto"
-          className="w-full h-full object-cover object-center"
-          style={{ opacity: 0 }}
-        />
+        {motionAllowed && (
+          <video
+            key={theme}
+            ref={videoRef}
+            src={LIGHT_HERO_VIDEO_URL}
+            muted
+            autoPlay
+            playsInline
+            loop
+            preload="auto"
+            className="w-full h-full object-cover object-center"
+            style={{ opacity: 0 }}
+          />
+        )}
         {/* Theme-specific Overlays */}
         {theme === 'kiremit' ? (
           <>

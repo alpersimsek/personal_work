@@ -201,7 +201,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
 
           {/* Cover Image Container */}
           <div className="w-full aspect-[16/9] max-h-[480px] rounded-3xl overflow-hidden border border-white/15 shadow-lg bg-neutral-900">
-            <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+            <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover" priority />
           </div>
         </header>
 

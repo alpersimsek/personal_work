@@ -11,6 +11,8 @@ interface PostCoverProps {
   markSize?: number;
   /** `admin` suits the light dashboard; `site` follows the active site theme. */
   tone?: 'site' | 'admin';
+  /** The main picture of a page: load it right away and ahead of other images. */
+  priority?: boolean;
 }
 
 /**
@@ -19,7 +21,7 @@ interface PostCoverProps {
  * No picture is ever chosen for the author: a post without a cover, or whose
  * image fails to load, shows the site's mark on a soft background instead.
  */
-export const PostCover: React.FC<PostCoverProps> = ({ src, alt, className = '', markSize = 56, tone = 'site' }) => {
+export const PostCover: React.FC<PostCoverProps> = ({ src, alt, className = '', markSize = 56, tone = 'site', priority = false }) => {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => setFailed(false), [src]);
@@ -36,5 +38,18 @@ export const PostCover: React.FC<PostCoverProps> = ({ src, alt, className = '', 
     );
   }
 
-  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      // Covers are stored at 1200x675; the sizes let the browser reserve space before the picture arrives.
+      width={1200}
+      height={675}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchPriority={priority ? 'high' : undefined}
+      className={className}
+      onError={() => setFailed(true)}
+    />
+  );
 };

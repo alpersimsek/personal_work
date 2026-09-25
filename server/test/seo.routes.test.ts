@@ -138,3 +138,25 @@ test('the API and uploads are not touched by the page router', async () => {
   assert.equal((await request(app).get('/api/nope')).status, 404);
   assert.match((await request(app).get('/api/nope')).headers['content-type'], /json/);
 });
+
+test('the home page copy for crawlers still matches the live page text', async () => {
+  const { SERVICES, COACH, HERO_TEXT } = await import('../seo/homeContent.js');
+  const read = (file: string) => fs.readFileSync(new URL(`../../src/components/${file}`, import.meta.url), 'utf8');
+  const services = read('ServicesSection.tsx');
+  const coach = read('CoachProfileSection.tsx');
+  const hero = read('HeroSection.tsx');
+
+  for (const service of SERVICES) {
+    assert.ok(services.includes(service.title), `ServicesSection no longer has "${service.title}"`);
+    assert.ok(services.includes(service.description), `ServicesSection changed the text of "${service.title}"`);
+  }
+  for (const text of [COACH.heading, COACH.storyTitle, COACH.story]) {
+    assert.ok(coach.includes(text), `CoachProfileSection no longer has "${text.slice(0, 40)}…"`);
+  }
+  assert.ok(coach.includes(COACH.quote.replace(/^/, '')), 'CoachProfileSection quote changed');
+  assert.ok(hero.includes(HERO_TEXT), 'HeroSection subtitle changed');
+
+  const html = (await request(app).get('/').expect(200)).text;
+  assert.ok(html.includes('<h3>Kendini ve Yönünü Keşfet</h3>'));
+  assert.ok(html.includes('Finans ve yönetim alanındaki 10+ yıllık'));
+});
