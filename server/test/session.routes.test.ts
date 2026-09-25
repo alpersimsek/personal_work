@@ -100,3 +100,18 @@ test('production uses the __Host- cookie name and ignores a plain session cookie
     process.env.NODE_ENV = previous;
   }
 });
+
+test('the session check answers 200 with loggedIn either way, so visitors see no 401', async () => {
+  const anonymous = await request(app).get('/api/auth/session');
+  assert.equal(anonymous.status, 200);
+  assert.deepEqual(anonymous.body, { loggedIn: false });
+  assert.equal((await request(app).get('/api/auth/session').set('Cookie', 'session=garbage')).body.loggedIn, false);
+
+  const cookie = await loginCookie();
+  const signedIn = await request(app).get('/api/auth/session').set('Cookie', cookie);
+  assert.deepEqual(signedIn.body, { loggedIn: true, username, role: 'admin' });
+  assert.equal(signedIn.headers['cache-control'], 'no-store');
+
+  await request(app).post('/api/auth/logout').set('Cookie', cookie);
+  assert.equal((await request(app).get('/api/auth/session').set('Cookie', cookie)).body.loggedIn, false, 'a revoked token is not signed in');
+});

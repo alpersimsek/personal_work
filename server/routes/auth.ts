@@ -9,7 +9,7 @@ import {
   sessionCookieOptions,
   SESSION_COOKIE_MAX_AGE_MS,
 } from '../utils/sessionCookie.js';
-import { requireAuth } from '../middleware/requireAuth.js';
+import { loadSessionUser, requireAuth } from '../middleware/requireAuth.js';
 import { changePasswordRateLimit, loginRateLimit } from '../middleware/rateLimit.js';
 import { HttpError } from '../middleware/errorHandler.js';
 
@@ -69,6 +69,16 @@ authRouter.post('/logout', async (req, res) => {
   }
   res.clearCookie(sessionCookieName(), sessionCookieOptions());
   res.json({ success: true });
+});
+
+/**
+ * Asks "am I signed in?" without an error status, so a visitor's browser
+ * console is not filled with 401s just for looking at a public page.
+ */
+authRouter.get('/session', async (req, res) => {
+  const token = req.cookies?.[sessionCookieName()];
+  const user = typeof token === 'string' && token ? await loadSessionUser(token) : null;
+  res.json(user ? { loggedIn: true, username: user.username, role: user.role } : { loggedIn: false });
 });
 
 authRouter.get('/me', requireAuth, (req, res) => {

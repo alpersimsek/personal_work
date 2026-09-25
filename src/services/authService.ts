@@ -16,11 +16,11 @@ export const authService = {
   },
 
   async getSession(): Promise<AdminSession> {
-    const response = await fetch('/api/auth/me', { credentials: 'include' });
-    if (response.status === 401) return { username: '', isLoggedIn: false };
+    // /session answers 200 either way, unlike /me, so visitors get no 401 in their console.
+    const response = await fetch('/api/auth/session', { credentials: 'include' });
     if (!response.ok) throw new Error('Oturum kontrol edilemedi.');
     const data = await response.json();
-    return { username: data.username, isLoggedIn: true };
+    return data.loggedIn ? { username: data.username, isLoggedIn: true } : { username: '', isLoggedIn: false };
   },
 
   /**

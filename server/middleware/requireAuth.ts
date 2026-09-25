@@ -13,6 +13,22 @@ declare module 'express-serve-static-core' {
 const REJECTED = { error: 'Geçersiz veya süresi dolmuş oturum.' };
 
 /**
+ * The user a session token belongs to, or null when it is invalid, expired,
+ * revoked or the account is gone. Read from the database, never from the token.
+ */
+export async function loadSessionUser(token: string): Promise<SessionPayload | null> {
+  let claims;
+  try {
+    claims = verifySession(token);
+  } catch {
+    return null;
+  }
+  const user = await findById(claims.userId);
+  if (!user || user.session_version !== claims.sessionVersion) return null;
+  return { userId: user.id, username: user.username, role: user.role };
+}
+
+/**
  * Accepts a request only when its session cookie holds a valid token for a
  * user that still exists and whose session generation has not moved on.
  *
@@ -26,20 +42,12 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     return;
   }
 
-  let claims;
-  try {
-    claims = verifySession(token);
-  } catch {
+  const user = await loadSessionUser(token);
+  if (!user) {
     res.status(401).json(REJECTED);
     return;
   }
 
-  const user = await findById(claims.userId);
-  if (!user || user.session_version !== claims.sessionVersion) {
-    res.status(401).json(REJECTED);
-    return;
-  }
-
-  req.user = { userId: user.id, username: user.username, role: user.role };
+  req.user = user;
   next();
 }
