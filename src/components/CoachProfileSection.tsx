@@ -12,7 +12,16 @@ import {
   MessagesSquare,
 } from 'lucide-react';
 
-export const CoachProfileSection: React.FC = () => {
+interface CoachProfileSectionProps {
+  /** True on its own page (/hakkimda), where the heading is the page's H1. */
+  asPage?: boolean;
+}
+
+export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage = false }) => {
+  // On its own page the outline runs h1 > h2 > h3; inside the home page it sits one level lower.
+  const Heading = asPage ? 'h1' : 'h2';
+  const Sub = asPage ? 'h2' : 'h3';
+  const Item = asPage ? 'h3' : 'h4';
   return (
     <section id="hakkimda" className="bg-black py-12 sm:py-16 md:py-20 lg:py-14 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -27,9 +36,9 @@ export const CoachProfileSection: React.FC = () => {
               DANIŞMANLIK & YOL ARKADAŞLIĞI
             </span>
           </div>
-          <h2 className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
+          <Heading className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
             Koçun Hikayesi & Yaklaşımı
-          </h2>
+          </Heading>
         </div>
 
         {/* Main 3-Column Grid */}
@@ -79,9 +88,9 @@ export const CoachProfileSection: React.FC = () => {
                 <span>KOÇUN HİKAYESİ & ÖZGEÇMİŞİ</span>
               </div>
 
-              <h3 className="serif-font text-xl sm:text-2xl lg:text-xl text-white mb-3 lg:mb-2 font-medium leading-snug">
+              <Sub className="serif-font text-xl sm:text-2xl lg:text-xl text-white mb-3 lg:mb-2 font-medium leading-snug">
                 Kurumsal Dünyadan İçsel Dönüşüme
-              </h3>
+              </Sub>
 
               <p className="text-white/70 text-xs sm:text-sm lg:text-[13px] leading-relaxed font-light mb-6 lg:mb-4">
                 Finans ve yönetim alanındaki 10+ yıllık kurumsal deneyimimin ardından, sürdürülebilir başarının dışsal hedeflerden önce içsel dinginlikle başladığını fark ettim. Bugün, danışanlarıma zihinsel berraklık ve özgün yaşam ritimleri kurma yolunda eşlik ediyorum.
@@ -94,9 +103,9 @@ export const CoachProfileSection: React.FC = () => {
                     <Briefcase size={15} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                    <Item className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
                       10+ Yıl Kurumsal Deneyim
-                    </h4>
+                    </Item>
                     <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
                       Üst düzey yöneticilik, stratejik liderlik ve takım danışmanlığı birikimi.
                     </p>
@@ -108,9 +117,9 @@ export const CoachProfileSection: React.FC = () => {
                     <GraduationCap size={15} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                    <Item className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
                       ICF PCC & Mindfulness
-                    </h4>
+                    </Item>
                     <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
                       Uluslararası koçluk akreditasyonu, MBSR eğitmenliği ve 1000+ saat seans.
                     </p>
@@ -122,9 +131,9 @@ export const CoachProfileSection: React.FC = () => {
                     <Sparkles size={15} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
+                    <Item className="text-xs font-semibold text-white uppercase tracking-wider font-mono">
                       Bütüncül Yaşam Metodu
-                    </h4>
+                    </Item>
                     <p className="text-xs text-white/50 font-light mt-0.5 leading-relaxed">
                       Farkındalık, zihinsel netlik ve eyleme dayalı sürdürülebilir gelişim.
                     </p>

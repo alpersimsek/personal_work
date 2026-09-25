@@ -2,40 +2,31 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { ArrowUpRight, Compass } from 'lucide-react';
 import { LazyVideo } from './LazyVideo';
+import { PROGRAMS, PROGRAMS_HEADING } from '../../server/content/programs';
+import { followInPage } from '../utils/followInPage';
+import { navigateToPath } from '../routes';
 
 interface ServicesSectionProps {
   onSelectTopic: (topic: 'netlik' | 'donusum' | 'diger') => void;
 }
 
-const CARDS_DATA = [
-  {
-    id: 'netlik' as const,
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4',
-    tag: 'NETLİK',
-    title: 'Kendini ve Yönünü Keşfet',
-    description:
-      'Ne istediğini bilmediğin dönemlerde zihindeki karmaşayı sadeleştirir, değerlerini ve gerçekten önemli olanı görünür hâle getiririz.',
-  },
-  {
-    id: 'donusum' as const,
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4',
-    tag: 'DÖNÜŞÜM',
-    title: 'Düşünceden Eyleme',
-    description:
-      'Seni aynı yerde tutan alışkanlıkları ve tekrar eden kalıpları fark eder, sana uygun gerçekçi adımlarla sürdürülebilir değişim oluştururuz.',
-  },
-  {
-    id: 'diger' as const,
-    video:
-      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4',
-    tag: 'DENGE',
-    title: 'Zihinsel Denge & Mindfulness',
-    description:
-      'Günlük hayatın yoğun telaşı içinde kendi merkezinde kalmayı, tükenmişliği önleyip sakin ve sürdürülebilir bir içsel denge kurmayı deneyimlersin.',
-  },
-];
+const VIDEOS = {
+  netlik:
+    'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4',
+  donusum:
+    'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260324_151826_c7218672-6e92-402c-9e45-f1e0f454bdc4.mp4',
+  diger:
+    'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4',
+} as const;
+
+const CARDS_DATA = PROGRAMS.map((program) => ({
+  id: program.topic,
+  slug: program.slug,
+  video: VIDEOS[program.topic],
+  tag: program.tag,
+  title: program.title,
+  description: program.description,
+}));
 
 export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -67,7 +58,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
             </span>
           </div>
           <h2 className="text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15] max-w-2xl font-serif">
-            Birlikte neyin üzerinde çalışabiliriz?
+            {PROGRAMS_HEADING}
           </h2>
         </motion.div>
 
@@ -114,9 +105,21 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onSelectTopic 
                   </p>
                 </div>
 
-                <div className="pt-6 mt-6 md:pt-4 md:mt-4 border-t border-white/5 flex items-center text-xs sm:text-sm text-white/60 group-hover:text-white/90 transition-colors font-medium">
-                  <span>Bu alanda görüşme başlat</span>
-                  <span className="ml-2 font-serif">→</span>
+                <div className="pt-6 mt-6 md:pt-4 md:mt-4 border-t border-white/5 flex items-center justify-between gap-3 text-xs sm:text-sm text-white/60 group-hover:text-white/90 transition-colors font-medium">
+                  <span>
+                    Bu alanda görüşme başlat
+                    <span className="ml-2 font-serif">→</span>
+                  </span>
+                  <a
+                    href={`/programlar/${card.slug}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      followInPage(() => navigateToPath(`/programlar/${card.slug}`))(event);
+                    }}
+                    className="underline underline-offset-4 decoration-white/25 hover:decoration-current"
+                  >
+                    Ayrıntılar
+                  </a>
                 </div>
               </div>
             </motion.div>

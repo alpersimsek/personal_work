@@ -1,27 +1,9 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'motion/react';
 import { Route } from 'lucide-react';
+import { PROCESS_STEPS } from '../../server/content/programs';
 
-const STEPS = [
-  {
-    number: '01',
-    title: 'Tanışma',
-    description:
-      'Kısa bir ön görüşmeyle bulunduğun noktayı, beklentilerini ve birlikte çalışmanın sana uygun olup olmadığını konuşuruz.',
-  },
-  {
-    number: '02',
-    title: 'Netleşme',
-    description:
-      'Hedeflerinin altında gerçekten ne olduğunu keşfeder, önündeki engelleri ve tekrar eden düşünce kalıplarını birlikte görünür hâle getiririz.',
-  },
-  {
-    number: '03',
-    title: 'Harekete Geçme',
-    description:
-      'İçgörüyü günlük hayatına taşıyabileceğin somut adımlara dönüştürür, ilerlemeyi birlikte takip ederiz.',
-  },
-];
+const STEPS = PROCESS_STEPS;
 
 export const ProcessSection: React.FC = () => {
   const ref = useRef<HTMLDivElement>(null);

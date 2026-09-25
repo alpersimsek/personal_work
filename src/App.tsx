@@ -6,6 +6,10 @@ import { BlogDetailPage } from './pages/BlogDetailPage';
 import { BlogAdminPage } from './pages/BlogAdminPage';
 import { KvkkPage } from './pages/KvkkPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { AboutPage } from './pages/AboutPage';
+import { ProgramsPage } from './pages/ProgramsPage';
+import { ProgramDetailPage } from './pages/ProgramDetailPage';
+import { findProgram, type Program } from '../server/content/programs';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { Navbar } from './components/Navbar';
 import { ConsultationModal } from './components/ConsultationModal';
@@ -33,6 +37,8 @@ export default function App() {
   const [postLoading, setPostLoading] = useState(initialRoute.view === 'blog-detail');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingTopic, setBookingTopic] = useState<Program['topic']>('netlik');
+  const [programSlug, setProgramSlug] = useState(initialRoute.view === 'program' ? initialRoute.slug : '');
   const [faqModalOpen, setFaqModalOpen] = useState(false);
   const [targetSection, setTargetSection] = useState<string | null>(null);
 
@@ -58,8 +64,14 @@ export default function App() {
       case 'home':
       case 'blog-list':
       case 'kvkk':
+      case 'about':
+      case 'programs':
       case 'not-found':
         setCurrentView(route.view);
+        return true;
+      case 'program':
+        setProgramSlug(route.slug);
+        setCurrentView('program');
         return true;
       case 'blog-detail':
         try {
@@ -112,8 +124,16 @@ export default function App() {
     else if (currentView === 'blog-list') document.title = `Blog | ${SITE_TITLE}`;
     else if (currentView === 'kvkk') document.title = `Bülten Aydınlatma Metni | ${SITE_TITLE}`;
     else if (currentView === 'not-found') document.title = `Sayfa bulunamadı | ${SITE_TITLE}`;
+    else if (currentView === 'about') document.title = `Hakkımda | ${SITE_TITLE}`;
+    else if (currentView === 'programs') document.title = `Koçluk Alanları | ${SITE_TITLE}`;
+    else if (currentView === 'program') document.title = `${findProgram(programSlug)?.title ?? 'Program'} | ${SITE_TITLE}`;
     else document.title = HOME_TITLE;
-  }, [currentView, selectedPost]);
+  }, [currentView, selectedPost, programSlug]);
+
+  const openBooking = (topic: Program['topic'] = 'netlik') => {
+    setBookingTopic(topic);
+    setBookingModalOpen(true);
+  };
 
   const handleNavigateHome = (sectionHref?: string) => {
     setTargetSection(typeof sectionHref === 'string' && sectionHref.startsWith('#') ? sectionHref : null);
@@ -138,7 +158,7 @@ export default function App() {
       {navigationError && <p role="alert" className="fixed top-24 inset-x-4 z-50 bg-red-950 text-white p-4 rounded-xl">{navigationError}</p>}
       {currentView !== 'blog-admin' && (
         <Navbar
-          onOpenBooking={() => setBookingModalOpen(true)}
+          onOpenBooking={() => openBooking()}
           onNavigateHome={handleNavigateHome}
           onNavigateBlog={handleNavigateBlog}
         />
@@ -206,6 +226,47 @@ export default function App() {
           </motion.div>
         )}
 
+        {currentView === 'about' && (
+          <motion.div
+            key="about"
+            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <AboutPage onNavigateHome={handleNavigateHome} onNavigateBlog={handleNavigateBlog} onOpenBooking={() => openBooking()} />
+          </motion.div>
+        )}
+
+        {currentView === 'programs' && (
+          <motion.div
+            key="programs"
+            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ProgramsPage onNavigateHome={handleNavigateHome} onNavigateBlog={handleNavigateBlog} onOpenBooking={() => openBooking()} />
+          </motion.div>
+        )}
+
+        {currentView === 'program' && findProgram(programSlug) && (
+          <motion.div
+            key={`program-${programSlug}`}
+            initial={{ opacity: 0, y: 15, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -15, filter: 'blur(8px)' }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ProgramDetailPage
+              program={findProgram(programSlug)!}
+              onNavigateHome={handleNavigateHome}
+              onNavigateBlog={handleNavigateBlog}
+              onOpenBooking={openBooking}
+            />
+          </motion.div>
+        )}
+
         {currentView === 'not-found' && (
           <motion.div
             key="not-found"
@@ -217,7 +278,7 @@ export default function App() {
             <NotFoundPage
               onNavigateHome={handleNavigateHome}
               onNavigateBlog={handleNavigateBlog}
-              onOpenBooking={() => setBookingModalOpen(true)}
+              onOpenBooking={() => openBooking()}
             />
           </motion.div>
         )}
@@ -233,7 +294,7 @@ export default function App() {
             <KvkkPage
               onNavigateHome={handleNavigateHome}
               onNavigateBlog={handleNavigateBlog}
-              onOpenBooking={() => setBookingModalOpen(true)}
+              onOpenBooking={() => openBooking()}
             />
           </motion.div>
         )}
@@ -267,13 +328,13 @@ export default function App() {
         isOpen={bookingModalOpen}
         onClose={() => setBookingModalOpen(false)}
         onOpenFAQ={() => setFaqModalOpen(true)}
-        initialTopic="netlik"
+        initialTopic={bookingTopic}
       />
 
       <FAQModal
         isOpen={faqModalOpen}
         onClose={() => setFaqModalOpen(false)}
-        onOpenBooking={() => setBookingModalOpen(true)}
+        onOpenBooking={() => openBooking()}
       />
     </ThemeProvider>
   );

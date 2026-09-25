@@ -2,36 +2,13 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronDown, HelpCircle, ArrowRight } from 'lucide-react';
-import { FAQItem } from '../types';
+import { FAQS } from '../../server/content/faqs';
 
 interface FAQModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenBooking: () => void;
 }
-
-const FAQS: FAQItem[] = [
-  {
-    question: 'Yaşam koçluğu ile terapi arasındaki temel fark nedir?',
-    answer: 'Terapi genellikle geçmiş travmaların iyileştirilmesine ve psikolojik semptomların tedavisine odaklanır. Yaşam koçluğu ise şu anki bulunduğunuz noktayı dürüstçe değerlendirip geleceğe yönelik netlik, kararlılık ve eylem planı oluşturmayı hedefler. Koçluk tıbbi veya psikiyatrik bir tedavi değildir.',
-  },
-  {
-    question: 'Görüşmeler nasıl ve nerede gerçekleşir?',
-    answer: 'Görüşmeler çevrim içi (online) veya karşılıklı mutabakata göre yüz yüze yapılır. Her seans yaklaşık 50 dakika sürer ve tamamen güvenli, gizli bir alanda gerçekleşir.',
-  },
-  {
-    question: 'Bir koçluk süreci genellikle ne kadar sürer?',
-    answer: 'Kişinin ihtiyaçlarına ve hedeflerine bağlı olarak ortalama 6 ila 12 seanslık periyotlar önerilir. Süreç haftada bir veya iki haftada bir yapılan seanslarla ilerler.',
-  },
-  {
-    question: 'İlk tanışma görüşmesinde ne konuşuyoruz?',
-    answer: '15 dakikalık ücretsiz tanışma görüşmesinde nerede hissettiğinizi, koçluktan beklentilerinizi ve birlikte çalışmanın aramızdaki enerji ve yöntem açısından uygun olup olmadığını sakin bir şekilde konuşuruz.',
-  },
-  {
-    question: 'Koçluk seanslarında bana ne yapmam gerektiği söylenecek mi?',
-    answer: 'Hayır. Koçluk tavsiye ya da talimat vermek değildir. Güçlü ve derinlikli sorularla kendi sezgilerinizi, değerlerinizi ve size özgü en doğru yolları keşfetmenizi sağlar.',
-  },
-];
 
 export const FAQModal: React.FC<FAQModalProps> = ({ isOpen, onClose, onOpenBooking }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);

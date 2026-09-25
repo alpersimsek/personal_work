@@ -1,3 +1,5 @@
+import { findProgram } from '../server/content/programs';
+
 /** The pages the app can show, each with its own address. */
 export type Route =
   | { view: 'home' }
@@ -5,6 +7,9 @@ export type Route =
   | { view: 'blog-detail'; slug: string }
   | { view: 'blog-admin' }
   | { view: 'kvkk' }
+  | { view: 'about' }
+  | { view: 'programs' }
+  | { view: 'program'; slug: string }
   | { view: 'not-found' };
 
 const decodeSegment = (segment: string): string => {
@@ -23,6 +28,9 @@ export function parseRoute(pathname: string): Route {
   if (first === 'blog' && second && rest.length === 0) return { view: 'blog-detail', slug: second };
   if (first === 'admin' && !second) return { view: 'blog-admin' };
   if (first === 'kvkk' && !second) return { view: 'kvkk' };
+  if (first === 'hakkimda' && !second) return { view: 'about' };
+  if (first === 'programlar' && !second) return { view: 'programs' };
+  if (first === 'programlar' && second && rest.length === 0 && findProgram(second)) return { view: 'program', slug: second };
   if (!first) return { view: 'home' };
   return { view: 'not-found' };
 }
@@ -38,6 +46,12 @@ export function pathForRoute(route: Route): string {
       return '/admin';
     case 'kvkk':
       return '/kvkk';
+    case 'about':
+      return '/hakkimda';
+    case 'programs':
+      return '/programlar';
+    case 'program':
+      return `/programlar/${route.slug}`;
     case 'not-found':
       return '/404';
     case 'home':

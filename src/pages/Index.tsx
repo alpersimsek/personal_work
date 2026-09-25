@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HeroSection } from '../components/HeroSection';
 import { MindfulPause } from '../components/MindfulPause';
 import { SelfReflectionGuide } from '../components/SelfReflectionGuide';
-import { CoachProfileSection } from '../components/CoachProfileSection';
+import { AboutSummary } from '../components/AboutSummary';
 import { AboutSection } from '../components/AboutSection';
 import { FeaturedVideoSection } from '../components/FeaturedVideoSection';
 import { PhilosophySection } from '../components/PhilosophySection';
@@ -84,7 +84,7 @@ export const IndexPage: React.FC<IndexPageProps> = ({
       <SelfReflectionGuide onStartBookingWithTopic={handleOpenBooking} />
 
       {/* 4. Feature 5: Koç Hakkında & ICF Etik Değerleri */}
-      <CoachProfileSection />
+      <AboutSummary />
 
       {/* 5. Transformation Overview */}
       <AboutSection />
