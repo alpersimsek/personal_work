@@ -29,8 +29,8 @@ export const AboutSummary: React.FC = () => (
           <img
             src="/profil.webp"
             alt="ICF Akredite Yaşam Koçu"
-            width={1400}
-            height={1482}
+            width={1122}
+            height={1402}
             loading="lazy"
             decoding="async"
             className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 contrast-105 brightness-95"

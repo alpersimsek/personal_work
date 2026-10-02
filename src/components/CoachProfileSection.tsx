@@ -23,19 +23,27 @@ export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage
   const Sub = asPage ? 'h2' : 'h3';
   const Item = asPage ? 'h3' : 'h4';
   return (
-    <section id="hakkimda" className="bg-black py-12 sm:py-16 md:py-20 lg:py-14 px-4 sm:px-6 relative overflow-hidden">
+    <section
+      id="hakkimda"
+      className={`bg-black px-4 sm:px-6 relative overflow-hidden ${
+        // The page already clears the fixed navbar, so the section's own top padding would double the gap.
+        asPage ? 'pt-2 sm:pt-4 pb-12 sm:pb-16 md:pb-20 lg:pb-14' : 'py-12 sm:py-16 md:py-20 lg:py-14'
+      }`}
+    >
       <div className="max-w-7xl mx-auto">
         
         {/* Section Header Title Badge */}
-        <div className="text-center mb-8 md:mb-10 lg:mb-8">
-          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6 lg:mb-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
-              <MessagesSquare size={20} />
+        <div className={`text-center ${asPage ? 'mb-4 sm:mb-5' : 'mb-8 md:mb-10 lg:mb-8'}`}>
+          {!asPage && (
+            <div className="inline-flex items-center gap-3 mb-4 sm:mb-6 lg:mb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
+                <MessagesSquare size={20} />
+              </div>
+              <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
+                DANIŞMANLIK & YOL ARKADAŞLIĞI
+              </span>
             </div>
-            <span className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
-              DANIŞMANLIK & YOL ARKADAŞLIĞI
-            </span>
-          </div>
+          )}
           <Heading className="serif-font text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.15]">
             Koçun Hikayesi & Yaklaşımı
           </Heading>
@@ -51,8 +59,8 @@ export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage
               <img
                 src="/profil.webp"
                 alt="ICF Akredite Yaşam Koçu"
-                width={1400}
-                height={1482}
+                width={1122}
+                height={1402}
                 loading="lazy"
                 decoding="async"
                 className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 contrast-105 brightness-95"
