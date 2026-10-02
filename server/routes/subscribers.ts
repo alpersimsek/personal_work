@@ -16,8 +16,12 @@ import { CURRENT_CONSENT_VERSION } from '../config/consent.js';
 export const subscribersRouter = Router();
 export const adminSubscribersRouter = Router();
 
-const ALREADY_SUBSCRIBED = 'Bu e-posta adresi zaten bültene kayıtlı.';
-
+/**
+ * Adds an address to the newsletter.
+ *
+ * The answer is the same whether the address is new, coming back or already
+ * subscribed, so this cannot be used to find out who is on the list.
+ */
 subscribersRouter.post('/', subscribeRateLimit, async (req, res) => {
   const parsed = subscribeSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -39,24 +43,22 @@ subscribersRouter.post('/', subscribeRateLimit, async (req, res) => {
 
   if (existing?.unsubscribed_at) {
     // Someone who left may come back; their new consent replaces the old one.
-    const subscriber = await resubscribe(existing.id, { name, consentVersion });
-    res.status(201).json({ id: subscriber.id, email: subscriber.email });
-    return;
+    await resubscribe(existing.id, { name, consentVersion });
+  } else if (!existing) {
+    await createUnlessDuplicate({ name, email, consentVersion });
   }
-  if (existing) {
-    throw new HttpError(409, ALREADY_SUBSCRIBED);
-  }
-
-  try {
-    const subscriber = await createSubscriber({ name, email, consentVersion });
-    res.status(201).json({ id: subscriber.id, email: subscriber.email });
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ER_DUP_ENTRY') {
-      throw new HttpError(409, ALREADY_SUBSCRIBED);
-    }
-    throw error;
-  }
+  // An active subscriber's row is left alone: a stranger must not be able to rename it.
+  res.status(201).json({ success: true });
 });
+
+/** Two sign-ups for one address can race past the lookup; the loser is already subscribed. */
+async function createUnlessDuplicate(input: { name: string; email: string; consentVersion: string }): Promise<void> {
+  try {
+    await createSubscriber(input);
+  } catch (error) {
+    if ((error as { code?: string }).code !== 'ER_DUP_ENTRY') throw error;
+  }
+}
 
 /**
  * Takes an address off the newsletter.

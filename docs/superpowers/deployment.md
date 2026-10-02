@@ -136,7 +136,7 @@ Node 22 replaces the earlier Node 20 target after hosting-readiness review. Node
 
 ## Public address and search engines
 
-- Set `PUBLIC_SITE_URL=https://www.tugbasimsek.com.tr` (no trailing slash). Canonical links, `sitemap.xml`, `robots.txt` and Open Graph URLs all use it; if it is unset they fall back to the address of each request, which is fine locally but must not be relied on behind a proxy.
+- Set `PUBLIC_SITE_URL=https://www.tugbasimsek.com.tr` (no trailing slash). Canonical links, `sitemap.xml`, `robots.txt` and Open Graph URLs all use it; locally, when it is unset, they fall back to the address of each request. In production the server refuses to start without it.
 - Redirect the bare domain (`tugbasimsek.com.tr`) to `www` at the host or DNS level, so there is a single canonical address.
 - Page addresses the server knows: `/`, `/blog`, `/blog/<slug>`, `/hakkimda`, `/programlar`, `/programlar/<slug>`, `/kvkk`, `/admin`. Anything else answers 404. A new page needs an entry in `server/seo/pages.ts`, the sitemap in `server/routes/seo.ts` and `src/routes.ts`.
 - The coaching areas and the FAQ live in `server/content/` and are read by both the site and the server, so the page and what crawlers see cannot drift.

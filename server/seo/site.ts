@@ -27,6 +27,26 @@ export function siteOrigin(request: Request): string {
   return `${request.protocol}://${request.get('host')}`;
 }
 
+/**
+ * Refuses to start with an unusable PUBLIC_SITE_URL, and in production
+ * without one: the fallback builds canonical links and the sitemap from the
+ * Host header, which the visitor chooses. Call once at startup.
+ */
+export function assertSiteConfiguration(): void {
+  const configured = process.env.PUBLIC_SITE_URL?.trim();
+  if (!configured) {
+    if (process.env.NODE_ENV === 'production') throw new Error('PUBLIC_SITE_URL is not configured');
+    return;
+  }
+  const url = URL.canParse(configured) ? new URL(configured) : undefined;
+  if (!url || !/^https?:$/.test(url.protocol)) {
+    throw new Error('PUBLIC_SITE_URL must be an http(s) address such as https://www.example.com');
+  }
+  if (url.pathname !== '/' || url.search || url.hash) {
+    throw new Error('PUBLIC_SITE_URL must be the site address only, without a path');
+  }
+}
+
 /** Makes a site path or an already absolute URL absolute. */
 export function absoluteUrl(origin: string, pathOrUrl: string): string {
   return /^https?:\/\//i.test(pathOrUrl) ? pathOrUrl : `${origin}${pathOrUrl}`;

@@ -28,14 +28,19 @@ test('POST /api/subscribe rejects an invalid email', async () => {
   assert.equal(response.status, 400);
 });
 
-test('POST /api/subscribe stores a valid subscriber and rejects a duplicate', async () => {
+test('POST /api/subscribe stores a valid subscriber once and answers a duplicate the same way', async () => {
   const payload = { name: 'Test Kullanıcı', email: 'unique-subscriber@example.com', consent: true, consentVersion };
 
   const first = await request(app).post('/api/subscribe').send(payload);
   assert.equal(first.status, 201);
 
-  const duplicate = await request(app).post('/api/subscribe').send(payload);
-  assert.equal(duplicate.status, 409);
+  const duplicate = await request(app).post('/api/subscribe').send({ ...payload, name: 'Başka Biri' });
+  assert.equal(duplicate.status, first.status);
+  assert.deepEqual(duplicate.body, first.body);
+
+  const rows = await db('subscribers').where({ email: payload.email });
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].name, 'Test Kullanıcı', 'a repeat sign-up must not rename the subscriber');
 });
 
 test('POST /api/subscribe silently no-ops when the honeypot field is filled', async () => {
@@ -66,12 +71,11 @@ test('GET /api/admin/subscribers requires authentication', async () => {
 test('admin listing exposes persisted consent, normalized email, and trimmed name', async () => {
   const response = await request(app).post('/api/subscribe').send({ name: ' Test Person ', email: 'Case@Example.com', consent: true, consentVersion });
   assert.equal(response.status, 201);
-  assert.equal(response.body.email, 'case@example.com');
   const agent = request.agent(app);
   assert.equal((await agent.post('/api/auth/login').send({ username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD })).status, 200);
   const list = await agent.get('/api/admin/subscribers');
   assert.equal(list.status, 200);
-  const row = list.body.find((item: { id: number }) => item.id === response.body.id);
+  const row = list.body.find((item: { email: string }) => item.email === 'case@example.com');
   assert.equal(row.name, 'Test Person');
   assert.equal(row.consent_given, true);
   assert.ok(row.consent_at);
@@ -94,10 +98,11 @@ test('user-role sessions cannot list subscribers', async () => {
   } finally { await db('users').where({ id }).delete(); }
 });
 
-test('concurrent duplicate signups yield one success and one conflict', async () => {
+test('concurrent duplicate signups both succeed and store one row', async () => {
   const payload = { name: 'Concurrent', email: 'concurrent@example.com', consent: true, consentVersion };
   const responses = await Promise.all([request(app).post('/api/subscribe').send(payload), request(app).post('/api/subscribe').send(payload)]);
-  assert.deepEqual(responses.map(response => response.status).sort(), [201, 409]);
+  assert.deepEqual(responses.map(response => response.status), [201, 201]);
+  assert.equal((await db('subscribers').where({ email: payload.email })).length, 1);
 });
 
 test('POST /api/subscribe rejects a missing, blank or outdated consent version', async () => {
@@ -178,13 +183,18 @@ test('someone who unsubscribed can sign up again with fresh consent', async () =
   assert.equal(row.unsubscribed_at, null);
   assert.equal(row.name, 'Yeni Ad');
   assert.equal(row.consent_version, CURRENT_CONSENT_VERSION);
-  assert.equal((await subscribeAs(email)).status, 409, 'an active subscriber is still a duplicate');
 });
 
-test('a duplicate sign-up explains itself in plain language', async () => {
-  const email = 'plain@example.com';
-  await subscribeAs(email);
-  const duplicate = await subscribeAs(email);
-  assert.equal(duplicate.status, 409);
-  assert.match(duplicate.body.error, /zaten/);
+test('signing up looks the same for a new, a returning and an already subscribed address', async () => {
+  const returning = 'returning@example.com';
+  await subscribeAs(returning);
+  await request(app).post('/api/subscribe/unsubscribe').send({ email: returning });
+  const active = 'active@example.com';
+  await subscribeAs(active);
+
+  for (const email of ['brand-new@example.com', returning, active]) {
+    const response = await subscribeAs(email);
+    assert.equal(response.status, 201, email);
+    assert.deepEqual(response.body, { success: true }, email);
+  }
 });
