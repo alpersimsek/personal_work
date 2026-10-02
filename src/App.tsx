@@ -14,7 +14,6 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { Navbar } from './components/Navbar';
 import { ConsultationModal } from './components/ConsultationModal';
 import { FAQModal } from './components/FAQModal';
-import { ThemeProvider } from './context/ThemeContext';
 import type { BlogPost } from './types';
 import { blogService } from './services/blogService';
 import { authService } from './services/authService';
@@ -154,7 +153,7 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider>
+    <>
       {navigationError && <p role="alert" className="fixed top-24 inset-x-4 z-50 bg-red-950 text-white p-4 rounded-xl">{navigationError}</p>}
       {currentView !== 'blog-admin' && (
         <Navbar
@@ -336,6 +335,6 @@ export default function App() {
         onClose={() => setFaqModalOpen(false)}
         onOpenBooking={() => openBooking()}
       />
-    </ThemeProvider>
+    </>
   );
 }

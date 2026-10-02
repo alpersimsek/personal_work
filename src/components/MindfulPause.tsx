@@ -559,7 +559,7 @@ export const MindfulPause: React.FC = () => {
 
   return (
     <div id="mindful-pause-section" className="w-full max-w-6xl mx-auto my-8 sm:my-14 md:my-16 px-4 sm:px-6">
-      <div className="liquid-glass rounded-3xl p-4 sm:p-8 md:p-12 border border-white/15 bg-gradient-to-b from-white/[0.04] via-black/60 to-black/90 relative overflow-hidden shadow-2xl">
+      <div className="liquid-glass rounded-3xl px-4 py-4 sm:px-8 sm:py-6 md:px-12 md:py-8 border border-white/15 bg-gradient-to-b from-white/[0.04] via-black/60 to-black/90 relative overflow-hidden shadow-2xl">
         {/* Soft Ambient Radiance in Background */}
         <div
           className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-white/[0.03] filter blur-3xl pointer-events-none transition-opacity duration-1000"
@@ -571,9 +571,9 @@ export const MindfulPause: React.FC = () => {
         />
 
         {/* Top Header Row with High-Visibility Countdown Badge */}
-        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 sm:pb-8 border-b border-white/10 text-center md:text-left">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-5 pb-4 sm:pb-6 border-b border-white/10 text-center md:text-left">
           <div className="max-w-xl flex flex-col items-center md:items-start mx-auto md:mx-0">
-            <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-3 mb-3 sm:mb-4">
               <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
                 <Wind size={20} />
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-current animate-pulse" />
@@ -631,7 +631,7 @@ export const MindfulPause: React.FC = () => {
         </div>
 
         {/* Global 60-Second Linear Progress Bar */}
-        <div className="relative z-10 w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-5 sm:mt-6">
+        <div className="relative z-10 w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-4 sm:mt-5">
           <div
             className="h-full bg-gradient-to-r from-white/40 via-white/80 to-white transition-all duration-200"
             style={{ width: `${totalProgressFraction * 100}%` }}
@@ -639,7 +639,7 @@ export const MindfulPause: React.FC = () => {
         </div>
 
         {/* Soundscape Music Selector Toolbar */}
-        <div className="relative z-10 mt-5 sm:mt-6 pt-2 pb-4 border-b border-white/5">
+        <div className="relative z-10 mt-4 sm:mt-5 pt-2 pb-4 border-b border-white/5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-3">
             <div className="flex items-center gap-2 text-xs sm:text-sm text-white/75 font-medium">
               <Music size={14} className="text-white/80 shrink-0" />
@@ -666,10 +666,10 @@ export const MindfulPause: React.FC = () => {
         </div>
 
         {/* Main Content: Interactive Visualizer & Instructions */}
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center pt-6 sm:pt-8">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center pt-4 sm:pt-6">
           
           {/* Left Column: Pattern Info, Guidance & Controls */}
-          <div className="lg:col-span-6 flex flex-col space-y-5 sm:space-y-6 text-left">
+          <div className="lg:col-span-6 flex flex-col space-y-4 sm:space-y-5 text-left">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/70 text-xs font-mono mb-3">
                 <Activity size={13} className="text-white/80" />

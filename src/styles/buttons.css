@@ -1,28 +1,11 @@
 /* ==========================================================================
    Button system
-   One quiet family, four themes. Buttons are drawn with a hairline and the
-   theme's own ink, never a filled block, so the page copy stays the loudest
-   thing in view. Every colour comes from five theme tokens, so a new theme
-   only has to define those.
+   One quiet family. Buttons are drawn with a hairline and the theme's own
+   ink, never a filled block, so the page copy stays the loudest thing in
+   view. Every colour comes from five theme tokens.
    ========================================================================== */
 
 :root,
-[data-theme="adacayi"] {
-  --btn-solid: #19382f;
-  --btn-solid-fg: #fdfaf5;
-  --btn-ink: #26332e;
-  --btn-surface: #fffdf9;
-  --btn-glow: 16 42 35;
-}
-
-[data-theme="lacivert"] {
-  --btn-solid: #12283d;
-  --btn-solid-fg: #fffdf9;
-  --btn-ink: #172536;
-  --btn-surface: #ffffff;
-  --btn-glow: 11 28 45;
-}
-
 [data-theme="kiremit"] {
   --btn-solid: #704a39;
   --btn-solid-fg: #fffaf0;

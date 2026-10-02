@@ -2,7 +2,6 @@ import React, { RefObject, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { NavItem } from '../types';
-import { ThemeToggle } from './ThemeToggle';
 import { BrandLogo } from './BrandLogo';
 
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
@@ -175,7 +174,6 @@ export const NavMenuPanel: React.FC<NavMenuPanelProps> = ({
           <span>Görüşme Planla</span>
           <ArrowRight size={14} className="btn-arrow" />
         </button>
-        <ThemeToggle showLabel={true} />
       </div>
     </motion.div>
   );

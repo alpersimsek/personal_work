@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, Instagram, Linkedin, Mail } from 'lucide-react';
 import { Navbar } from './Navbar';
-import { useTheme } from '../context/ThemeContext';
 import { scrollToSection } from '../utils/scrollToSection';
 import { useMotionAllowed } from '../utils/useMotionAllowed';
 
@@ -16,7 +15,6 @@ const LIGHT_HERO_VIDEO_URL =
   '/videos/hero.mp4';
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
-  const { theme } = useTheme();
   const motionAllowed = useMotionAllowed();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -56,7 +54,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
     };
 
     playVideo();
-  }, [theme, motionAllowed]);
+  }, [motionAllowed]);
 
   const scrollToApproach = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,7 +70,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden">
         {motionAllowed && (
           <video
-            key={theme}
             ref={videoRef}
             src={LIGHT_HERO_VIDEO_URL}
             muted
@@ -86,23 +83,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenBooking, onNavig
             }`}
           />
         )}
-        {/* Theme-specific Overlays */}
-        {theme === 'kiremit' ? (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#fffaf0]/80 via-[#f7ecd7]/50 to-[#fffaf0]/90 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,_rgba(199,126,102,0.22),_transparent_38%)] pointer-events-none" />
-          </>
-        ) : theme === 'lacivert' ? (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#fffdf9]/80 via-[#f8f5ef]/50 to-[#fffdf9]/90 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,_rgba(223,150,112,0.22),_transparent_38%),radial-gradient(circle_at_85%_80%,_rgba(196,154,58,0.15),_transparent_35%)] pointer-events-none" />
-          </>
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-b from-[#fdfaf5]/80 via-[#f7f1e8]/50 to-[#fdfaf5]/90 pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_20%,_rgba(253,250,245,0.65)_85%)] pointer-events-none" />
-          </>
-        )}
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#fffaf0]/80 via-[#f7ecd7]/50 to-[#fffaf0]/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,_rgba(199,126,102,0.22),_transparent_38%)] pointer-events-none" />
       </div>
 
       {/* Atmospheric Background Glow Spots */}

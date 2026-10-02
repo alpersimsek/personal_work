@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { NavItem } from '../types';
-import { ThemeToggle } from './ThemeToggle';
 import { BrandLogo } from './BrandLogo';
 import { CollapsedNavMenu } from './CollapsedNavMenu';
 import { MenuToggleIcon, NavMenuPanel, useMenuDismiss } from './NavMenu';
-import { useTheme } from '../context/ThemeContext';
 import { scrollToSection } from '../utils/scrollToSection';
 
 interface NavbarProps {
@@ -28,8 +26,9 @@ const COLLAPSE_SCROLL_THRESHOLD = 80;
 const DESKTOP_LINK_CLASS =
   'relative py-1 cursor-pointer text-white/75 hover:text-white transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 hover:after:scale-x-100 focus-visible:outline-none focus-visible:after:scale-x-100';
 
+const MOBILE_MENU_CLASS = 'bg-[#fffaf0]/95 border-[#ead8b8] text-[#33261F]';
+
 export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, onNavigateBlog }) => {
-  const { theme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const compactMenuRef = useRef<HTMLDivElement>(null);
@@ -71,20 +70,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
       onNavigateHome();
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Mobile menu background derived from theme
-  const getMobileMenuBg = () => {
-    switch (theme) {
-      case 'adacayi':
-        return 'bg-[#fdfaf5]/95 border-[#ddd5ca] text-[#26332e]';
-      case 'lacivert':
-        return 'bg-[#fffdf9]/95 border-[#e2ddd4] text-[#172536]';
-      case 'kiremit':
-        return 'bg-[#fffaf0]/95 border-[#ead8b8] text-[#33261F]';
-      default:
-        return 'bg-[#0c0c0c]/95 border-white/10 text-white';
-    }
   };
 
   return (
@@ -131,8 +116,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
               İletişim
             </a>
 
-            <ThemeToggle showLabel={true} />
-
             <button
               id="nav-btn-booking"
               type="button"
@@ -176,7 +159,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
                 id="compact-nav-panel"
                 links={MENU_LINKS}
                 className="pointer-events-auto mt-3 w-full sm:w-[23rem]"
-                themeClassName={getMobileMenuBg()}
+                themeClassName={MOBILE_MENU_CLASS}
                 showLogo={false}
                 onNavigate={handleLinkClick}
                 onLogoClick={handleLogoClick}
@@ -192,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
       <CollapsedNavMenu
         visible={scrolled}
         links={MENU_LINKS}
-        panelClassName={getMobileMenuBg()}
+        panelClassName={MOBILE_MENU_CLASS}
         onNavigate={handleLinkClick}
         onLogoClick={handleLogoClick}
         onBook={onOpenBooking}

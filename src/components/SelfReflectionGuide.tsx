@@ -136,8 +136,8 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
     <section id="ic-kesif" className="bg-black py-12 sm:py-16 md:py-20 px-4 sm:px-6 relative overflow-hidden">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-8 md:mb-10">
-          <div className="inline-flex items-center gap-3 mb-4 sm:mb-6">
+        <div className="text-center mb-6 md:mb-7">
+          <div className="inline-flex items-center gap-3 mb-3 sm:mb-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-white/10 border border-white/15 text-white shrink-0">
               <Timer size={20} />
             </div>
@@ -154,7 +154,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
         </div>
 
         {/* Card Container */}
-        <div className="liquid-glass rounded-3xl p-5 sm:p-8 md:p-12 border border-white/10 shadow-2xl relative bg-[#0d0d0d]/90 max-w-4xl mx-auto">
+        <div className="liquid-glass rounded-3xl px-5 py-4 sm:px-8 sm:py-6 md:px-12 md:py-8 border border-white/10 shadow-2xl relative bg-[#0d0d0d]/90 max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             {currentStep < QUESTIONS.length ? (
               <motion.div
@@ -163,7 +163,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.35 }}
-                className="space-y-8"
+                className="space-y-5 sm:space-y-6"
               >
                 {/* Progress bar & Step indicator */}
                 <div className="flex items-center justify-between text-xs sm:text-sm md:text-base text-white/90 pb-4 border-b border-white/10 font-mono font-bold tracking-wider">
@@ -218,7 +218,7 @@ export const SelfReflectionGuide: React.FC<SelfReflectionGuideProps> = ({
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4 }}
-                className="text-center py-4 space-y-6"
+                className="text-center py-4 space-y-4 sm:space-y-5"
               >
                 <div className="inline-flex p-3 rounded-full bg-white/10 border border-white/20 text-white mb-2">
                   <Sparkles size={26} />
