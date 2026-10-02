@@ -1,6 +1,7 @@
 import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { assertSiteConfiguration } from '../seo/site.js';
+import type { Request } from 'express';
+import { assertSiteConfiguration, siteOrigin } from '../seo/site.js';
 
 const previous = { url: process.env.PUBLIC_SITE_URL, env: process.env.NODE_ENV };
 
@@ -32,8 +33,22 @@ test('a site address with or without a trailing slash is accepted', () => {
 });
 
 test('anything that is not a bare http(s) site address is refused everywhere', () => {
-  for (const url of ['www.tugbasimsek.com.tr', 'ftp://example.com', 'javascript:alert(1)', 'https://example.com/blog', 'https://example.com/?a=1']) {
+  for (const url of ['www.tugbasimsek.com.tr', 'ftp://example.com', 'javascript:alert(1)', 'https://example.com/blog', 'https://example.com/?a=1', 'https://user:secret@example.com']) {
     configure(url, 'development');
-    assert.throws(assertSiteConfiguration, /PUBLIC_SITE_URL must be/, url);
+    assert.throws(assertSiteConfiguration, /PUBLIC_SITE_URL must /, url);
   }
+});
+
+test('links use the parsed site address, not the text as typed', () => {
+  const request = { protocol: 'http', get: () => 'attacker.example' } as unknown as Request;
+  for (const url of ['https://www.tugbasimsek.com.tr///', 'https://www.tugbasimsek.com.tr?', 'https://www.tugbasimsek.com.tr/#', ' HTTPS://WWW.tugbasimsek.com.tr/. ']) {
+    configure(url, 'production');
+    assert.equal(siteOrigin(request), 'https://www.tugbasimsek.com.tr', url);
+  }
+});
+
+test('without PUBLIC_SITE_URL links fall back to the address of the request', () => {
+  configure(undefined, 'development');
+  const request = { protocol: 'http', get: () => 'localhost:3000' } as unknown as Request;
+  assert.equal(siteOrigin(request), 'http://localhost:3000');
 });

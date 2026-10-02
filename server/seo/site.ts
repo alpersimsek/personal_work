@@ -22,9 +22,7 @@ export const SITE = {
  * the address of the current request, so local runs still produce working links.
  */
 export function siteOrigin(request: Request): string {
-  const configured = process.env.PUBLIC_SITE_URL?.trim().replace(/\/+$/, '');
-  if (configured) return configured;
-  return `${request.protocol}://${request.get('host')}`;
+  return configuredOrigin() ?? `${request.protocol}://${request.get('host')}`;
 }
 
 /**
@@ -33,18 +31,31 @@ export function siteOrigin(request: Request): string {
  * Host header, which the visitor chooses. Call once at startup.
  */
 export function assertSiteConfiguration(): void {
-  const configured = process.env.PUBLIC_SITE_URL?.trim();
-  if (!configured) {
-    if (process.env.NODE_ENV === 'production') throw new Error('PUBLIC_SITE_URL is not configured');
-    return;
+  if (!configuredOrigin() && process.env.NODE_ENV === 'production') {
+    throw new Error('PUBLIC_SITE_URL is not configured');
   }
+}
+
+/**
+ * PUBLIC_SITE_URL as scheme and host only, or undefined when it is unset.
+ *
+ * The parsed address is returned rather than the text as typed, so what is
+ * checked here is exactly what ends up in links.
+ */
+function configuredOrigin(): string | undefined {
+  const configured = process.env.PUBLIC_SITE_URL?.trim().replace(/\/+$/, '');
+  if (!configured) return undefined;
   const url = URL.canParse(configured) ? new URL(configured) : undefined;
   if (!url || !/^https?:$/.test(url.protocol)) {
     throw new Error('PUBLIC_SITE_URL must be an http(s) address such as https://www.example.com');
   }
+  if (url.username || url.password) {
+    throw new Error('PUBLIC_SITE_URL must not contain a user name or password');
+  }
   if (url.pathname !== '/' || url.search || url.hash) {
     throw new Error('PUBLIC_SITE_URL must be the site address only, without a path');
   }
+  return url.origin;
 }
 
 /** Makes a site path or an already absolute URL absolute. */
