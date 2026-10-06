@@ -35,7 +35,7 @@ export const CollapsedNavMenu: React.FC<CollapsedNavMenuProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`hidden lg:block absolute top-6 left-6 transition-[opacity,visibility] duration-300 ${
+      className={`absolute top-2.5 left-2.5 sm:top-6 sm:left-6 transition-[opacity,visibility] duration-300 ${
         visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
       }`}
     >
@@ -57,7 +57,7 @@ export const CollapsedNavMenu: React.FC<CollapsedNavMenuProps> = ({
           <NavMenuPanel
             id="collapsed-nav-panel"
             links={links}
-            className="absolute top-full left-0 mt-3 w-[23rem]"
+            className="absolute top-full left-0 mt-3 w-[calc(100vw-1.25rem)] sm:w-[23rem]"
             themeClassName={panelClassName}
             showLogo={true}
             onNavigate={onNavigate}

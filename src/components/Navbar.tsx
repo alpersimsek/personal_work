@@ -44,6 +44,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // The panel hangs under the full navbar, so it goes when the navbar does.
+  useEffect(() => {
+    if (scrolled) closeMobileMenu();
+  }, [scrolled, closeMobileMenu]);
+
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
@@ -79,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
           id="navbar-container"
           aria-label="Ana gezinme"
           className={`pointer-events-auto liquid-glass !overflow-visible rounded-full max-w-5xl mx-auto pl-4 pr-2 sm:pl-8 sm:pr-3 lg:px-8 py-2 sm:py-3 flex items-center justify-between gap-2 transition-all duration-300 shadow-xl relative z-50 min-w-0 ${
-            scrolled ? 'lg:opacity-0 lg:-translate-y-6 lg:invisible lg:pointer-events-none' : ''
+            scrolled ? 'opacity-0 -translate-y-6 invisible pointer-events-none' : ''
           }`}
         >
           <a
@@ -171,7 +176,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenBooking, onNavigateHome, o
         </div>
       </div>
 
-      {/* Wide screens: hamburger pinned to the top-left once the page is scrolled */}
+      {/* Every screen size: hamburger pinned to the top-left once the page is scrolled */}
       <CollapsedNavMenu
         visible={scrolled}
         links={MENU_LINKS}
