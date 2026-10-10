@@ -10,6 +10,7 @@ import {
   listDuePostIds,
   markFailed,
   markRetry,
+  reclaimStaleDeliveries,
 } from '../repositories/newsletterDeliveriesRepo.js';
 
 const prefix = `deliv-${process.pid}`;
@@ -125,4 +126,22 @@ test('fan-out tolerates an existing delivery without duplicating it', async () =
   const rows = await db('newsletter_deliveries').where({ post_id: postId })
     .whereIn('subscriber_id', [existing, fresh]).orderBy('subscriber_id');
   assert.deepEqual(rows.map(r => [r.subscriber_id, r.status]), [[existing, 'sent'], [fresh, 'pending']]);
+});
+
+test('a stale sending delivery is failed as interrupted, never re-queued', async () => {
+  const postId = await makePost();
+  const [staleSubscriber, freshSubscriber] = [await makeSubscriber(), await makeSubscriber()];
+  const [staleId] = await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: staleSubscriber, status: 'sending', attempts: 1,
+    updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 11 MINUTE)'),
+  });
+  const [freshId] = await db('newsletter_deliveries')
+    .insert({ post_id: postId, subscriber_id: freshSubscriber, status: 'sending' });
+
+  await reclaimStaleDeliveries();
+  const stale = await db('newsletter_deliveries').where({ id: staleId }).first();
+  assert.equal(stale.status, 'failed');
+  assert.equal(stale.last_error, 'interrupted');
+  assert.equal(stale.attempts, 1);
+  assert.equal((await db('newsletter_deliveries').where({ id: freshId }).first()).status, 'sending');
 });

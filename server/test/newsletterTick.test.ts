@@ -3,7 +3,6 @@ import { test, after, beforeEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { db } from '../db/knex.js';
 import { runBroadcastTick } from '../services/newsletterBroadcast.js';
-import { startNewsletterWorker } from '../worker/newsletterWorker.js';
 import { countSentInLast24Hours, fanOutDeliveries } from '../repositories/newsletterDeliveriesRepo.js';
 import { NewsletterSendError, type BroadcastMessage, type NewsletterSender } from '../services/newsletterSender.js';
 
@@ -15,9 +14,12 @@ const originalEnv = Object.fromEntries(ENV_KEYS.map(key => [key, process.env[key
 
 class FakeSender implements NewsletterSender {
   readonly sent: BroadcastMessage[] = [];
+  readonly attempted: string[] = [];
   failures = new Map<string, NewsletterSendError>();
+  alwaysFail?: NewsletterSendError;
   async send(message: BroadcastMessage): Promise<void> {
-    const failure = this.failures.get(message.to);
+    this.attempted.push(message.to);
+    const failure = this.alwaysFail ?? this.failures.get(message.to);
     if (failure) throw failure;
     this.sent.push(message);
   }
@@ -70,6 +72,8 @@ async function myDeliveries(postId: number) {
     .select('d.id', 'd.status', 'd.attempts', 'd.last_error', 's.email');
 }
 
+// Every tick test uses makeHermeticDuePost, so tokens are only ever issued to
+// this file's subscribers and the prefix match removes all of them.
 async function cleanup() {
   await db('blog_posts').where('slug', 'like', `${prefix}%`).delete();
   await db('subscribers').where('email', 'like', `${prefix}%`).delete();
@@ -95,7 +99,7 @@ test('sends once to verified, subscribed addresses only, then never again', asyn
   const ok = await makeSubscriber('ok');
   await makeSubscriber('unverified', { email_verified_at: null });
   await makeSubscriber('gone', { unsubscribed_at: db.fn.now() });
-  const postId = await makeDuePost();
+  const postId = await makeHermeticDuePost();
   const sender = new FakeSender();
 
   await runBroadcastTick({ sender, postId });
@@ -168,6 +172,7 @@ test('a quota or auth error halts the tick and burns no recipient to failed', as
   sender.failures.set(second.email, new NewsletterSendError('halt', 'halt (smtp 550)'));
   const result = await runBroadcastTick({ sender, postId });
   assert.equal(result.halted, true);
+  assert.equal(result.haltReason, 'send');
   assert.equal(result.sent, 0);
   assert.equal((await db('newsletter_deliveries').where({ post_id: postId, status: 'failed' })).length, 0);
   const rows = await myDeliveries(postId);
@@ -192,6 +197,7 @@ test('a delivery that keeps halting is failed at the halt cap; the others stay p
 
   const result = await runBroadcastTick({ sender, postId });
   assert.equal(result.halted, true);
+  assert.equal(result.failed, 1);
   const stuckRow = await deliveryOf(postId, stuck.email);
   assert.equal(stuckRow.status, 'failed');
   assert.equal(stuckRow.last_error, 'halt-repeated');
@@ -267,25 +273,115 @@ test('a missing PUBLIC_SITE_URL halts without touching any delivery', async () =
   delete process.env.PUBLIC_SITE_URL;
   const result = await runBroadcastTick({ sender: new FakeSender(), postId });
   assert.equal(result.halted, true);
+  assert.equal(result.haltReason, 'configuration');
   const rows = await myDeliveries(postId);
   assert.ok(rows.length > 0);
   assert.ok(rows.every(row => row.status === 'pending' && row.attempts === 0));
 });
 
-test('the worker never starts under tests or when disabled', () => {
-  const setIntervalSpy = mock.method(globalThis, 'setInterval');
-  const originalNodeEnv = process.env.NODE_ENV;
-  const originalEnabled = process.env.NEWSLETTER_WORKER_ENABLED;
-  try {
-    startNewsletterWorker(new FakeSender())();
-    process.env.NODE_ENV = 'development';
-    process.env.NEWSLETTER_WORKER_ENABLED = 'false';
-    startNewsletterWorker(new FakeSender())();
-    assert.equal(setIntervalSpy.mock.callCount(), 0);
-  } finally {
-    process.env.NODE_ENV = originalNodeEnv;
-    if (originalEnabled === undefined) delete process.env.NEWSLETTER_WORKER_ENABLED;
-    else process.env.NEWSLETTER_WORKER_ENABLED = originalEnabled;
-    setIntervalSpy.mock.restore();
+
+test('an outage halts after three transient failures in a row without failing anyone', async () => {
+  for (const name of ['a', 'b', 'c', 'd', 'e']) await makeSubscriber(name);
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  sender.alwaysFail = new NewsletterSendError('transient', 'transient');
+
+  const result = await runBroadcastTick({ sender, postId });
+  assert.equal(result.halted, true);
+  assert.equal(result.haltReason, 'transient');
+  assert.equal(sender.attempted.filter(mine).length, 3);
+  const rows = await myDeliveries(postId);
+  assert.ok(rows.every(row => row.status === 'pending'));
+  assert.deepEqual(rows.map(row => row.attempts).sort(), [0, 0, 1, 1, 1]);
+});
+
+test('a success resets the run of transient failures', async () => {
+  const names = ['a', 'b', 'ok', 'c', 'd'];
+  const subscribers = [];
+  for (const name of names) subscribers.push(await makeSubscriber(name));
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  for (const { email } of subscribers) {
+    if (!email.includes('-ok@')) sender.failures.set(email, new NewsletterSendError('transient', 'transient'));
   }
+  const result = await runBroadcastTick({ sender, postId });
+  assert.equal(result.halted, false);
+  assert.equal(result.sent, 1);
+  assert.equal(sender.attempted.filter(mine).length, 5);
+});
+
+test('skipped deliveries do not use up the batch', async () => {
+  const gone = [];
+  for (const name of ['gone1', 'gone2', 'gone3']) gone.push(await makeSubscriber(name));
+  const live = [await makeSubscriber('live1'), await makeSubscriber('live2')];
+  const postId = await makeHermeticDuePost();
+  await db('subscribers').whereIn('id', gone.map(s => s.id)).update({ unsubscribed_at: db.fn.now() });
+  process.env.NEWSLETTER_BATCH_SIZE = '2';
+
+  const sender = new FakeSender();
+  const result = await runBroadcastTick({ sender, postId });
+  assert.deepEqual(sender.mine.map(m => m.to), live.map(s => s.email));
+  assert.equal(result.skipped, 3);
+});
+
+test('every send attempt, not only a success, uses up the batch', async () => {
+  for (const name of ['a', 'b', 'c']) await makeSubscriber(name);
+  const postId = await makeHermeticDuePost();
+  process.env.NEWSLETTER_BATCH_SIZE = '2';
+  const sender = new FakeSender();
+  sender.alwaysFail = new NewsletterSendError('permanent', 'permanent (smtp 550)');
+  const result = await runBroadcastTick({ sender, postId });
+  assert.equal(result.failed, 2);
+  assert.equal(sender.attempted.filter(mine).length, 2);
+});
+
+test('an error before sending is retried, then failed, without blocking others or logging the address', async () => {
+  const broken = await makeSubscriber('broken');
+  const fine = await makeSubscriber('fine');
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  const issueUnsubscribeToken = async (email: string) => {
+    if (email === broken.email) throw new Error(`insert into tokens values ('${email}') - Duplicate entry`);
+    return 'a'.repeat(43);
+  };
+  const errorLog = mock.method(console, 'error', () => {});
+  try {
+    for (let round = 0; round < 3; round++) {
+      const result = await runBroadcastTick({ sender, postId, issueUnsubscribeToken });
+      assert.equal(result.halted, false);
+    }
+    const logged = errorLog.mock.calls.map(call => call.arguments.map(String).join(' ')).join('\n');
+    assert.ok(errorLog.mock.callCount() >= 3);
+    assert.ok(!logged.includes(broken.email));
+    assert.ok(!logged.includes('@'));
+  } finally {
+    errorLog.mock.restore();
+  }
+  assert.deepEqual(sender.mine.map(m => m.to), [fine.email]);
+  assert.equal(sender.attempted.includes(broken.email), false);
+  const row = await deliveryOf(postId, broken.email);
+  assert.equal(row.status, 'failed');
+  assert.equal(row.attempts, 3);
+  assert.equal(row.last_error, 'processing-error');
+});
+
+test('a sent email whose result cannot be recorded is never sent again', async () => {
+  const first = await makeSubscriber('a');
+  await makeSubscriber('b');
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  const markSent = async () => { throw new Error('connection lost'); };
+
+  await assert.rejects(runBroadcastTick({ sender, postId, markSent }));
+  assert.deepEqual(sender.mine.map(m => m.to), [first.email]);
+  assert.equal(await statusOf(postId, first.email), 'sending');
+
+  // Once stale, the row is failed as interrupted rather than re-sent.
+  await db('newsletter_deliveries').where({ post_id: postId, status: 'sending' })
+    .update({ updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 11 MINUTE)') });
+  await runBroadcastTick({ sender, postId });
+  const row = await deliveryOf(postId, first.email);
+  assert.equal(row.status, 'failed');
+  assert.equal(row.last_error, 'interrupted');
+  assert.equal(sender.mine.filter(m => m.to === first.email).length, 1);
 });

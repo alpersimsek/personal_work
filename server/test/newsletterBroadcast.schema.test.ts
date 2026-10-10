@@ -27,24 +27,48 @@ test('deliveries are removed with their post', async () => {
 });
 
 test('configuration has safe defaults and rejects nonsense values', () => {
-  const keys = ['NEWSLETTER_WORKER_ENABLED', 'NEWSLETTER_DELAY_MINUTES', 'NEWSLETTER_BATCH_SIZE',
+  const keys = ['NODE_ENV', 'NEWSLETTER_WORKER_ENABLED', 'NEWSLETTER_DELAY_MINUTES', 'NEWSLETTER_BATCH_SIZE',
     'NEWSLETTER_DAILY_CAP', 'NEWSLETTER_UNSUBSCRIBE_TTL_DAYS'] as const;
   const saved = Object.fromEntries(keys.map(key => [key, process.env[key]]));
   try {
-    for (const key of keys) delete process.env[key];
+    for (const key of keys) if (key !== 'NODE_ENV') delete process.env[key];
+    process.env.NODE_ENV = 'test';
     assert.deepEqual(newsletterBroadcastConfig(),
-      { workerEnabled: true, delayMinutes: 10, batchSize: 20, dailyCap: 400, unsubscribeTtlDays: 30 });
+      { workerEnabled: false, delayMinutes: 10, batchSize: 20, dailyCap: 400, unsubscribeTtlDays: 30 });
     process.env.NEWSLETTER_DAILY_CAP = '-5';
     process.env.NEWSLETTER_DELAY_MINUTES = 'abc';
-    process.env.NEWSLETTER_WORKER_ENABLED = 'false';
     const config = newsletterBroadcastConfig();
     assert.equal(config.dailyCap, 400);
     assert.equal(config.delayMinutes, 10);
-    assert.equal(config.workerEnabled, false);
   } finally {
     for (const key of keys) {
       if (saved[key] === undefined) delete process.env[key];
       else process.env[key] = saved[key];
     }
+  }
+});
+
+test('the worker is on by default only in production and the flag overrides it', () => {
+  const saved = { nodeEnv: process.env.NODE_ENV, flag: process.env.NEWSLETTER_WORKER_ENABLED };
+  const enabled = (nodeEnv: string, flag?: string) => {
+    process.env.NODE_ENV = nodeEnv;
+    if (flag === undefined) delete process.env.NEWSLETTER_WORKER_ENABLED;
+    else process.env.NEWSLETTER_WORKER_ENABLED = flag;
+    return newsletterBroadcastConfig().workerEnabled;
+  };
+  try {
+    assert.equal(enabled('test'), false);
+    assert.equal(enabled('development'), false);
+    assert.equal(enabled('production'), true);
+    assert.equal(enabled('production', 'FALSE'), false);
+    assert.equal(enabled('production', ' false '), false);
+    assert.equal(enabled('development', 'True'), true);
+    assert.equal(enabled('test', 'true'), true);
+    assert.equal(enabled('production', 'nonsense'), true);
+    assert.equal(enabled('development', 'nonsense'), false);
+  } finally {
+    process.env.NODE_ENV = saved.nodeEnv;
+    if (saved.flag === undefined) delete process.env.NEWSLETTER_WORKER_ENABLED;
+    else process.env.NEWSLETTER_WORKER_ENABLED = saved.flag;
   }
 });

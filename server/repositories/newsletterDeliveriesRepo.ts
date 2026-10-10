@@ -113,12 +113,17 @@ export const deferDelivery = (id: number): Promise<number> =>
     updated_at: db.fn.now(),
   });
 
-/** A crash between claim and result would leave `sending` rows forever. */
+/**
+ * A crash (or a failed write) between claim and result leaves a row `sending`
+ * and we cannot know whether its email went out. Delivery is at-most-once: a
+ * stale `sending` row is marked failed as `interrupted`, never re-sent
+ * automatically; an admin can re-queue it with retry-failed.
+ */
 export async function reclaimStaleDeliveries(): Promise<void> {
   await db('newsletter_deliveries')
     .where({ status: 'sending' })
     .whereRaw('updated_at < DATE_SUB(NOW(), INTERVAL ? MINUTE)', [STALE_SENDING_MINUTES])
-    .update({ status: 'pending', updated_at: db.fn.now() });
+    .update({ status: 'failed', last_error: 'interrupted', updated_at: db.fn.now() });
 }
 
 export async function countSentInLast24Hours(): Promise<number> {
