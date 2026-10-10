@@ -5,6 +5,7 @@ import { db } from '../db/knex.js';
 import {
   cancelPendingDeliveries,
   claimNextDelivery,
+  countSentInLast24Hours,
   deferDelivery,
   fanOutDeliveries,
   listDuePostIds,
@@ -58,6 +59,27 @@ test('a delivery that has been deferred is claimed after fresh ones', async () =
   const second = await claimNextDelivery(postId);
   assert.equal(second?.id, oldId);
   assert.equal(await claimNextDelivery(postId), null);
+});
+
+test('with equal attempts, a recently released delivery is claimed after untried ones', async () => {
+  const postId = await makePost();
+  const [first, second] = [await makeSubscriber(), await makeSubscriber()];
+  const [releasedId] = await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: first, status: 'pending',
+    updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 1 MINUTE)'),
+  });
+  const [untriedId] = await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: second, status: 'pending',
+    updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 1 MINUTE)'),
+  });
+  assert.ok(releasedId < untriedId);
+
+  const claimed = await claimNextDelivery(postId);
+  assert.equal(claimed?.id, releasedId);
+  assert.equal(await releaseDelivery(releasedId), 1);
+
+  assert.equal((await claimNextDelivery(postId))?.id, untriedId);
+  assert.equal((await claimNextDelivery(postId))?.id, releasedId);
 });
 
 test('deferDelivery returns the row to pending and counts an attempt', async () => {
@@ -185,4 +207,20 @@ test('releaseDelivery returns a sending row to pending without counting an attem
   await cancelPendingDeliveries(postId);
   assert.equal(await releaseDelivery(claimed.id), 0);
   assert.equal((await db('newsletter_deliveries').where({ id: claimed.id }).first()).status, 'skipped');
+});
+
+test('the daily count includes in-flight and interrupted deliveries, which may have been sent', async () => {
+  const postId = await makePost();
+  const subscribers = [await makeSubscriber(), await makeSubscriber(), await makeSubscriber(), await makeSubscriber()];
+  const before = await countSentInLast24Hours();
+  await db('newsletter_deliveries').insert([
+    { post_id: postId, subscriber_id: subscribers[0], status: 'failed', last_error: 'interrupted' },
+    { post_id: postId, subscriber_id: subscribers[1], status: 'sending' },
+    { post_id: postId, subscriber_id: subscribers[2], status: 'failed', last_error: 'permanent (smtp 550)' },
+    {
+      post_id: postId, subscriber_id: subscribers[3], status: 'failed', last_error: 'interrupted',
+      updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 25 HOUR)'),
+    },
+  ]);
+  assert.equal(await countSentInLast24Hours(), before + 2);
 });

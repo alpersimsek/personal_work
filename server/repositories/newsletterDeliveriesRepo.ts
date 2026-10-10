@@ -56,16 +56,22 @@ export async function listDuePostIds(onlyPostId?: number): Promise<number[]> {
 }
 
 /**
- * Takes the least-attempted, oldest pending delivery. Ordering by attempts
- * first lets a recipient that keeps halting sink behind fresh ones instead of
- * blocking the queue. The conditional update is the claim: if another tick got
- * there first it affects no row and we try the next one.
+ * Takes the least-attempted, least recently tried pending delivery. Ordering by
+ * attempts first lets a recipient that keeps halting sink behind fresh ones;
+ * ordering by `updated_at` next lets a paused (released) row, whose attempts
+ * do not change, sink behind rows not tried since, so it cannot block the
+ * queue. The conditional update is the claim: if another tick got there first
+ * it affects no row and we try the next one.
  */
 export async function claimNextDelivery(onlyPostId?: number, excludeIds: number[] = []): Promise<DeliveryRow | null> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const query = db<DeliveryRow>('newsletter_deliveries')
       .where({ status: 'pending' })
-      .orderBy([{ column: 'attempts', order: 'asc' }, { column: 'id', order: 'asc' }]);
+      .orderBy([
+        { column: 'attempts', order: 'asc' },
+        { column: 'updated_at', order: 'asc' },
+        { column: 'id', order: 'asc' },
+      ]);
     if (onlyPostId !== undefined) query.where({ post_id: onlyPostId });
     if (excludeIds.length > 0) query.whereNotIn('id', excludeIds);
     const candidate = await query.first();
@@ -135,10 +141,18 @@ export async function reclaimStaleDeliveries(): Promise<void> {
     .update({ status: 'failed', last_error: 'interrupted', updated_at: db.fn.now() });
 }
 
+/**
+ * Messages that count against the rolling daily cap. Fail-closed: besides rows
+ * recorded as sent, it counts rows in flight (`sending`) and rows failed as
+ * `interrupted`, because their email may have gone out.
+ */
 export async function countSentInLast24Hours(): Promise<number> {
   const row = await db('newsletter_deliveries')
-    .where({ status: 'sent' })
-    .whereRaw('sent_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)')
+    .where(builder => builder
+      .where(sent => sent.where({ status: 'sent' }).whereRaw('sent_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)'))
+      .orWhere({ status: 'sending' })
+      .orWhere(interrupted => interrupted.where({ status: 'failed', last_error: 'interrupted' })
+        .whereRaw('updated_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)')))
     .count<{ count: string }[]>({ count: 'id' })
     .first();
   return Number(row?.count ?? 0);

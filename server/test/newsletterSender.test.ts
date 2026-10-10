@@ -94,3 +94,29 @@ test('missing mail configuration pauses instead of failing recipients', async ()
   await assert.rejects(new GmailNewsletterSender().send(message),
     (error: unknown) => error instanceof NewsletterSendError && error.kind === 'pause');
 });
+
+test('an address echoed in a rejection cannot turn it into a pause', () => {
+  for (const address of ['quota@x.test', '5.7.0@x.test', 'daily-user-sending-limit@x.test', 'auth@x.test',
+    'too-many@x.test', '"daily user sending limit"@x.test']) {
+    for (const response of [
+      `550 5.1.1 <${address}>: Recipient address rejected: User unknown`,
+      `550-5.1.1 ${address} The email account that you tried to reach does not exist`,
+      `550 ${address}: user unknown`,
+    ]) {
+      assert.equal(classifySmtpError({ responseCode: 550, response, message: `Can't send mail - all recipients were rejected: ${response}` }),
+        'permanent', response);
+    }
+    assert.equal(classifySmtpError({ responseCode: 552, response: `552 5.3.4 <${address}> message too large` }), 'halt', address);
+    assert.equal(classifySmtpError({ code: 'ETIMEDOUT', message: `timeout sending to ${address}` }), 'transient', address);
+  }
+});
+
+test('structural codes win over free text and follow the documented precedence', () => {
+  assert.equal(classifySmtpError({ response: '535 5.7.8 Username and Password not accepted' }), 'pause');
+  assert.equal(classifySmtpError({ responseCode: 550, response: '550-5.4.5 Daily user sending limit exceeded' }), 'pause');
+  assert.equal(classifySmtpError({ responseCode: 452, response: '452 4.2.2 The recipient mailbox is full' }), 'transient');
+  assert.equal(classifySmtpError({ responseCode: 552, response: '552 5.2.2 The recipient mailbox is full' }), 'permanent');
+  assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.5.3 Too many recipients' }), 'pause');
+  assert.equal(classifySmtpError({ responseCode: 550, response: '550 5.1.1 quota exceeded for this user' }), 'permanent');
+  assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.3.0 Temporary server error' }), 'transient');
+});

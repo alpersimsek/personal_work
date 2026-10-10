@@ -187,10 +187,30 @@ test('a pause repeated for many ticks never counts an attempt or fails anyone', 
   sender.alwaysFail = new NewsletterSendError('pause', 'mail configuration is missing or invalid');
   for (let round = 0; round < 8; round++) {
     assert.equal((await runBroadcastTick({ sender, postId })).halted, true);
+    assert.equal(sender.attempted.filter(mine).length, round + 1);
   }
-  assert.equal(sender.attempted.filter(mine).length, 8);
   const rows = await myDeliveries(postId);
   assert.ok(rows.every(row => row.status === 'pending' && row.attempts === 0));
+});
+
+test('a recipient that keeps pausing does not block the recipients behind it', async () => {
+  const stuck = await makeSubscriber('a');
+  const second = await makeSubscriber('b');
+  const third = await makeSubscriber('c');
+  const postId = await makeHermeticDuePost();
+  // Fan-out happened a while ago, as it would before an hourly worker pause.
+  await db('newsletter_deliveries').where({ post_id: postId })
+    .update({ updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 1 HOUR)') });
+  const sender = new FakeSender();
+  sender.failures.set(stuck.email, new NewsletterSendError('pause', 'pause (smtp 554)'));
+
+  for (let round = 0; round < 3; round++) await runBroadcastTick({ sender, postId });
+  assert.deepEqual(sender.mine.map(m => m.to), [second.email, third.email]);
+  assert.equal(await statusOf(postId, second.email), 'sent');
+  assert.equal(await statusOf(postId, third.email), 'sent');
+  const stuckRow = await deliveryOf(postId, stuck.email);
+  assert.equal(stuckRow.status, 'pending');
+  assert.equal(stuckRow.attempts, 0);
 });
 
 test('a repeated non-recipient 5xx halt still fails the recipient after 6 attempts', async () => {

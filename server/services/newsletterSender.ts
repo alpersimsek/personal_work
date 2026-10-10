@@ -30,27 +30,68 @@ export interface NewsletterSender {
   send(message: BroadcastMessage): Promise<void>;
 }
 
-const QUOTA_PATTERN = /(daily user sending limit|sending limit|rate limit|quota|too many|5\.4\.5|4\.5\.3|4\.7\.0)/i;
+/** `550 5.1.1 ...` or `550-5.1.1 ...`: the reply code and enhanced status code at the start of the reply. */
+// Followed by whitespace or the end, so an address such as `5.7.0@x` never counts.
+const ENHANCED_CODE = /^(\d{3})[ -](\d)\.(\d{1,3})\.(\d{1,3})(?=\s|$)/;
+const REPLY_CODE = /^(\d{3})(?=[\s-]|$)/;
 
-const SENDER_LEVEL_PATTERN = /(\b[45]\.7\.\d+\b|authentication required|app password)/i;
-const RECIPIENT_PATTERN = /(\b5\.1\.\d+\b|no such user|user unknown|does not exist|mailbox (unavailable|not found)|invalid (recipient|address))/i;
+// Free-text fallbacks, used only on sanitised text (see `sanitise`).
+const DAILY_LIMIT_PATTERN = /daily user sending limit/i;
+const SENDER_TEXT_PATTERN = /(sending limit|rate limit|quota|too many|authentication required|app password)/i;
+const RECIPIENT_PATTERN = /(no such user|user unknown|does not exist|mailbox (unavailable|not found)|invalid (recipient|address))/i;
 
 /**
- * `permanent` is reserved for rejections that are specific to the recipient.
- * Sender-level problems pause the run without touching the recipient; any
- * other 5xx halts the run and counts against the recipient.
+ * SMTP replies often echo the recipient address, and a subscriber chooses that
+ * text (`quota@...`, `5.7.0@...`). Remove anything in angle brackets, quoted
+ * local parts and every token containing `@` before matching free text.
+ */
+function sanitise(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/"[^"]*"@\S*/g, ' ')
+    .split(/\s+/)
+    .filter(token => !token.includes('@'))
+    .join(' ');
+}
+
+/**
+ * Precedence, first match wins:
+ * 1. EAUTH or reply 530/534/535 -> `pause` (our credentials).
+ * 2. Enhanced 5.1.x, or (without an enhanced code) 550/551/553 with recipient
+ *    wording -> `permanent`.
+ * 3. Enhanced 4.2.2 -> `transient`, 5.2.2 -> `permanent` (mailbox full).
+ * 4. Quota or rate limits: enhanced 5.4.5, 4.5.3, 4.7.x, or "daily user
+ *    sending limit" -> `pause`.
+ * 5. Any other enhanced 5.7.x (sender policy) -> `pause`.
+ * 6. Only when there is no enhanced code: sender wording such as "quota",
+ *    "too many" or "authentication required" -> `pause`.
+ * 7. Any other 5xx -> `halt` (not recipient-specific, but counts against it).
+ * 8. Everything else -> `transient`.
+ * Structural codes are preferred; free text is only ever matched after
+ * `sanitise`, so a recipient address cannot steer the result.
  */
 export function classifySmtpError(error: unknown): SendFailureKind {
   const details = (error ?? {}) as { code?: unknown; responseCode?: unknown; response?: unknown; message?: unknown };
-  const text = `${String(details.response ?? '')} ${String(details.message ?? '')}`;
-  const responseCode = typeof details.responseCode === 'number' ? details.responseCode : undefined;
-  const authFailure = details.code === 'EAUTH'
-    || (details.code === 'EENVELOPE' && /auth/i.test(text))
-    || responseCode === 530 || responseCode === 534 || responseCode === 535;
-  if (authFailure || QUOTA_PATTERN.test(text) || SENDER_LEVEL_PATTERN.test(text)) return 'pause';
-  if (responseCode !== undefined && responseCode >= 500) {
-    return RECIPIENT_PATTERN.test(text) ? 'permanent' : 'halt';
-  }
+  const response = String(details.response ?? '').trimStart();
+  const text = sanitise(`${response} ${String(details.message ?? '')}`);
+  const enhanced = ENHANCED_CODE.exec(response);
+  const parsedReply = enhanced?.[1] ?? REPLY_CODE.exec(response)?.[1];
+  const replyCode = typeof details.responseCode === 'number' ? details.responseCode
+    : parsedReply ? Number(parsedReply) : undefined;
+  const [statusClass, subject, detail] = enhanced ? enhanced.slice(2).map(Number) : [];
+
+  if (details.code === 'EAUTH' || replyCode === 530 || replyCode === 534 || replyCode === 535) return 'pause';
+  if (enhanced ? statusClass === 5 && subject === 1
+    : (replyCode === 550 || replyCode === 551 || replyCode === 553) && RECIPIENT_PATTERN.test(text)) return 'permanent';
+  if (enhanced && subject === 2 && detail === 2) return statusClass === 5 ? 'permanent' : 'transient';
+  const quota = enhanced
+    ? (statusClass === 5 && subject === 4 && detail === 5) || (statusClass === 4 && subject === 5 && detail === 3)
+      || (statusClass === 4 && subject === 7)
+    : false;
+  if (quota || DAILY_LIMIT_PATTERN.test(text)) return 'pause';
+  if (enhanced && statusClass === 5 && subject === 7) return 'pause';
+  if (!enhanced && SENDER_TEXT_PATTERN.test(text)) return 'pause';
+  if (replyCode !== undefined && replyCode >= 500) return 'halt';
   return 'transient';
 }
 
