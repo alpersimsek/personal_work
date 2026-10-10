@@ -9,6 +9,7 @@ import { AdminPostPreview } from '../components/AdminPostPreview';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
 import { WORDS_PER_MINUTE, countWords, estimateReadingMinutes, formatReadingTime, readingTimeLabel } from '../utils/readingTime';
 import { PostCover } from '../components/PostCover';
+import { NewsletterStatus } from '../components/NewsletterStatus';
 
 interface BlogAdminPageProps {
   onNavigateHome: () => void;
@@ -53,6 +54,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [tagsInput, setTagsInput] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [newsletterEnabled, setNewsletterEnabled] = useState(true);
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -109,6 +111,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setShowUrlInput(false);
     setTagsInput('Yaşam Koçluğu, Farkındalık');
     setFeatured(false);
+    setNewsletterEnabled(true);
     setStatusNotice(null);
     setActiveTab('editor');
   };
@@ -126,6 +129,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setShowUrlInput(false);
     setTagsInput(post.tags ? post.tags.join(', ') : '');
     setFeatured(post.featured || false);
+    setNewsletterEnabled(post.newsletterEnabled);
     setStatusNotice(null);
     setActiveTab('editor');
   };
@@ -146,6 +150,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     coverImage: coverImage.trim(),
     tags: tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean),
     featured,
+    newsletterEnabled,
   });
 
   /** Saves the editor and returns the stored article, or null after showing why not. */
@@ -312,6 +317,11 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                           <span>•</span>
                           <span>{post.likes || 0} Beğeni</span>
                         </div>
+                        <NewsletterStatus
+                          post={post}
+                          onChanged={() => void refreshPosts()}
+                          onNotice={(type, text) => setStatusNotice({ type, text })}
+                        />
                       </div>
                     </div>
 
@@ -640,6 +650,17 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
                 />
                 <span>Öne Çıkan Makale Yap</span>
               </label>
+              {!editingPost?.newsletterSentAt && (
+                <label className="flex items-center gap-2 text-sm text-neutral-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newsletterEnabled}
+                    onChange={(e) => setNewsletterEnabled(e.target.checked)}
+                    className="rounded border-neutral-300 text-neutral-900 focus:ring-0 w-4 h-4"
+                  />
+                  <span>Yayınlanınca abonelere e-posta gönder</span>
+                </label>
+              )}
             </div>
 
             {/* Actions: saving is always safe (draft, or as-is for a live article); publishing is its own button */}

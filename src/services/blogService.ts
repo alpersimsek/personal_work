@@ -17,6 +17,9 @@ interface ApiBlogPost {
   views: number;
   created_at: string;
   updated_at: string;
+  newsletter_enabled: boolean;
+  newsletter_scheduled_at: string | null;
+  newsletter_sent_at: string | null;
 }
 
 function toBlogPost(row: ApiBlogPost): BlogPost {
@@ -42,6 +45,9 @@ function toBlogPost(row: ApiBlogPost): BlogPost {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     content: row.content ?? '',
+    newsletterEnabled: Boolean(row.newsletter_enabled),
+    newsletterScheduledAt: row.newsletter_scheduled_at ?? null,
+    newsletterSentAt: row.newsletter_sent_at ?? null,
   };
 }
 
@@ -51,6 +57,13 @@ async function parseJsonOrThrow(response: Response): Promise<any> {
     throw new Error(data.error || 'Yazılar şu anda yüklenemedi. Lütfen daha sonra tekrar deneyin.');
   }
   return data;
+}
+
+export interface NewsletterStatusData {
+  enabled: boolean;
+  scheduledAt: string | null;
+  sentAt: string | null;
+  counts: Record<'pending' | 'sending' | 'sent' | 'failed' | 'skipped', number>;
 }
 
 export const blogService = {
@@ -138,6 +151,26 @@ export const blogService = {
     const response = await fetch(`/api/admin/posts/${encodeURIComponent(id)}/publish`, { method: 'PATCH', credentials: 'include' });
     const data = await parseJsonOrThrow(response);
     return data.published;
+  },
+
+  async getNewsletterStatus(id: string): Promise<NewsletterStatusData> {
+    const response = await fetch(`/api/admin/posts/${encodeURIComponent(id)}/newsletter`, { credentials: 'include' });
+    return parseJsonOrThrow(response);
+  },
+
+  async cancelNewsletter(id: string): Promise<NewsletterStatusData> {
+    const response = await fetch(`/api/admin/posts/${encodeURIComponent(id)}/newsletter/cancel`, { method: 'POST', credentials: 'include' });
+    return parseJsonOrThrow(response);
+  },
+
+  async retryNewsletter(id: string): Promise<NewsletterStatusData> {
+    const response = await fetch(`/api/admin/posts/${encodeURIComponent(id)}/newsletter/retry-failed`, { method: 'POST', credentials: 'include' });
+    return parseJsonOrThrow(response);
+  },
+
+  async sendNewsletterTest(id: string): Promise<void> {
+    const response = await fetch(`/api/admin/posts/${encodeURIComponent(id)}/newsletter/test`, { method: 'POST', credentials: 'include' });
+    await parseJsonOrThrow(response);
   },
 };
 

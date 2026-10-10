@@ -70,6 +70,9 @@ export interface BlogPost {
   createdAt: string;
   updatedAt: string;
   content: string;
+  newsletterEnabled: boolean;
+  newsletterScheduledAt: string | null;
+  newsletterSentAt: string | null;
 }
 
 export interface BlogFilterOptions {
