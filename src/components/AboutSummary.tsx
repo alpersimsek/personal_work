@@ -42,7 +42,7 @@ export const AboutSummary: React.FC = () => (
                 <Award size={20} />
               </div>
               <div className="text-left">
-                <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono">AKREDİTASYON</div>
+                <div className="text-xs uppercase tracking-wider text-white/50 font-mono">AKREDİTASYON</div>
                 <div className="text-xs sm:text-sm font-semibold text-white">ICF Akredite Profesyonel Koç (PCC)</div>
               </div>
             </div>

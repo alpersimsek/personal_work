@@ -82,7 +82,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
       }
       if (trimmed.startsWith('> ')) {
         return (
-          <blockquote key={idx} className="my-6 p-4 rounded-xl bg-white/5 border-l-2 border-white/40 italic text-white/80 text-sm sm:text-base">
+          <blockquote key={idx} className="my-6 p-4 rounded-xl bg-white/5 border border-white/15 italic text-white/80 text-sm sm:text-base">
             {trimmed.slice(2)}
           </blockquote>
         );
@@ -152,7 +152,7 @@ export const BlogPostModal: React.FC<BlogPostModalProps> = ({
               </div>
               <div>
                 <span className="text-white font-medium block">{post.author}</span>
-                <span className="text-[10px] text-white/40">ICF Unvanlı Profesyonel Koç</span>
+                <span className="text-xs text-white/40">ICF Unvanlı Profesyonel Koç</span>
               </div>
             </div>
 

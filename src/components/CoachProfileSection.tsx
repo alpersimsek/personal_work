@@ -76,7 +76,7 @@ export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage
                     <Award size={20} />
                   </div>
                   <div className="text-left">
-                    <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono">
+                    <div className="text-xs uppercase tracking-wider text-white/50 font-mono">
                       AKREDİTASYON
                     </div>
                     <div className="text-xs sm:text-sm font-semibold text-white">
@@ -150,7 +150,7 @@ export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage
               </div>
             </div>
 
-            <div className="pt-4 lg:pt-3 border-t border-white/10 text-[11px] text-white/40 font-mono">
+            <div className="pt-4 lg:pt-3 border-t border-white/10 text-xs text-white/40 font-mono">
               BİREBİR SEANSLAR • YÖNETİCİ KOÇLUĞU • MİNDFULNESS
             </div>
           </div>
@@ -195,7 +195,7 @@ export const CoachProfileSection: React.FC<CoachProfileSectionProps> = ({ asPage
               </div>
             </div>
 
-            <div className="pt-4 lg:pt-3 border-t border-white/10 text-[11px] text-white/40 font-mono">
+            <div className="pt-4 lg:pt-3 border-t border-white/10 text-xs text-white/40 font-mono">
               GÜVENLİ & AÇIK İLETİŞİM • YARGI ALANINDAN UZAK
             </div>
           </div>

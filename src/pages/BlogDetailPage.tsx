@@ -131,7 +131,7 @@ export const BlogDetailPage: React.FC<BlogDetailPageProps> = ({
       }
       if (trimmed.startsWith('> ')) {
         return (
-          <blockquote key={idx} className="blog-quote text-xl sm:text-2xl italic text-white/95 bg-white/[0.05] border-l-4 border-white/40 p-6 rounded-2xl my-8 leading-relaxed shadow-sm">
+          <blockquote key={idx} className="blog-quote text-xl sm:text-2xl italic text-white/95 bg-white/[0.05] border border-white/15 p-6 rounded-2xl my-8 leading-relaxed shadow-sm">
             {trimmed.slice(2)}
           </blockquote>
         );

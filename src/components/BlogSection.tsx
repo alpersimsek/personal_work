@@ -168,14 +168,14 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   <PostCover src={post.coverImage} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-70" />
 
-                  <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-[10px] font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
+                  <span className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-medium bg-black/60 backdrop-blur-md text-white/90 border border-white/15">
                     {post.category}
                   </span>
                 </div>
 
                 {/* Card Body */}
                 <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-center gap-2 text-[11px] text-white/50 mb-3 font-sans">
+                  <div className="flex items-center gap-2 text-xs text-white/50 mb-3 font-sans">
                     <span>{post.date}</span>
                     <span>•</span>
                     <span>{post.readTime}</span>
@@ -196,7 +196,7 @@ export const BlogSection: React.FC<BlogSectionProps> = ({
                   </p>
 
                   <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-sans">
-                    <span className="text-white/40 text-[11px]">Tuğba Ergüner Şimşek</span>
+                    <span className="text-white/40 text-xs">Tuğba Ergüner Şimşek</span>
                     <span className="text-white/90 font-medium group-hover:text-white transition-colors inline-flex items-center gap-1">
                       Oku
                       <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

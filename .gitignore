@@ -14,3 +14,8 @@ uploads/
 
 # SEO sprint planning and audit reports: kept out of version control on purpose
 /SEO/
+findings.txt
+assets/aday9.png
+assets/profil_2.png
+google-chrome-stable_current_amd64.deb
+source-findings.txt

@@ -30,6 +30,15 @@ interface ConsultationModalProps {
   initialNote?: string;
 }
 
+/** Scrolls the text field being typed in to the middle of the window. */
+const centerFocusedField = (root: HTMLElement) => {
+  const field = document.activeElement;
+  const isTextField =
+    field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement;
+  if (!isTextField || !root.contains(field)) return;
+  requestAnimationFrame(() => field.scrollIntoView({ block: 'center' }));
+};
+
 export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   isOpen,
   onClose,
@@ -55,6 +64,34 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
   // The notice window belongs to this one: it never outlives it.
   React.useEffect(() => {
     if (!isOpen) setNoticeOpen(false);
+  }, [isOpen]);
+
+  // On phones the on-screen keyboard covers the lower half of the window
+  // without shrinking it, so the field being typed in ends up underneath.
+  // Fit the window to the part of the screen that is still visible and keep
+  // the focused field in the middle of it.
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const viewport = window.visualViewport;
+    const root = rootRef.current;
+    if (!isOpen || !viewport || !root) return;
+
+    const fitToVisibleArea = () => {
+      root.style.setProperty('--vv-top', `${viewport.offsetTop}px`);
+      root.style.setProperty('--vv-height', `${viewport.height}px`);
+    };
+    const fitAndCenter = () => {
+      fitToVisibleArea();
+      centerFocusedField(root);
+    };
+
+    fitToVisibleArea();
+    viewport.addEventListener('resize', fitAndCenter);
+    viewport.addEventListener('scroll', fitToVisibleArea);
+    return () => {
+      viewport.removeEventListener('resize', fitAndCenter);
+      viewport.removeEventListener('scroll', fitToVisibleArea);
+    };
   }, [isOpen]);
 
   // Sync initial props when opened
@@ -110,7 +147,9 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
       {isOpen && (
         <div
           id="consultation-modal-root"
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6"
+          ref={rootRef}
+          onFocus={(e) => centerFocusedField(e.currentTarget)}
+          className="fixed inset-0 top-[var(--vv-top,0px)] h-[var(--vv-height,100%)] z-[9999] flex items-center justify-center p-3 sm:p-6"
         >
           {/* Backdrop */}
           <motion.div
@@ -128,7 +167,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 15 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-xl liquid-glass rounded-3xl p-5 sm:p-8 md:p-10 text-white z-10 shadow-2xl bg-[#0c0c0c]/98 border border-white/15 text-left my-auto max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-xl liquid-glass rounded-3xl p-5 sm:p-8 md:p-10 text-white z-10 shadow-2xl bg-[#0c0c0c]/98 border border-white/15 text-left my-auto max-h-[calc(var(--vv-height,100vh)*0.9)] overflow-y-auto"
           >
             {/* Close Button */}
             <button
@@ -159,9 +198,9 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
 
                 {/* FAQ Quick Link Banner */}
                 {onOpenFAQ && (
-                  <div className="flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10 mb-5">
-                    <div className="flex items-center gap-2 text-xs text-white/80">
-                      <HelpCircle size={15} className="text-white/70 shrink-0" />
+                  <div className="flex items-center justify-between gap-2.5 p-3 rounded-2xl bg-white/[0.04] border border-white/10 mb-5">
+                    <div className="flex min-w-0 items-center gap-2 text-[11px] sm:text-xs leading-snug text-white/80">
+                      <HelpCircle size={15} className="hidden sm:block text-white/70 shrink-0" />
                       <span>Aklınıza takılan sorular mı var?</span>
                     </div>
                     <button
@@ -171,7 +210,7 @@ export const ConsultationModal: React.FC<ConsultationModalProps> = ({
                         onClose();
                         onOpenFAQ();
                       }}
-                      className="btn btn-secondary btn-sm shrink-0"
+                      className="btn btn-secondary btn-sm shrink-0 max-sm:px-2.5"
                     >
                       <span>Sıkça Sorulan Sorular</span>
                       <ArrowRight size={12} className="btn-arrow" />

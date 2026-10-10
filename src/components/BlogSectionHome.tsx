@@ -106,7 +106,7 @@ export const BlogSectionHome: React.FC<BlogSectionHomeProps> = ({
                 </p>
 
                 <div className="flex items-center justify-between pt-4 border-t border-white/10 text-xs font-sans">
-                  <span className="text-white/40 text-[11px]">Tuğba Ergüner Şimşek</span>
+                  <span className="text-white/40 text-xs">Tuğba Ergüner Şimşek</span>
                   <span className="text-white/90 font-medium group-hover:text-white transition-colors inline-flex items-center gap-1">
                     Devamını Oku
                     <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
