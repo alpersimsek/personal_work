@@ -3,198 +3,76 @@ import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { createApp } from '../app.js';
-
 import { db } from '../db/knex.js';
 import { signSession } from '../utils/jwt.js';
 import { CURRENT_CONSENT_VERSION } from '../config/consent.js';
-import { subscribeRateLimit } from '../middleware/rateLimit.js';
 
 const app = createApp();
-const consentVersion = CURRENT_CONSENT_VERSION;
-before(async () => { await db('subscribers').delete(); });
-after(async () => { await db('subscribers').delete(); await db.destroy(); });
-
-test('POST /api/subscribe rejects missing consent', async () => {
-  const response = await request(app)
-    .post('/api/subscribe')
-    .send({ name: 'Test Kullanıcı', email: 'consent-missing@example.com' });
-  assert.equal(response.status, 400);
+const emails = [`audit-active-${process.pid}@example.test`, `audit-inactive-${process.pid}@example.test`];
+before(async () => {
+  await db('subscribers').insert(emails.map((email, index) => ({
+    name: 'Synthetic Audit Subscriber', email, consent_given: true,
+    consent_version: CURRENT_CONSENT_VERSION, consent_at: '2026-01-01 00:00:00',
+    unsubscribed_at: index ? '2026-02-01 00:00:00' : null,
+  })));
+});
+after(async () => {
+  await db('subscribers').whereIn('email', emails).delete();
+  await db.destroy();
 });
 
-test('POST /api/subscribe rejects an invalid email', async () => {
-  const response = await request(app)
-    .post('/api/subscribe')
-    .send({ name: 'Test Kullanıcı', email: 'not-an-email', consent: true, consentVersion });
-  assert.equal(response.status, 400);
+test('anonymous clients cannot create consent, unsubscribe others, or undo an opt-out', async () => {
+  const before = await db('subscribers').whereIn('email', emails).orderBy('email');
+  const fresh = `audit-new-${process.pid}@example.test`;
+  let rejection;
+  for (const email of [...emails, fresh]) {
+    for (const route of ['/api/subscribe', '/api/subscribe/unsubscribe']) {
+      const response = await request(app).post(route).send({
+        name: 'Untrusted replacement', email, consent: true, consentVersion: CURRENT_CONSENT_VERSION,
+      });
+      assert.equal(response.status, 403);
+      assert.equal(response.headers['cache-control'], 'no-store');
+      assert.equal(response.body.success, undefined);
+      rejection ??= response.body;
+      assert.deepEqual(response.body, rejection, 'membership must not be disclosed');
+    }
+  }
+  assert.deepEqual(await db('subscribers').whereIn('email', emails).orderBy('email'), before);
+  assert.equal(await db('subscribers').where({ email: fresh }).first(), undefined);
 });
 
-test('POST /api/subscribe stores a valid subscriber once and answers a duplicate the same way', async () => {
-  const payload = { name: 'Test Kullanıcı', email: 'unique-subscriber@example.com', consent: true, consentVersion };
-
-  const first = await request(app).post('/api/subscribe').send(payload);
-  assert.equal(first.status, 201);
-
-  const duplicate = await request(app).post('/api/subscribe').send({ ...payload, name: 'Başka Biri' });
-  assert.equal(duplicate.status, first.status);
-  assert.deepEqual(duplicate.body, first.body);
-
-  const rows = await db('subscribers').where({ email: payload.email });
-  assert.equal(rows.length, 1);
-  assert.equal(rows[0].name, 'Test Kullanıcı', 'a repeat sign-up must not rename the subscriber');
+test('trusted frontend origin cannot bypass mailbox ownership containment', async () => {
+  for (const route of ['/api/subscribe', '/api/subscribe/unsubscribe']) {
+    const response = await request(app).post(route).set('Origin', process.env.ALLOWED_ORIGIN || 'http://localhost:3000')
+      .send({ email: emails[0], consent: true, consentVersion: CURRENT_CONSENT_VERSION });
+    assert.equal(response.status, 403);
+  }
 });
 
-test('POST /api/subscribe silently no-ops when the honeypot field is filled', async () => {
-  const response = await request(app).post('/api/subscribe').send({
-    name: 'Bot',
-    email: 'bot-honeypot@example.com',
-    consent: true,
-    consentVersion,
-    honeypot: 'filled-in-by-a-bot',
-  });
-  assert.equal(response.status, 201);
-
-  const dupCheck = await request(app).post('/api/subscribe').send({
-    name: 'Bot',
-    email: 'bot-honeypot@example.com',
-    consent: true,
-    consentVersion,
-  });
-  assert.equal(dupCheck.status, 201, 'the honeypot request should not have actually created a row');
-});
-
-test('GET /api/admin/subscribers requires authentication', async () => {
-  const response = await request(app).get('/api/admin/subscribers');
-  assert.equal(response.status, 401);
-});
-
-
-test('admin listing exposes persisted consent, normalized email, and trimmed name', async () => {
-  const response = await request(app).post('/api/subscribe').send({ name: ' Test Person ', email: 'Case@Example.com', consent: true, consentVersion });
-  assert.equal(response.status, 201);
-  const agent = request.agent(app);
-  assert.equal((await agent.post('/api/auth/login').send({ username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD })).status, 200);
-  const list = await agent.get('/api/admin/subscribers');
-  assert.equal(list.status, 200);
-  const row = list.body.find((item: { email: string }) => item.email === 'case@example.com');
-  assert.equal(row.name, 'Test Person');
-  assert.equal(row.consent_given, true);
-  assert.ok(row.consent_at);
-  assert.equal(row.consent_version, CURRENT_CONSENT_VERSION);
-  assert.equal(row.unsubscribed_at, null);
-});
-
-test('subscribers rejects whitespace names and false consent', async () => {
-  for (const payload of [
-    { name: '   ', email: 'white@example.com', consent: true, consentVersion },
-    { name: 'Test', email: 'false@example.com', consent: false, consentVersion },
-  ]) assert.equal((await request(app).post('/api/subscribe').send(payload)).status, 400);
-});
-
-test('user-role sessions cannot list subscribers', async () => {
-  const [id] = await db('users').insert({ username: 'subscribers-test-user', role: 'user', password_hash: 'unused' });
+test('subscriber listing requires a current administrator session', async () => {
+  assert.equal((await request(app).get('/api/admin/subscribers')).status, 401);
+  const [id] = await db('users').insert({ username: `newsletter-user-${process.pid}`, role: 'user', password_hash: 'unused' });
   try {
     const token = signSession({ userId: id, sessionVersion: 0 });
     assert.equal((await request(app).get('/api/admin/subscribers').set('Cookie', `session=${token}`)).status, 403);
   } finally { await db('users').where({ id }).delete(); }
 });
 
-test('concurrent duplicate signups both succeed and store one row', async () => {
-  const payload = { name: 'Concurrent', email: 'concurrent@example.com', consent: true, consentVersion };
-  const responses = await Promise.all([request(app).post('/api/subscribe').send(payload), request(app).post('/api/subscribe').send(payload)]);
-  assert.deepEqual(responses.map(response => response.status), [201, 201]);
-  assert.equal((await db('subscribers').where({ email: payload.email })).length, 1);
-});
-
-test('POST /api/subscribe rejects a missing, blank or outdated consent version', async () => {
-  const base = { name: 'Test', email: 'version@example.com', consent: true };
-  for (const extra of [{}, { consentVersion: '' }, { consentVersion: '1999-01-01' }]) {
-    const response = await request(app).post('/api/subscribe').send({ ...base, ...extra });
-    assert.equal(response.status, 400, JSON.stringify(extra));
-  }
-  assert.equal(await db('subscribers').where({ email: base.email }).first(), undefined);
-});
-
-test('the consent version on the server matches the wording on the site', async () => {
-  const { readFile } = await import('node:fs/promises');
-  const source = await readFile(new URL('../../src/legal/kvkk.ts', import.meta.url), 'utf8');
-  const siteVersion = source.match(/export const KVKK_VERSION = '([^']+)'/)?.[1];
-  assert.equal(siteVersion, CURRENT_CONSENT_VERSION);
-});
-
-/** Sign-up is limited per address; these tests sign up more often than a person would. */
-function resetSubscribeLimit() {
-  for (const address of ['::ffff:127.0.0.1', '::1', '127.0.0.1']) subscribeRateLimit.resetKey(address);
-}
-
-async function subscribeAs(email: string, name = 'Test Kişi') {
-  resetSubscribeLimit();
-  return request(app).post('/api/subscribe').send({ name, email, consent: true, consentVersion });
-}
-
-test('POST /api/subscribe/unsubscribe marks the subscriber as unsubscribed', async () => {
-  const email = 'leaving@example.com';
-  assert.equal((await subscribeAs(email)).status, 201);
-
-  const response = await request(app).post('/api/subscribe/unsubscribe').send({ email });
-  assert.equal(response.status, 200);
-  assert.deepEqual(response.body, { success: true });
-
-  const row = await db('subscribers').where({ email }).first();
-  assert.ok(row.unsubscribed_at);
-});
-
-test('unsubscribing normalizes the e-mail address and is safe to repeat', async () => {
-  const email = 'repeat@example.com';
-  await subscribeAs(email);
-
-  assert.equal((await request(app).post('/api/subscribe/unsubscribe').send({ email: '  Repeat@Example.COM ' })).status, 200);
-  const first = (await db('subscribers').where({ email }).first()).unsubscribed_at;
-  assert.ok(first);
-
-  assert.equal((await request(app).post('/api/subscribe/unsubscribe').send({ email })).status, 200);
-  const second = (await db('subscribers').where({ email }).first()).unsubscribed_at;
-  assert.equal(String(second), String(first), 'the original opt-out time must not be overwritten');
-});
-
-test('unsubscribing an unknown address looks the same as a known one', async () => {
-  const unknown = await request(app).post('/api/subscribe/unsubscribe').send({ email: 'nobody-here@example.com' });
-  assert.equal(unknown.status, 200);
-  assert.deepEqual(unknown.body, { success: true });
-});
-
-test('unsubscribing rejects a missing or malformed e-mail with a readable message', async () => {
-  for (const body of [{}, { email: '' }, { email: 'not-an-email' }, { email: 42 }]) {
-    const response = await request(app).post('/api/subscribe/unsubscribe').send(body);
-    assert.equal(response.status, 400, JSON.stringify(body));
-    assert.match(response.body.error, /e-posta/i);
+test('administrators retain access to existing consent and opt-out records', async () => {
+  const agent = request.agent(app);
+  await agent.post('/api/auth/login').send({ username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD }).expect(200);
+  const response = await agent.get('/api/admin/subscribers').expect(200);
+  assert.equal(response.headers['cache-control'], 'no-store');
+  for (const email of emails) {
+    const row = response.body.find((item: { email: string }) => item.email === email);
+    assert.ok(row);
+    assert.equal(row.consent_given, true);
+    assert.equal(row.consent_version, CURRENT_CONSENT_VERSION);
+    assert.equal(Boolean(row.unsubscribed_at), email === emails[1]);
   }
 });
 
-test('someone who unsubscribed can sign up again with fresh consent', async () => {
-  const email = 'comeback@example.com';
-  await subscribeAs(email, 'Eski Ad');
-  await request(app).post('/api/subscribe/unsubscribe').send({ email });
-  await db('subscribers').where({ email }).update({ consent_version: 'old-version' });
-
-  const again = await subscribeAs(email, 'Yeni Ad');
-  assert.equal(again.status, 201);
-
-  const row = await db('subscribers').where({ email }).first();
-  assert.equal(row.unsubscribed_at, null);
-  assert.equal(row.name, 'Yeni Ad');
-  assert.equal(row.consent_version, CURRENT_CONSENT_VERSION);
-});
-
-test('signing up looks the same for a new, a returning and an already subscribed address', async () => {
-  const returning = 'returning@example.com';
-  await subscribeAs(returning);
-  await request(app).post('/api/subscribe/unsubscribe').send({ email: returning });
-  const active = 'active@example.com';
-  await subscribeAs(active);
-
-  for (const email of ['brand-new@example.com', returning, active]) {
-    const response = await subscribeAs(email);
-    assert.equal(response.status, 201, email);
-    assert.deepEqual(response.body, { success: true }, email);
-  }
+test('server and frontend display the same availability notice', async () => {
+  const { NEWSLETTER_UNAVAILABLE } = await import('../../src/newsletterAvailability.js');
+  assert.equal((await request(app).post('/api/subscribe').send({})).body.error, NEWSLETTER_UNAVAILABLE);
 });

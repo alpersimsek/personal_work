@@ -5,6 +5,8 @@ import { isPlausibleEmail, subscribe } from '../services/subscribeService';
 import { UnsubscribeModal } from './UnsubscribeModal';
 import { CONSENT_STATEMENT, KVKK_PATH, KVKK_VERSION } from '../legal/kvkk';
 import { navigateToPath } from '../routes';
+import { NEWSLETTER_UNAVAILABLE } from '../newsletterAvailability';
+import { DATA_CONTROLLER } from '../legal/kvkk';
 
 const DRAFT_KEY = 'tugba-subscribe-draft';
 
@@ -85,10 +87,12 @@ export const SubscribeSection: React.FC = () => {
             </div>
 
             <p className="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed mb-8 font-light px-2">
-              İçsel netlik, farkındalık ve yaşam dönüşümü üzerine yazıları e-posta ile ilk sen öğren.
+              {NEWSLETTER_UNAVAILABLE}{' '}
+              <a href={`mailto:${DATA_CONTROLLER.email}`} className="underline">{DATA_CONTROLLER.email}</a>
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-left" noValidate>
+              <fieldset disabled className="space-y-4 opacity-60">
               {/* Anti-bot Honeypot Input */}
               <div className="hidden" aria-hidden="true">
                 <input
@@ -184,6 +188,7 @@ export const SubscribeSection: React.FC = () => {
                   Bültenden çık
                 </button>
               </div>
+              </fieldset>
             </form>
           </div>
         </motion.div>

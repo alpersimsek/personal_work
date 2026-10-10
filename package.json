@@ -7,7 +7,7 @@
     "node": ">=22 <23"
   },
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev": "vite --port=3000 --host=127.0.0.1",
     "build": "vite build",
     "build:hosting": "npm run lint && npm run build && npm run build:server",
     "preview": "vite preview",
@@ -26,6 +26,7 @@
     "db:seed:mock-posts": "tsx server/db/seedMockPosts.ts",
     "db:test:reset": "NODE_ENV=test tsx server/db/testReset.ts",
     "test:server": "NODE_ENV=test node --import tsx --test server/test/*.test.ts",
+    "test:security": "node scripts/test-security.mjs",
     "db:migrate:prod": "node dist-server/db/migrate.js",
     "db:seed:prod": "node dist-server/db/seed.js",
     "admin:set-password:prod": "node dist-server/db/setAdminPassword.js",

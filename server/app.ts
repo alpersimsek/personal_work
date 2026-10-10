@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requireSameOrigin } from './middleware/requireSameOrigin.js';
 import { postsRouter, adminPostsRouter } from './routes/posts.js';
 import { subscribersRouter, adminSubscribersRouter } from './routes/subscribers.js';
 import { authRouter } from './routes/auth.js';
@@ -55,6 +56,11 @@ export function createApp(options: { staticDir?: string; serveStatic?: boolean }
     );
   }
   app.use(cookieParser());
+  app.use(['/api/auth', '/api/admin'], (_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+  app.use('/api', requireSameOrigin);
   app.use('/api/admin/images', imagesRouter);
   app.use(express.json({ limit: '15mb' }));
 

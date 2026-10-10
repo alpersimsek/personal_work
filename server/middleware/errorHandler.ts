@@ -24,6 +24,12 @@ export function errorHandler(
       type === 'entity.too.large' ? 'Dosya boyutu izin verilen sınırı aşıyor.' : 'Geçersiz JSON verisi.' });
     return;
   }
-  console.error(err);
+  // Driver errors can embed full SQL statements, passwords and personal data.
+  // Log only a fixed diagnostic category, never the error object or request.
+  const code = (err as { code?: unknown } | null)?.code;
+  const category = typeof code === 'string' &&
+    ['ER_DUP_ENTRY', 'ER_DATA_TOO_LONG', 'ER_LOCK_DEADLOCK', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOENT', 'EACCES', 'ENOSPC'].includes(code)
+    ? code : 'INTERNAL_ERROR';
+  console.error({ event: 'request_failed', status: 500, category });
   res.status(500).json({ error: 'Internal server error' });
 }

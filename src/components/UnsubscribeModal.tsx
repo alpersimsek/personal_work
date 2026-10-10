@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, MailMinus, X } from 'lucide-react';
 import { isPlausibleEmail, unsubscribe } from '../services/subscribeService';
+import { NEWSLETTER_UNAVAILABLE } from '../newsletterAvailability';
+import { DATA_CONTROLLER } from '../legal/kvkk';
 
 interface UnsubscribeModalProps {
   isOpen: boolean;
@@ -124,7 +126,8 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                   Bültenden çık
                 </h2>
                 <p className="text-white/70 text-sm leading-relaxed font-light mb-5">
-                  Bültene katılırken kullandığın e-posta adresini yaz, seni listeden çıkaralım. Bunun için başka bir bilgiye gerek yok.
+                  {NEWSLETTER_UNAVAILABLE}{' '}
+                  <a href={`mailto:${DATA_CONTROLLER.email}`} className="underline">{DATA_CONTROLLER.email}</a>
                 </p>
 
                 <label htmlFor="unsubscribe-email" className="block text-xs uppercase tracking-wider text-white/70 mb-1.5 font-medium">
@@ -132,6 +135,7 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                 </label>
                 <input
                   id="unsubscribe-email"
+                  disabled
                   ref={inputRef}
                   type="email"
                   inputMode="email"
@@ -157,7 +161,7 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                   <button type="button" onClick={onClose} className="btn btn-ghost">
                     Vazgeç
                   </button>
-                  <button type="submit" disabled={submitting} className="btn btn-primary">
+                  <button type="submit" disabled className="btn btn-primary">
                     {submitting ? 'Gönderiliyor…' : 'Bültenden çık'}
                   </button>
                 </div>

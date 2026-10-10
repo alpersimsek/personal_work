@@ -24,6 +24,9 @@ const changePasswordSchema = z.object({
   confirmPassword: z.string().min(1),
 });
 
+// Pay the same bcrypt cost for an unknown name without a per-request hash.
+const unknownUserHash = hashPassword('unavailable-user-timing-placeholder');
+
 export const authRouter = Router();
 
 // Session state must never be stored by a browser or a shared cache.
@@ -39,7 +42,7 @@ authRouter.post('/login', loginRateLimit, async (req, res) => {
   }
 
   const user = await findByUsername(parsed.data.username.toLowerCase());
-  const passwordMatches = user ? await verifyPassword(parsed.data.password, user.password_hash) : false;
+  const passwordMatches = await verifyPassword(parsed.data.password, user?.password_hash ?? await unknownUserHash);
   if (!user || !passwordMatches) {
     throw new HttpError(401, 'Geçersiz kullanıcı adı veya şifre.');
   }
@@ -52,19 +55,25 @@ authRouter.post('/login', loginRateLimit, async (req, res) => {
 /**
  * Ends the session for good: bumping the user's session version makes the
  * token dead even if someone copied it, not just deleted from this browser.
- * Always clears the cookie, whether or not the token was still valid.
+ * Clears the cookie for invalid tokens too, but preserves it on a storage
+ * failure so the browser can retry revoking the still-active session.
  */
 authRouter.post('/logout', async (req, res) => {
   const token = req.cookies?.[sessionCookieName()];
   if (typeof token === 'string' && token) {
+    let claims;
     try {
-      const claims = verifySession(token);
+      claims = verifySession(token);
+    } catch {
+      // An invalid or expired token has nothing left to revoke.
+    }
+    // Storage failures must reach the error handler: reporting success here
+    // would leave a copied token valid after the user thought they logged out.
+    if (claims) {
       const user = await findById(claims.userId);
       if (user && user.session_version === claims.sessionVersion) {
         await bumpSessionVersion(user.id);
       }
-    } catch {
-      // An invalid or expired token has nothing left to revoke.
     }
   }
   res.clearCookie(sessionCookieName(), sessionCookieOptions());
