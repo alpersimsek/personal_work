@@ -32,7 +32,7 @@ export function hashNewsletterToken(token: string): string {
 export async function issueNewsletterToken(input: NewsletterTokenInput): Promise<string | null> {
   return withDbTransaction(async trx => {
     const pending = await trx('newsletter_verification_tokens')
-      .where({ email: input.email, purpose: input.purpose })
+      .where({ email: input.email, purpose: input.purpose, broadcast: false })
       .whereNull('consumed_at')
       .where('expires_at', '>', trx.fn.now())
       .whereRaw('created_at > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE)')
@@ -42,7 +42,7 @@ export async function issueNewsletterToken(input: NewsletterTokenInput): Promise
 
     const token = randomBytes(TOKEN_BYTES).toString('base64url');
     await trx('newsletter_verification_tokens')
-      .where({ email: input.email, purpose: input.purpose })
+      .where({ email: input.email, purpose: input.purpose, broadcast: false })
       .whereNull('consumed_at')
       .update({ consumed_at: trx.fn.now() });
     await trx('newsletter_verification_tokens').insert({
@@ -94,7 +94,8 @@ export async function consumeNewsletterToken(
  * A long-lived unsubscribe token for a broadcast email.
  *
  * Unlike `issueNewsletterToken` it neither rate-limits nor invalidates other
- * tokens, so every newsletter a person has received keeps a working link.
+ * tokens, so every newsletter a person has received keeps a working link. It
+ * is marked `broadcast` so form-driven issuance ignores it in turn.
  */
 export async function issueBroadcastUnsubscribeToken(email: string, ttlMs: number): Promise<string> {
   const token = randomBytes(TOKEN_BYTES).toString('base64url');
@@ -102,6 +103,7 @@ export async function issueBroadcastUnsubscribeToken(email: string, ttlMs: numbe
     token_hash: hashNewsletterToken(token),
     purpose: 'unsubscribe',
     email,
+    broadcast: true,
     // Computed on the database clock: consumeNewsletterToken compares against
     // the database NOW(), so a JS Date would skew by any driver/session
     // timezone difference.

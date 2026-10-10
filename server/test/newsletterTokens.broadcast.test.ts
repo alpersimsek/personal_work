@@ -4,12 +4,13 @@ import assert from 'node:assert/strict';
 import { db } from '../db/knex.js';
 import {
   consumeNewsletterToken, hashNewsletterToken,
-  issueBroadcastUnsubscribeToken, purgeExpiredNewsletterTokens,
+  issueBroadcastUnsubscribeToken, issueNewsletterToken, purgeExpiredNewsletterTokens,
 } from '../services/newsletterTokens.js';
 
 const email = `bcast-token-${process.pid}@example.test`;
+const formEmails = ['keep', 'pending', 'regular'].map(name => `bcast-${name}-${process.pid}@example.test`);
 after(async () => {
-  await db('newsletter_verification_tokens').where({ email }).delete();
+  await db('newsletter_verification_tokens').whereIn('email', [email, ...formEmails]).delete();
   await db.destroy();
 });
 
@@ -44,4 +45,30 @@ test('only the hash is stored, and purge removes long-expired rows', async () =>
   await purgeExpiredNewsletterTokens();
   assert.equal(await db('newsletter_verification_tokens').where({ token_hash: hashNewsletterToken(old) }).first(), undefined);
   assert.ok(await db('newsletter_verification_tokens').where({ token_hash: hashNewsletterToken(token) }).first());
+});
+
+test('a form unsubscribe request does not invalidate a broadcast token', async () => {
+  const [formEmail] = formEmails;
+  const broadcast = await issueBroadcastUnsubscribeToken(formEmail, 60_000);
+  assert.equal(typeof await issueNewsletterToken({ purpose: 'unsubscribe', email: formEmail }), 'string');
+  assert.equal(await consumeNewsletterToken(broadcast, 'unsubscribe', async () => {}), true);
+});
+
+test('a pending broadcast token does not rate-limit form requests', async () => {
+  const formEmail = formEmails[1];
+  await issueBroadcastUnsubscribeToken(formEmail, 60_000);
+  assert.equal(typeof await issueNewsletterToken({ purpose: 'unsubscribe', email: formEmail }), 'string');
+});
+
+test('form tokens are still rate-limited and superseded', async () => {
+  const formEmail = formEmails[2];
+  const first = await issueNewsletterToken({ purpose: 'unsubscribe', email: formEmail });
+  assert.equal(typeof first, 'string');
+  assert.equal(await issueNewsletterToken({ purpose: 'unsubscribe', email: formEmail }), null);
+
+  await db('newsletter_verification_tokens')
+    .where({ token_hash: hashNewsletterToken(first as string) })
+    .update({ created_at: db.raw('DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 MINUTE)') });
+  assert.equal(typeof await issueNewsletterToken({ purpose: 'unsubscribe', email: formEmail }), 'string');
+  assert.equal(await consumeNewsletterToken(first as string, 'unsubscribe', async () => {}), false);
 });
