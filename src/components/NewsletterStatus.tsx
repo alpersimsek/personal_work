@@ -25,6 +25,7 @@ export function newsletterLabel(
   if (post.newsletterSentAt) {
     if (!counts) return 'Bülten: gönderildi';
     const total = counts.pending + counts.sending + counts.sent + counts.failed + counts.skipped;
+    if (total === 0) return 'Bülten: gönderildi';
     return `Bülten: ${counts.sent}/${total} gönderildi`;
   }
   if (!post.newsletterEnabled) return 'Bülten: kapalı';
@@ -36,18 +37,26 @@ export function newsletterLabel(
 export const NewsletterStatus: React.FC<Props> = ({ post, onChanged, onNotice }) => {
   const [status, setStatus] = useState<NewsletterStatusData | null>(null);
   const [busy, setBusy] = useState(false);
-  const showsProgress = Boolean(post.newsletterSentAt);
+  const showsProgress = post.published && Boolean(post.newsletterSentAt);
 
-  const load = useCallback(async () => {
-    if (!showsProgress) return;
-    try {
-      setStatus(await blogService.getNewsletterStatus(post.id));
-    } catch {
+  const load = useCallback(async (isStale: () => boolean = () => false) => {
+    if (!showsProgress) {
       setStatus(null);
+      return;
+    }
+    try {
+      const next = await blogService.getNewsletterStatus(post.id);
+      if (!isStale()) setStatus(next);
+    } catch {
+      if (!isStale()) setStatus(null);
     }
   }, [post.id, showsProgress]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    let ignore = false;
+    void load(() => ignore);
+    return () => { ignore = true; };
+  }, [load]);
 
   const run = async (action: () => Promise<unknown>, success: string) => {
     setBusy(true);
@@ -71,17 +80,20 @@ export const NewsletterStatus: React.FC<Props> = ({ post, onChanged, onNotice })
       {label && <span className="px-2.5 py-0.5 rounded font-semibold bg-neutral-100 border border-neutral-200">{label}</span>}
       {post.published && post.newsletterEnabled && !post.newsletterSentAt && post.newsletterScheduledAt && (
         <button type="button" disabled={busy} className="btn btn-secondary btn-sm"
+          aria-label={`Gönderimi iptal et: ${post.title}`}
           onClick={() => void run(() => blogService.cancelNewsletter(post.id), 'Bülten gönderimi iptal edildi.')}>
           Gönderimi iptal et
         </button>
       )}
-      {counts && counts.failed > 0 && (
+      {showsProgress && counts && counts.failed > 0 && (
         <button type="button" disabled={busy} className="btn btn-secondary btn-sm"
+          aria-label={`${counts.failed} başarısız gönderimi yeniden dene: ${post.title}`}
           onClick={() => void run(() => blogService.retryNewsletter(post.id), 'Başarısız gönderimler yeniden denenecek.')}>
-          {counts.failed} başarısızı yeniden dene
+          {counts.failed} başarısız gönderimi yeniden dene
         </button>
       )}
       <button type="button" disabled={busy} className="btn btn-ghost btn-sm"
+        aria-label={`Test e-postası gönder: ${post.title}`}
         onClick={() => void run(() => blogService.sendNewsletterTest(post.id), 'Test e-postası size gönderildi.')}>
         Test e-postası gönder
       </button>
