@@ -29,7 +29,7 @@ export function assertNewsletterMailConfiguration(): void {
   }
 }
 
-function transport(): Pick<Transporter, 'sendMail'> {
+export function mailTransport(): Pick<Transporter, 'sendMail'> {
   if (injectedTransport) return injectedTransport;
   assertNewsletterMailConfiguration();
   return nodemailer.createTransport({
@@ -53,7 +53,7 @@ export function setNewsletterMailTransportForTests(value?: Pick<Transporter, 'se
   injectedTransport = value;
 }
 
-function publicOrigin(): string {
+export function publicOrigin(): string {
   const raw = required('PUBLIC_SITE_URL').replace(/\/+$/, '');
   const url = new URL(raw);
   if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password ||
@@ -61,6 +61,10 @@ function publicOrigin(): string {
     throw new Error('PUBLIC_SITE_URL is invalid');
   }
   return url.origin;
+}
+
+export function newsletterFrom(): string {
+  return required('NEWSLETTER_FROM');
 }
 
 export async function sendNewsletterActionEmail(input: {
@@ -84,7 +88,7 @@ export async function sendNewsletterActionEmail(input: {
   const htmlUrl = escapeHtml(url);
   const htmlAction = escapeHtml(action);
   const brandMark = await readFile(new URL('../../public/newsletter-logo.png', import.meta.url));
-  await transport().sendMail({
+  await mailTransport().sendMail({
     from: required('NEWSLETTER_FROM'),
     to: input.email,
     subject: heading,

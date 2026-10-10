@@ -89,3 +89,29 @@ export async function consumeNewsletterToken(
     return true;
   });
 }
+
+/**
+ * A long-lived unsubscribe token for a broadcast email.
+ *
+ * Unlike `issueNewsletterToken` it neither rate-limits nor invalidates other
+ * tokens, so every newsletter a person has received keeps a working link.
+ */
+export async function issueBroadcastUnsubscribeToken(email: string, ttlMs: number): Promise<string> {
+  const token = randomBytes(TOKEN_BYTES).toString('base64url');
+  await db('newsletter_verification_tokens').insert({
+    token_hash: hashNewsletterToken(token),
+    purpose: 'unsubscribe',
+    email,
+    // Computed on the database clock: consumeNewsletterToken compares against
+    // the database NOW(), so a JS Date would skew by any driver/session
+    // timezone difference.
+    expires_at: db.raw('DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? SECOND)', [Math.round(ttlMs / 1000)]),
+  });
+  return token;
+}
+
+export async function purgeExpiredNewsletterTokens(): Promise<void> {
+  await db('newsletter_verification_tokens')
+    .whereRaw('expires_at < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)')
+    .delete();
+}
