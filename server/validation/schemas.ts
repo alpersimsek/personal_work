@@ -18,6 +18,7 @@ export const createPostSchema = z.object({
   coverImage: coverImageSchema.optional(),
   published: z.boolean().optional(),
   featured: z.boolean().optional(),
+  newsletterEnabled: z.boolean().optional(),
 });
 
 export const updatePostSchema = createPostSchema.partial();

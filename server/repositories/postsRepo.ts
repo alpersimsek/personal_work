@@ -15,13 +15,17 @@ export interface BlogPostRow {
   featured: boolean;
   likes: number;
   views: number;
+  newsletter_enabled: boolean;
+  newsletter_scheduled_at: string | null;
+  newsletter_sent_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 function normalize(row: BlogPostRow): BlogPostRow {
   return { ...row, tags: typeof row.tags === 'string' ? JSON.parse(row.tags) : (row.tags ?? []),
-    published: Boolean(row.published), featured: Boolean(row.featured) };
+    published: Boolean(row.published), featured: Boolean(row.featured),
+    newsletter_enabled: Boolean(row.newsletter_enabled) };
 }
 
 export interface PostFilters {
@@ -42,6 +46,7 @@ export interface PostInput {
   coverImage?: string;
   published?: boolean;
   featured?: boolean;
+  newsletterEnabled?: boolean;
 }
 
 export async function listPublished(
@@ -123,6 +128,7 @@ export async function createPost(slug: string, input: PostInput): Promise<BlogPo
     cover_image: input.coverImage ?? null,
     published: input.published ?? true,
     featured: input.featured ?? false,
+    newsletter_enabled: input.newsletterEnabled ?? true,
   });
   const created = await findById(id);
   return created!;
@@ -140,6 +146,7 @@ export async function updatePost(id: number, input: PostInput): Promise<BlogPost
   if (input.coverImage !== undefined) updates.cover_image = input.coverImage;
   if (input.published !== undefined) updates.published = input.published;
   if (input.featured !== undefined) updates.featured = input.featured;
+  if (input.newsletterEnabled !== undefined) updates.newsletter_enabled = input.newsletterEnabled;
 
   const existing = await findById(id);
   if (!existing) return undefined;
