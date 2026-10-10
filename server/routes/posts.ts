@@ -16,6 +16,7 @@ import { createPostSchema, updatePostSchema } from '../validation/schemas.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { uniqueSlug } from '../utils/slug.js';
+import { syncNewsletterSchedule } from '../services/newsletterSchedule.js';
 
 export const postsRouter = Router();
 export const adminPostsRouter = Router();
@@ -70,7 +71,7 @@ adminPostsRouter.post('/', async (req, res) => {
     await uniqueSlug(parsed.data.title, async (slug) => Boolean(await findBySlug(slug))),
     parsed.data,
   );
-  res.status(201).json(post);
+  res.status(201).json(await syncNewsletterSchedule(post));
 });
 
 adminPostsRouter.put('/:id', async (req, res) => {
@@ -82,7 +83,7 @@ adminPostsRouter.put('/:id', async (req, res) => {
   if (!updated) {
     throw new HttpError(404, 'Yazı bulunamadı.');
   }
-  res.json(updated);
+  res.json(await syncNewsletterSchedule(updated));
 });
 
 adminPostsRouter.delete('/:id', async (req, res) => {
@@ -100,5 +101,5 @@ adminPostsRouter.patch('/:id/publish', async (req, res) => {
     throw new HttpError(404, 'Yazı bulunamadı.');
   }
   const updated = await setPublished(id, !current.published);
-  res.json(updated);
+  res.json(updated && (await syncNewsletterSchedule(updated)));
 });
