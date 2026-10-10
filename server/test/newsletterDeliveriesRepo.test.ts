@@ -77,12 +77,15 @@ test('deferDelivery returns the row to pending and counts an attempt', async () 
 test('fan-out enqueues verified subscribers once and marks the post sent', async () => {
   const postId = await makePost({ newsletter_enabled: true });
   const verified = await makeSubscriber(true);
-  await makeSubscriber(false);
+  const unverified = await makeSubscriber(false);
 
   assert.equal(await fanOutDeliveries(postId), true);
   assert.equal(await fanOutDeliveries(postId), false);
   const rows = await db('newsletter_deliveries').where({ post_id: postId });
-  assert.deepEqual(rows.map(r => r.subscriber_id), [verified]);
+  const queued = rows.map(r => r.subscriber_id);
+  assert.equal(queued.filter(id => id === verified).length, 1);
+  assert.equal(queued.includes(unverified), false);
+  assert.equal(new Set(queued).size, queued.length);
 });
 
 test('a post scheduled in the past is due; one in the future is not', async () => {

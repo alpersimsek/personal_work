@@ -24,7 +24,7 @@ import {
   deliveryCounts,
   requeueFailedDeliveries,
 } from '../repositories/newsletterDeliveriesRepo.js';
-import { GmailNewsletterSender } from '../services/newsletterSender.js';
+import { GmailNewsletterSender, NewsletterSendError } from '../services/newsletterSender.js';
 import { renderBroadcast } from '../services/newsletterBroadcastMail.js';
 import { publicOrigin } from '../services/newsletterMail.js';
 
@@ -131,8 +131,11 @@ adminPostsRouter.get('/:id/newsletter', async (req, res) => {
 
 adminPostsRouter.post('/:id/newsletter/cancel', async (req, res) => {
   const id = positiveInteger(req.params.id);
-  await newsletterStatus(id);
-  await db('blog_posts').where({ id }).update({ newsletter_enabled: false, newsletter_scheduled_at: null });
+  const current = await newsletterStatus(id);
+  // After the send has started the flag is history; only the queue is stopped.
+  if (!current.sentAt) {
+    await db('blog_posts').where({ id }).update({ newsletter_enabled: false, newsletter_scheduled_at: null });
+  }
   await cancelPendingDeliveries(id);
   res.json(await newsletterStatus(id));
 });
@@ -160,7 +163,12 @@ adminPostsRouter.post('/:id/newsletter/test', async (req, res) => {
       unsubscribeUrl: origin,
     });
     await new GmailNewsletterSender().send({ to: admin.email, ...mail, unsubscribeUrl: origin });
-  } catch {
+  } catch (error) {
+    // Class name only: lets a configuration bug be told apart from an SMTP
+    // outage without the message or cause, which may hold addresses.
+    if (!(error instanceof NewsletterSendError)) {
+      console.error({ event: 'newsletter_test_failed', errorClass: error instanceof Error ? error.name : typeof error });
+    }
     throw new HttpError(503, 'Test e-postası gönderilemedi.');
   }
   res.json({ success: true });

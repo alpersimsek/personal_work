@@ -65,11 +65,17 @@ async function freshPost(): Promise<number> {
   return postId;
 }
 
+// One login for the whole file: the login rate limit allows only ten.
+let sharedAgent: ReturnType<typeof request.agent> | undefined;
+
 async function adminAgent() {
+  if (sharedAgent) return sharedAgent;
   const agent = request.agent(app);
-  await agent.post('/api/auth/login').send({
+  const login = await agent.post('/api/auth/login').send({
     username: adminUsername, password: process.env.ADMIN_PASSWORD ?? '',
   });
+  assert.equal(login.status, 200);
+  sharedAgent = agent;
   return agent;
 }
 
@@ -88,14 +94,20 @@ test('newsletter endpoints reject anonymous requests', async () => {
 
 test('newsletter POST endpoints reject cross-origin requests before side effects', async () => {
   await freshPost();
+  await db('newsletter_deliveries').insert({ post_id: postId, subscriber_id: subscriberId, status: 'pending' });
+  await db('newsletter_deliveries').insert({ post_id: postId, subscriber_id: interruptedSubscriberId, status: 'failed' });
   const agent = await adminAgent();
   mails.length = 0;
+  const statusBefore = (await agent.get(`/api/admin/posts/${postId}/newsletter`)).body;
   for (const action of ['cancel', 'retry-failed', 'test']) {
     const response = await agent.post(`/api/admin/posts/${postId}/newsletter/${action}`)
       .set('Origin', 'http://localhost:3999');
     assert.equal(response.status, 403, action);
   }
   assert.equal(mails.length, 0);
+  const statusAfter = (await agent.get(`/api/admin/posts/${postId}/newsletter`)).body;
+  assert.equal(statusAfter.enabled, true);
+  assert.deepEqual(statusAfter.counts, statusBefore.counts);
 });
 
 test('status reports flags and delivery counts', async () => {
@@ -131,6 +143,53 @@ test('cancel opts the post out, clears the schedule and skips pending deliveries
   assert.equal(response.body.enabled, false);
   assert.equal(response.body.scheduledAt, null);
   assert.equal(response.body.counts.skipped, 1);
+});
+
+test('cancel after the send started keeps the flag but still stops the queue', async () => {
+  await freshPost();
+  await db('blog_posts').where({ id: postId }).update({ newsletter_sent_at: db.fn.now() });
+  await db('newsletter_deliveries').insert({ post_id: postId, subscriber_id: subscriberId, status: 'pending' });
+  const response = await (await adminAgent()).post(`/api/admin/posts/${postId}/newsletter/cancel`);
+  assert.equal(response.status, 200);
+  assert.equal(response.body.enabled, true);
+  assert.equal(response.body.counts.skipped, 1);
+});
+
+test('POST routes answer 400 for an invalid id and 404 for an unknown post', async () => {
+  const agent = await adminAgent();
+  for (const action of ['cancel', 'retry-failed', 'test']) {
+    const invalid = await agent.post(`/api/admin/posts/abc/newsletter/${action}`);
+    assert.equal(invalid.status, 400, `${action} invalid`);
+    const unknown = await agent.post(`/api/admin/posts/99999999/newsletter/${action}`);
+    assert.equal(unknown.status, 404, `${action} unknown`);
+  }
+});
+
+test('test send without an admin email is a 400 and sends nothing', async () => {
+  await freshPost();
+  const agent = await adminAgent();
+  mails.length = 0;
+  await db('users').where({ username: adminUsername }).update({ email: null });
+  try {
+    const response = await agent.post(`/api/admin/posts/${postId}/newsletter/test`);
+    assert.equal(response.status, 400);
+    assert.equal(mails.length, 0);
+  } finally {
+    await db('users').where({ username: adminUsername }).update({ email: `${prefix}-admin@example.test` });
+  }
+});
+
+test('test send with PUBLIC_SITE_URL missing is the same generic 503', async () => {
+  await freshPost();
+  const agent = await adminAgent();
+  delete process.env.PUBLIC_SITE_URL;
+  try {
+    const response = await agent.post(`/api/admin/posts/${postId}/newsletter/test`);
+    assert.equal(response.status, 503);
+    assert.deepEqual(response.body, { error: 'Test e-postası gönderilemedi.' });
+  } finally {
+    process.env.PUBLIC_SITE_URL = 'http://localhost:3000';
+  }
 });
 
 test('test send goes only to the signed-in admin address and leaves the queue alone', async () => {
