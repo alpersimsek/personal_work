@@ -35,6 +35,22 @@ test('classifies Gmail failures', () => {
   assert.equal(classifySmtpError(new Error('boom')), 'transient');
 });
 
+test('sender-level rejections halt instead of failing recipients', () => {
+  const cases: Array<[number, string]> = [
+    [530, '530 5.7.0 Authentication Required'],
+    [534, '534 5.7.9 Application-specific password required'],
+    [550, '550 5.7.1 Message blocked, sender not allowed'],
+    [552, '552 5.3.4 Message size exceeds fixed limit'],
+    [554, '554 5.7.1 Message rejected as spam'],
+  ];
+  for (const [responseCode, response] of cases) {
+    assert.equal(classifySmtpError({ responseCode, response }), 'halt', response);
+  }
+  assert.equal(classifySmtpError({ code: 'EENVELOPE', response: '530 Authentication required' }), 'halt');
+  assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.7.1 Try again later' }), 'halt');
+  assert.equal(classifySmtpError({ responseCode: 553, response: '553 invalid recipient address' }), 'permanent');
+});
+
 test('sends one message with a List-Unsubscribe header and no other recipients', async () => {
   process.env.NEWSLETTER_FROM = 'Tuğba <newsletter@example.test>';
   const sent: Array<Record<string, unknown>> = [];
@@ -64,6 +80,7 @@ test('wraps SMTP errors with their kind and never leaks the recipient', async ()
 
 test('missing mail configuration halts instead of failing recipients', async () => {
   setNewsletterMailTransportForTests(undefined);
+  process.env.NEWSLETTER_FROM = 'Tuğba <newsletter@example.test>';
   delete process.env.NEWSLETTER_SMTP_USER;
   await assert.rejects(new GmailNewsletterSender().send(message),
     (error: unknown) => error instanceof NewsletterSendError && error.kind === 'halt');

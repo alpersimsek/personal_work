@@ -17,8 +17,8 @@ export interface BroadcastMessage {
 export type SendFailureKind = 'transient' | 'permanent' | 'halt';
 
 export class NewsletterSendError extends Error {
-  constructor(readonly kind: SendFailureKind, message: string) {
-    super(message);
+  constructor(readonly kind: SendFailureKind, message: string, options?: { cause?: unknown }) {
+    super(message, options);
     this.name = 'NewsletterSendError';
   }
 }
@@ -29,11 +29,25 @@ export interface NewsletterSender {
 
 const QUOTA_PATTERN = /(daily user sending limit|sending limit|rate limit|quota|too many|5\.4\.5|4\.5\.3|4\.7\.0)/i;
 
+const SENDER_LEVEL_PATTERN = /(\b[45]\.7\.\d+\b|authentication required|app password)/i;
+const RECIPIENT_PATTERN = /(\b5\.1\.\d+\b|no such user|user unknown|does not exist|mailbox (unavailable|not found)|invalid (recipient|address))/i;
+
+/**
+ * `permanent` is reserved for rejections that are specific to the recipient.
+ * Any other 5xx describes the sender or the message and would fail every
+ * recipient, so it halts the run and leaves recipients pending.
+ */
 export function classifySmtpError(error: unknown): SendFailureKind {
   const details = (error ?? {}) as { code?: unknown; responseCode?: unknown; response?: unknown; message?: unknown };
   const text = `${String(details.response ?? '')} ${String(details.message ?? '')}`;
-  if (details.code === 'EAUTH' || details.responseCode === 535 || QUOTA_PATTERN.test(text)) return 'halt';
-  if (typeof details.responseCode === 'number' && details.responseCode >= 500) return 'permanent';
+  const responseCode = typeof details.responseCode === 'number' ? details.responseCode : undefined;
+  const authFailure = details.code === 'EAUTH'
+    || (details.code === 'EENVELOPE' && /auth/i.test(text))
+    || responseCode === 530 || responseCode === 534 || responseCode === 535;
+  if (authFailure || QUOTA_PATTERN.test(text) || SENDER_LEVEL_PATTERN.test(text)) return 'halt';
+  if (responseCode !== undefined && responseCode >= 500) {
+    return RECIPIENT_PATTERN.test(text) ? 'permanent' : 'halt';
+  }
   return 'transient';
 }
 
@@ -50,8 +64,8 @@ export class GmailNewsletterSender implements NewsletterSender {
     try {
       mailer = mailTransport();
       from = newsletterFrom();
-    } catch {
-      throw new NewsletterSendError('halt', 'mail configuration is missing or invalid');
+    } catch (error) {
+      throw new NewsletterSendError('halt', 'mail configuration is missing or invalid', { cause: error });
     }
     try {
       await mailer.sendMail({
@@ -64,7 +78,7 @@ export class GmailNewsletterSender implements NewsletterSender {
       });
     } catch (error) {
       const kind = classifySmtpError(error);
-      throw new NewsletterSendError(kind, reasonFor(kind, error));
+      throw new NewsletterSendError(kind, reasonFor(kind, error), { cause: error });
     }
   }
 }
