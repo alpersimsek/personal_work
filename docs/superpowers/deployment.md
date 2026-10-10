@@ -131,8 +131,22 @@ Node 22 replaces the earlier Node 20 target after hosting-readiness review. Node
 - The privacy notice and consent wording live in `src/legal/kvkk.ts` and are served at `/kvkk`. `KVKK_VERSION` there must equal `CURRENT_CONSENT_VERSION` in `server/config/consent.ts` (a test fails otherwise). Every sign-up stores that version in `subscribers.consent_version`, together with `consent_at`, as proof of which wording the person agreed to. Bump both whenever the text changes.
 - Fill in `DATA_CONTROLLER.address` in `src/legal/kvkk.ts` if a postal address should appear in the notice.
 - Have a lawyer review the notice before the first send: the legal bases, the retention wording and, once a sending service is chosen, cross-border transfer (KVKK article 9) if that service stores data abroad.
-- Before sending any newsletter every message needs a working, free unsubscribe link (Law 6563 and its regulation), and the sender may need to be registered with İYS. The site has an "Bültenden çık" button (`POST /api/subscribe/unsubscribe`) that marks `subscribers.unsubscribed_at`; **never mail a row where `unsubscribed_at` is set**. Point the unsubscribe link in each message at the site (or use the mailing-list service's own), and keep the two lists in sync. Signing up again clears `unsubscribed_at` and records the new consent.
-- Run `npm run db:migrate:prod` on deploy: it adds `users.session_version` and `subscribers.consent_version`.
+- Before sending any newsletter every message needs a working, free unsubscribe link (Law 6563 and its regulation), and the sender may need to be registered with İYS. **Never mail a row unless `email_verified_at` is set and `unsubscribed_at` is null.** The site sends a one-time Gmail link for both signup and unsubscribe, and changes the row only after an explicit confirmation POST.
+- Run `npm run db:migrate:prod` on deploy. The current migrations add session versioning, consent versioning, `subscribers.email_verified_at`, and the one-time newsletter token table.
+
+### Gmail verification mail
+
+Use a dedicated Gmail or Google Workspace sender with two-step verification and a Google App Password. Do not put the normal Google account password in the app. Add these only to the hosting server's environment panel:
+
+```text
+NEWSLETTER_SMTP_USER=newsletter@your-domain.example
+NEWSLETTER_SMTP_APP_PASSWORD=<16-character Google App Password>
+NEWSLETTER_FROM=Tuğba Ergüner Şimşek <newsletter@your-domain.example>
+```
+
+The backend fixes delivery to `smtp.gmail.com:465` with TLS, bounded timeouts, and disabled file/URL access. It never returns or logs SMTP details. The App Password is read only by the backend; never prefix these names with `VITE_`, commit them, place them in browser code, or paste them into issue reports. Production refuses to start if these variables are missing or the App Password is not 16 characters after spaces are removed.
+
+After setting the variables, restart the app and submit one signup using an owner-controlled inbox. Opening the emailed link shows a confirmation page; the subscription changes only after pressing its button. Remove the test subscriber through the same verified unsubscribe flow. Gmail delivery is not exercised by automated tests; tests inject an in-memory mail transport.
 
 ## Public address and search engines
 

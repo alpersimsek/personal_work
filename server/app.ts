@@ -62,6 +62,7 @@ export function createApp(options: { staticDir?: string; serveStatic?: boolean }
   });
   app.use('/api', requireSameOrigin);
   app.use('/api/admin/images', imagesRouter);
+  app.use(express.urlencoded({ extended: false, limit: '4kb' }));
   app.use(express.json({ limit: '15mb' }));
 
   app.use('/uploads', (req, res, next) => {

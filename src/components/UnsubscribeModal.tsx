@@ -3,8 +3,6 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, MailMinus, X } from 'lucide-react';
 import { isPlausibleEmail, unsubscribe } from '../services/subscribeService';
-import { NEWSLETTER_UNAVAILABLE } from '../newsletterAvailability';
-import { DATA_CONTROLLER } from '../legal/kvkk';
 
 interface UnsubscribeModalProps {
   isOpen: boolean;
@@ -103,7 +101,7 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                   Talebin alındı
                 </h2>
                 <p className="text-white/70 text-sm leading-relaxed font-light mb-2">
-                  <span className="break-all font-medium text-white">{requestedEmail}</span> adresi bültene kayıtlıysa listeden çıkarıldı; artık size bülten göndermeyeceğiz.
+                  <span className="break-all font-medium text-white">{requestedEmail}</span> adresi listemizdeyse, yeni yazı e-postalarını durdurmak için bir onay bağlantısı gönderdik.
                 </p>
                 <p className="text-white/50 text-xs leading-relaxed mb-6">
                   Gizliliğiniz için bir adresin listede olup olmadığını söylemiyoruz. Adresi yanlış yazdıysanız başka bir adresle yeniden deneyebilirsiniz.
@@ -123,11 +121,10 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                   <MailMinus size={20} />
                 </div>
                 <h2 id={titleId} className="serif-font text-2xl sm:text-3xl tracking-tight mb-2">
-                  Bültenden çık
+                  E-posta bildirimlerini durduralım
                 </h2>
                 <p className="text-white/70 text-sm leading-relaxed font-light mb-5">
-                  {NEWSLETTER_UNAVAILABLE}{' '}
-                  <a href={`mailto:${DATA_CONTROLLER.email}`} className="underline">{DATA_CONTROLLER.email}</a>
+                  Yeni yazılardan haberdar olmak için kullandığın adresi yaz. E-posta bildirimlerini durdurman için güvenli bir onay bağlantısı göndereceğiz.
                 </p>
 
                 <label htmlFor="unsubscribe-email" className="block text-xs uppercase tracking-wider text-white/70 mb-1.5 font-medium">
@@ -135,7 +132,6 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                 </label>
                 <input
                   id="unsubscribe-email"
-                  disabled
                   ref={inputRef}
                   type="email"
                   inputMode="email"
@@ -161,8 +157,8 @@ export const UnsubscribeModal: React.FC<UnsubscribeModalProps> = ({ isOpen, onCl
                   <button type="button" onClick={onClose} className="btn btn-ghost">
                     Vazgeç
                   </button>
-                  <button type="submit" disabled className="btn btn-primary">
-                    {submitting ? 'Gönderiliyor…' : 'Bültenden çık'}
+                  <button type="submit" disabled={submitting} className="btn btn-primary">
+                    {submitting ? 'Gönderiliyor…' : 'Durdurma bağlantısı gönder'}
                   </button>
                 </div>
               </form>

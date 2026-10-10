@@ -1,12 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
-import { Mail } from 'lucide-react';
+import { CheckCircle2, Mail } from 'lucide-react';
 import { isPlausibleEmail, subscribe } from '../services/subscribeService';
 import { UnsubscribeModal } from './UnsubscribeModal';
 import { CONSENT_STATEMENT, KVKK_PATH, KVKK_VERSION } from '../legal/kvkk';
 import { navigateToPath } from '../routes';
-import { NEWSLETTER_UNAVAILABLE } from '../newsletterAvailability';
-import { DATA_CONTROLLER } from '../legal/kvkk';
 
 const DRAFT_KEY = 'tugba-subscribe-draft';
 
@@ -43,7 +41,7 @@ export const SubscribeSection: React.FC = () => {
       return;
     }
     if (!consent) {
-      setNotice({ type: 'error', text: 'Bültene katılmak için lütfen onay kutusunu işaretleyin.' });
+      setNotice({ type: 'error', text: 'E-posta ile haberdar olmak için lütfen onay kutusunu işaretleyin.' });
       return;
     }
 
@@ -52,7 +50,7 @@ export const SubscribeSection: React.FC = () => {
     try {
       const result = await subscribe({ name, email, consent, consentVersion: KVKK_VERSION, honeypot });
       if (result.success) {
-        setNotice({ type: 'success', text: 'Kaydınız alındı, teşekkürler!' });
+        setNotice({ type: 'success', text: result.message || 'Doğrulama bağlantısı e-posta adresinize gönderildi.' });
         setName('');
         setEmail('');
         setConsent(false);
@@ -82,17 +80,15 @@ export const SubscribeSection: React.FC = () => {
                 <Mail size={20} />
               </div>
               <h2 className="text-white/50 text-xs sm:text-sm tracking-[0.25em] uppercase font-semibold">
-                Bültene Katıl
+                Yeni yazılarımdan haberdar ol
               </h2>
             </div>
 
             <p className="text-white/80 text-sm sm:text-base md:text-lg leading-relaxed mb-8 font-light px-2">
-              {NEWSLETTER_UNAVAILABLE}{' '}
-              <a href={`mailto:${DATA_CONTROLLER.email}`} className="underline">{DATA_CONTROLLER.email}</a>
+              Yeni blog yazıları, farkındalık içerikleri ve duyurular e-posta kutuna gelsin.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-left" noValidate>
-              <fieldset disabled className="space-y-4 opacity-60">
               {/* Anti-bot Honeypot Input */}
               <div className="hidden" aria-hidden="true">
                 <input
@@ -167,12 +163,19 @@ export const SubscribeSection: React.FC = () => {
               </p>
 
               {notice && (
-                <p
-                  role={notice.type === 'error' ? 'alert' : 'status'}
-                  className={`text-xs sm:text-sm ${notice.type === 'success' ? 'text-emerald-300' : 'text-red-300'}`}
-                >
-                  {notice.text}
-                </p>
+                notice.type === 'success' ? (
+                  <div role="status" className="flex items-start gap-3 rounded-2xl border border-[#c99c70] bg-[#f6eadc] px-4 py-4 text-left shadow-[0_8px_24px_rgba(0,0,0,0.18)] sm:px-5">
+                    <CheckCircle2 size={22} strokeWidth={2} aria-hidden="true" className="mt-0.5 shrink-0 text-[#704a39]" />
+                    <div>
+                      <p className="text-sm font-semibold leading-snug text-[#3c2921] sm:text-base">E-posta kutunu kontrol et</p>
+                      <p className="mt-1 text-xs leading-relaxed text-[#5d493d] sm:text-sm">{notice.text}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p role="alert" className="rounded-xl border border-red-400/40 bg-red-950/40 px-4 py-3 text-left text-xs text-red-200 sm:text-sm">
+                    {notice.text}
+                  </p>
+                )
               )}
 
               <button
@@ -180,15 +183,14 @@ export const SubscribeSection: React.FC = () => {
                 disabled={submitting}
                 className="btn btn-primary btn-lg w-full"
               >
-                {submitting ? 'Gönderiliyor…' : 'Bültene Katıl'}
+                {submitting ? 'Gönderiliyor…' : 'Beni haberdar et'}
               </button>
 
               <div className="text-center">
                 <button type="button" onClick={() => setUnsubscribeOpen(true)} className="btn btn-link text-xs sm:text-sm">
-                  Bültenden çık
+                  E-posta bildirimlerini durdur
                 </button>
               </div>
-              </fieldset>
             </form>
           </div>
         </motion.div>

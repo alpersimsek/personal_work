@@ -4,6 +4,13 @@ import type { Request, Response, NextFunction } from 'express';
 export function requireSameOrigin(req: Request, res: Response, next: NextFunction): void {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
 
+  // These two POSTs are authorized only by a random, expiring, one-time token
+  // delivered to the mailbox owner. Email clients may submit them with an
+  // external Origin/Fetch-Metadata context; there is no cookie authority here.
+  // Other API writes continue through the same-origin check below.
+  if (req.method === 'POST' &&
+      ['/subscribe/confirm', '/subscribe/unsubscribe/confirm'].includes(req.path)) return next();
+
   const expected = process.env.NODE_ENV === 'production'
     ? process.env.PUBLIC_SITE_URL
     : process.env.ALLOWED_ORIGIN || `${req.protocol}://${req.get('host')}`;

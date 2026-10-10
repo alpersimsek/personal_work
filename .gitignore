@@ -53,3 +53,9 @@ strix_runs/host-docker-internal-3000_2b24/.state/agents.db
 strix_runs/host-docker-internal-3000_2b24/.state/agents.db-shm
 strix_runs/host-docker-internal-3000_2b24/.state/agents.db-wal
 strix_runs/host-docker-internal-3000_2b24/.state/agents.json
+.env.example
+.env.example
+README.md
+docs/security/gmail-newsletter-implementation-plan.md
+public/tugba-brand-animated.gif
+public/newsletter-logo.png

@@ -44,7 +44,10 @@ async function failureMessage(response: Response, fallback: string): Promise<str
 export async function subscribe(input: SubscribeInput): Promise<SubscribeResult> {
   const response = await postJson('/api/subscribe', input);
   if (!response) return { success: false, message: NETWORK_ERROR };
-  if (response.ok) return { success: true };
+  if (response.ok) {
+    const data = await response.json().catch(() => ({}));
+    return { success: true, message: typeof data.message === 'string' ? data.message : undefined };
+  }
   return {
     success: false,
     message: await failureMessage(response, 'Kaydınız şu anda alınamadı. Lütfen bilgilerinizi kontrol edip tekrar deneyin.'),
@@ -60,7 +63,10 @@ export async function subscribe(input: SubscribeInput): Promise<SubscribeResult>
 export async function unsubscribe(email: string): Promise<SubscribeResult> {
   const response = await postJson('/api/subscribe/unsubscribe', { email });
   if (!response) return { success: false, message: NETWORK_ERROR };
-  if (response.ok) return { success: true };
+  if (response.ok) {
+    const data = await response.json().catch(() => ({}));
+    return { success: true, message: typeof data.message === 'string' ? data.message : undefined };
+  }
   return {
     success: false,
     message: await failureMessage(response, 'E-posta adresi geçerli görünmüyor. Lütfen kontrol edip tekrar deneyin.'),
