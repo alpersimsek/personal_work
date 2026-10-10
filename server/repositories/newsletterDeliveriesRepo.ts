@@ -102,6 +102,15 @@ export const markFailed = (id: number, reason: string): Promise<number> =>
     .update({ status: 'failed', attempts: db.raw('attempts + 1'), last_error: reason.slice(0, 255), updated_at: db.fn.now() });
 
 /**
+ * Puts a claimed delivery back without counting an attempt, for sender-level
+ * pauses (quota, authentication, configuration) that say nothing about the
+ * recipient.
+ */
+export const releaseDelivery = (id: number): Promise<number> =>
+  db('newsletter_deliveries').where({ id, status: 'sending' })
+    .update({ status: 'pending', updated_at: db.fn.now() });
+
+/**
  * Puts a claimed delivery back and counts an attempt, so that when sending
  * halts repeatedly on the same recipient it sinks behind fresher deliveries.
  */
@@ -144,11 +153,21 @@ export async function deliveryCounts(postId: number): Promise<Record<DeliverySta
 }
 
 /**
- * `interrupted` deliveries are left alone: their email may already have gone
- * out, so re-queueing them could send a duplicate.
+ * Failed deliveries that retry-failed will re-queue. `interrupted` deliveries
+ * are left alone: their email may already have gone out, so re-queueing them
+ * could send a duplicate.
  */
-export function requeueFailedDeliveries(postId: number): Promise<number> {
+function retryableFailed(postId: number) {
   return db('newsletter_deliveries').where({ post_id: postId, status: 'failed' })
-    .where(builder => builder.whereNull('last_error').orWhereNot('last_error', 'interrupted'))
+    .where(builder => builder.whereNull('last_error').orWhereNot('last_error', 'interrupted'));
+}
+
+export async function countRetryableFailed(postId: number): Promise<number> {
+  const row = await retryableFailed(postId).count<{ count: string }[]>({ count: 'id' }).first();
+  return Number(row?.count ?? 0);
+}
+
+export function requeueFailedDeliveries(postId: number): Promise<number> {
+  return retryableFailed(postId)
     .update({ status: 'pending', attempts: 0, last_error: null, updated_at: db.fn.now() });
 }

@@ -150,7 +150,9 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     coverImage: coverImage.trim(),
     tags: tagsInput.split(',').map((tag) => tag.trim()).filter(Boolean),
     featured,
-    newsletterEnabled,
+    // Sent only when changed here, so a stale tab cannot re-enable a newsletter
+    // that was cancelled elsewhere after this editor was opened.
+    ...(newsletterEnabled !== (editingPost?.newsletterEnabled ?? true) ? { newsletterEnabled } : {}),
   });
 
   /** Saves the editor and returns the stored article, or null after showing why not. */

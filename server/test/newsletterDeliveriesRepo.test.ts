@@ -11,6 +11,7 @@ import {
   markFailed,
   markRetry,
   reclaimStaleDeliveries,
+  releaseDelivery,
   requeueFailedDeliveries,
 } from '../repositories/newsletterDeliveriesRepo.js';
 
@@ -163,4 +164,25 @@ test('requeueFailedDeliveries skips interrupted deliveries that may already be s
   assert.deepEqual(rows.map(row => row.status), ['pending', 'failed']);
   assert.equal(rows[0].attempts, 0);
   assert.equal(rows[1].last_error, 'interrupted');
+});
+
+test('releaseDelivery returns a sending row to pending without counting an attempt', async () => {
+  const postId = await makePost();
+  const subscriberId = await makeSubscriber();
+  await db('newsletter_deliveries')
+    .insert({ post_id: postId, subscriber_id: subscriberId, status: 'pending', attempts: 2 });
+  const claimed = await claimNextDelivery(postId);
+  assert.ok(claimed);
+
+  assert.equal(await releaseDelivery(claimed.id), 1);
+  const row = await db('newsletter_deliveries').where({ id: claimed.id }).first();
+  assert.equal(row.status, 'pending');
+  assert.equal(row.attempts, 2);
+
+  // Not sending any more, so a second release (or one after a cancel) is a no-op.
+  assert.equal(await releaseDelivery(claimed.id), 0);
+  await claimNextDelivery(postId);
+  await cancelPendingDeliveries(postId);
+  assert.equal(await releaseDelivery(claimed.id), 0);
+  assert.equal((await db('newsletter_deliveries').where({ id: claimed.id }).first()).status, 'skipped');
 });

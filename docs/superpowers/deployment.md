@@ -166,7 +166,7 @@ NEWSLETTER_WORKER_ENABLED=<true in production, false elsewhere>
 NEWSLETTER_DELAY_MINUTES=10
 NEWSLETTER_BATCH_SIZE=20
 NEWSLETTER_DAILY_CAP=400
-NEWSLETTER_UNSUBSCRIBE_TTL_DAYS=30
+NEWSLETTER_UNSUBSCRIBE_TTL_DAYS=365
 ```
 
 - `NEWSLETTER_WORKER_ENABLED` defaults to on only when `NODE_ENV=production` and to off everywhere else, so a development server never mails real subscribers. Set it to `true` to test sending locally, `false` to stop it in production.
@@ -174,8 +174,12 @@ NEWSLETTER_UNSUBSCRIBE_TTL_DAYS=30
 - The worker runs inside the API process, so the Node.js app must stay running; there is no separate worker or cron job. If the app is stopped, queued mail waits and is sent when it starts again.
 - `PUBLIC_SITE_URL` and the Gmail app password (`NEWSLETTER_SMTP_APP_PASSWORD`, see above) are required to send. Without them the worker halts sending and the admin test send answers 503.
 - Run `npm run db:migrate` (`npm run db:migrate:prod` on the host) before deploying. The feature needs migrations `20261011000007` and `20261011000008`.
-- On a Gmail quota, authentication or configuration error, sending pauses for an hour and resumes by itself. Fix the cause (app password, quota) in the meantime; no manual restart is needed.
-- Sends are at-most-once. A delivery interrupted by a crash or restart while it was being sent is marked `interrupted` and is never re-sent automatically, because the message may already have gone out (a possible duplicate). The admin "retry failed" action skips interrupted deliveries on purpose.
+- Sending pauses for an hour and resumes by itself on a Gmail quota, authentication or configuration error, and also after 3 transient send failures in a row (for example a network outage). These pauses never count against a recipient. Fix the cause (app password, quota) in the meantime; no manual restart is needed.
+- An unrecognised sender-side 5xx rejection also pauses sending, but it counts against the recipient it happened on: after 6 such attempts that delivery is failed. "Retry failed" in the admin re-queues it.
+- Unpublishing a post in the middle of a send cancels all its remaining recipients, and publishing it again does not resume the send. Do not unpublish a post while it is being sent.
+- Only posts that were published when migration `20261011000007` ran are protected from a retroactive email. A post that was live earlier but was a draft at that moment will be emailed when it is published again; turn off "Send to subscribers" for such posts before republishing.
+- Rarely, a lost SMTP acknowledgement can make one subscriber receive the same email twice.
+- Sends are at-most-once. Restarting the API during a send can leave one delivery marked `interrupted`; it is never re-sent automatically, because the message may already have gone out (a possible duplicate). The admin "retry failed" action skips interrupted deliveries on purpose.
 - To move to a mail relay later, add one class implementing `NewsletterSender` (`server/services/newsletterSender.ts`) and use it where `GmailNewsletterSender` is constructed; the queue, worker and templates stay as they are.
 - Timezones: the broadcast code compares times with the database clock (`NOW()` and the database session timezone). The older newsletter verification-token expiry still uses the application clock. If the host's timezone and the database's timezone differ, those two can disagree by the offset; keep both on the same timezone (UTC is simplest).
 - Send one test email from the blog admin with an owner-controlled admin address before the first real publish. Test sends go only to the signed-in admin's own address and never touch the queue.

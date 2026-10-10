@@ -116,7 +116,21 @@ test('status reports flags and delivery counts', async () => {
   const response = await (await adminAgent()).get(`/api/admin/posts/${postId}/newsletter`);
   assert.equal(response.status, 200);
   assert.equal(response.body.counts.failed, 1);
+  assert.equal(response.body.retryableFailed, 1);
   assert.equal(response.body.enabled, true);
+});
+
+test('status counts only failed rows that retry-failed will requeue as retryable', async () => {
+  await freshPost();
+  await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: subscriberId, status: 'failed', last_error: 'permanent (smtp 550)',
+  });
+  await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: interruptedSubscriberId, status: 'failed', last_error: 'interrupted',
+  });
+  const response = await (await adminAgent()).get(`/api/admin/posts/${postId}/newsletter`);
+  assert.equal(response.body.counts.failed, 2);
+  assert.equal(response.body.retryableFailed, 1);
 });
 
 test('retry-failed requeues failed rows but never interrupted ones', async () => {
@@ -129,6 +143,7 @@ test('retry-failed requeues failed rows but never interrupted ones', async () =>
   assert.equal(response.status, 200);
   assert.equal(response.body.counts.pending, 1);
   assert.equal(response.body.counts.failed, 1);
+  assert.equal(response.body.retryableFailed, 0);
   const interrupted = await db('newsletter_deliveries')
     .where({ post_id: postId, subscriber_id: interruptedSubscriberId }).first('status', 'last_error');
   assert.deepEqual({ ...interrupted }, { status: 'failed', last_error: 'interrupted' });

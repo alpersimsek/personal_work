@@ -29,6 +29,6 @@ export function newsletterBroadcastConfig(): NewsletterBroadcastConfig {
     delayMinutes: positiveInteger('NEWSLETTER_DELAY_MINUTES', 10),
     batchSize: positiveInteger('NEWSLETTER_BATCH_SIZE', 20),
     dailyCap: positiveInteger('NEWSLETTER_DAILY_CAP', 400),
-    unsubscribeTtlDays: positiveInteger('NEWSLETTER_UNSUBSCRIBE_TTL_DAYS', 30),
+    unsubscribeTtlDays: positiveInteger('NEWSLETTER_UNSUBSCRIBE_TTL_DAYS', 365),
   };
 }

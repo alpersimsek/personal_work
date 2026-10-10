@@ -34,7 +34,7 @@ test('configuration has safe defaults and rejects nonsense values', () => {
     for (const key of keys) if (key !== 'NODE_ENV') delete process.env[key];
     process.env.NODE_ENV = 'test';
     assert.deepEqual(newsletterBroadcastConfig(),
-      { workerEnabled: false, delayMinutes: 10, batchSize: 20, dailyCap: 400, unsubscribeTtlDays: 30 });
+      { workerEnabled: false, delayMinutes: 10, batchSize: 20, dailyCap: 400, unsubscribeTtlDays: 365 });
     process.env.NEWSLETTER_DAILY_CAP = '-5';
     process.env.NEWSLETTER_DELAY_MINUTES = 'abc';
     const config = newsletterBroadcastConfig();

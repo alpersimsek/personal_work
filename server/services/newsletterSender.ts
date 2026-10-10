@@ -11,10 +11,13 @@ export interface BroadcastMessage {
 /**
  * - `transient`: try this recipient again later.
  * - `permanent`: this recipient will never work (mailbox missing); stop trying.
- * - `halt`: nothing can be sent right now (quota, authentication, missing
- *   configuration). Leave every recipient pending.
+ * - `pause`: a sender-level problem that says nothing about the recipient
+ *   (quota, authentication, 4.7.x/5.7.x policy, missing configuration). Stop
+ *   sending and leave the recipient untouched.
+ * - `halt`: any other 5xx that is not recipient-specific. Stop sending, but
+ *   count it against the recipient in case it really is about that address.
  */
-export type SendFailureKind = 'transient' | 'permanent' | 'halt';
+export type SendFailureKind = 'transient' | 'permanent' | 'halt' | 'pause';
 
 export class NewsletterSendError extends Error {
   constructor(readonly kind: SendFailureKind, message: string, options?: { cause?: unknown }) {
@@ -34,8 +37,8 @@ const RECIPIENT_PATTERN = /(\b5\.1\.\d+\b|no such user|user unknown|does not exi
 
 /**
  * `permanent` is reserved for rejections that are specific to the recipient.
- * Any other 5xx describes the sender or the message and would fail every
- * recipient, so it halts the run and leaves recipients pending.
+ * Sender-level problems pause the run without touching the recipient; any
+ * other 5xx halts the run and counts against the recipient.
  */
 export function classifySmtpError(error: unknown): SendFailureKind {
   const details = (error ?? {}) as { code?: unknown; responseCode?: unknown; response?: unknown; message?: unknown };
@@ -44,7 +47,7 @@ export function classifySmtpError(error: unknown): SendFailureKind {
   const authFailure = details.code === 'EAUTH'
     || (details.code === 'EENVELOPE' && /auth/i.test(text))
     || responseCode === 530 || responseCode === 534 || responseCode === 535;
-  if (authFailure || QUOTA_PATTERN.test(text) || SENDER_LEVEL_PATTERN.test(text)) return 'halt';
+  if (authFailure || QUOTA_PATTERN.test(text) || SENDER_LEVEL_PATTERN.test(text)) return 'pause';
   if (responseCode !== undefined && responseCode >= 500) {
     return RECIPIENT_PATTERN.test(text) ? 'permanent' : 'halt';
   }
@@ -65,7 +68,7 @@ export class GmailNewsletterSender implements NewsletterSender {
       mailer = mailTransport();
       from = newsletterFrom();
     } catch (error) {
-      throw new NewsletterSendError('halt', 'mail configuration is missing or invalid', { cause: error });
+      throw new NewsletterSendError('pause', 'mail configuration is missing or invalid', { cause: error });
     }
     try {
       await mailer.sendMail({

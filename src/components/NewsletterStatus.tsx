@@ -73,6 +73,7 @@ export const NewsletterStatus: React.FC<Props> = ({ post, onChanged, onNotice })
   };
 
   const counts = status?.counts;
+  const retryable = status?.retryableFailed ?? 0;
   const label = newsletterLabel(post, counts);
 
   return (
@@ -85,11 +86,11 @@ export const NewsletterStatus: React.FC<Props> = ({ post, onChanged, onNotice })
           Gönderimi iptal et
         </button>
       )}
-      {showsProgress && counts && counts.failed > 0 && (
+      {showsProgress && retryable > 0 && (
         <button type="button" disabled={busy} className="btn btn-secondary btn-sm"
-          aria-label={`${counts.failed} başarısız gönderimi yeniden dene: ${post.title}`}
+          aria-label={`${retryable} başarısız gönderimi yeniden dene: ${post.title}`}
           onClick={() => void run(() => blogService.retryNewsletter(post.id), 'Başarısız gönderimler yeniden denenecek.')}>
-          {counts.failed} başarısız gönderimi yeniden dene
+          {retryable} başarısız gönderimi yeniden dene
         </button>
       )}
       <button type="button" disabled={busy} className="btn btn-ghost btn-sm"

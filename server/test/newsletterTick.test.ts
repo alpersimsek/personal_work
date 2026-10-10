@@ -163,13 +163,60 @@ test('the rolling daily cap stops sending and leaves the rest pending', async ()
   assert.equal(pending.length, 2);
 });
 
-test('a quota or auth error halts the tick and burns no recipient to failed', async () => {
+test('a quota or auth pause stops the tick and leaves every recipient untouched', async () => {
   const first = await makeSubscriber('a');
   const second = await makeSubscriber('b');
   const postId = await makeHermeticDuePost();
   const sender = new FakeSender();
-  sender.failures.set(first.email, new NewsletterSendError('halt', 'halt (smtp 550)'));
-  sender.failures.set(second.email, new NewsletterSendError('halt', 'halt (smtp 550)'));
+  sender.alwaysFail = new NewsletterSendError('pause', 'pause (smtp 535)');
+  const result = await runBroadcastTick({ sender, postId });
+  assert.equal(result.halted, true);
+  assert.equal(result.haltReason, 'send');
+  assert.equal(sender.attempted.filter(mine).length, 1);
+  const rows = await myDeliveries(postId);
+  assert.deepEqual(
+    rows.map(row => [row.email, row.status, row.attempts, row.last_error]).sort(),
+    [[first.email, 'pending', 0, null], [second.email, 'pending', 0, null]],
+  );
+});
+
+test('a pause repeated for many ticks never counts an attempt or fails anyone', async () => {
+  for (const name of ['a', 'b']) await makeSubscriber(name);
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  sender.alwaysFail = new NewsletterSendError('pause', 'mail configuration is missing or invalid');
+  for (let round = 0; round < 8; round++) {
+    assert.equal((await runBroadcastTick({ sender, postId })).halted, true);
+  }
+  assert.equal(sender.attempted.filter(mine).length, 8);
+  const rows = await myDeliveries(postId);
+  assert.ok(rows.every(row => row.status === 'pending' && row.attempts === 0));
+});
+
+test('a repeated non-recipient 5xx halt still fails the recipient after 6 attempts', async () => {
+  const stuck = await makeSubscriber('stuck');
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  sender.failures.set(stuck.email, new NewsletterSendError('halt', 'halt (smtp 552)'));
+  for (let round = 0; round < 5; round++) await runBroadcastTick({ sender, postId });
+  const deferred = await deliveryOf(postId, stuck.email);
+  assert.equal(deferred.status, 'pending');
+  assert.equal(deferred.attempts, 5);
+  const result = await runBroadcastTick({ sender, postId });
+  assert.equal(result.failed, 1);
+  const row = await deliveryOf(postId, stuck.email);
+  assert.equal(row.status, 'failed');
+  assert.equal(row.attempts, 6);
+  assert.equal(row.last_error, 'halt-repeated');
+});
+
+test('a non-recipient 5xx halts the tick and defers only the claimed recipient', async () => {
+  const first = await makeSubscriber('a');
+  const second = await makeSubscriber('b');
+  const postId = await makeHermeticDuePost();
+  const sender = new FakeSender();
+  sender.failures.set(first.email, new NewsletterSendError('halt', 'halt (smtp 552)'));
+  sender.failures.set(second.email, new NewsletterSendError('halt', 'halt (smtp 552)'));
   const result = await runBroadcastTick({ sender, postId });
   assert.equal(result.halted, true);
   assert.equal(result.haltReason, 'send');

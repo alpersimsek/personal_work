@@ -3,7 +3,7 @@ import { findById } from '../repositories/postsRepo.js';
 import type { SubscriberRow } from '../repositories/subscribersRepo.js';
 import {
   claimNextDelivery, countSentInLast24Hours, deferDelivery, fanOutDeliveries, listDuePostIds, markFailed,
-  markRetry, markSent as markDeliverySent, markSkipped, reclaimStaleDeliveries, type DeliveryRow,
+  markRetry, markSent as markDeliverySent, markSkipped, reclaimStaleDeliveries, releaseDelivery, type DeliveryRow,
 } from '../repositories/newsletterDeliveriesRepo.js';
 import { newsletterBroadcastConfig } from '../config/newsletterBroadcast.js';
 import { issueBroadcastUnsubscribeToken, purgeExpiredNewsletterTokens } from './newsletterTokens.js';
@@ -59,6 +59,12 @@ export function describeErrorSafely(error: unknown): string {
 /** Records a failed send, storing only `failure.message`, never `cause`. */
 async function recordSendFailure(delivery: DeliveryRow, failure: NewsletterSendError): Promise<DeliveryResult> {
   const transientSendFailure = failure.kind === 'transient';
+  if (failure.kind === 'pause') {
+    // A sender-level problem says nothing about this recipient: put the row
+    // back untouched so a long outage can never fail anyone.
+    await releaseDelivery(delivery.id);
+    return { outcome: 'halt', transientSendFailure };
+  }
   if (failure.kind === 'halt') {
     // Deferring counts an attempt, so a recipient that keeps halting sinks
     // behind fresh ones instead of blocking the queue.

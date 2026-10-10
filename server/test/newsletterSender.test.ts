@@ -28,26 +28,35 @@ const message = {
 };
 
 test('classifies Gmail failures', () => {
-  assert.equal(classifySmtpError({ responseCode: 550, response: '550-5.4.5 Daily user sending limit exceeded' }), 'halt');
-  assert.equal(classifySmtpError({ code: 'EAUTH', responseCode: 535, response: '535 Username and Password not accepted' }), 'halt');
+  assert.equal(classifySmtpError({ responseCode: 550, response: '550-5.4.5 Daily user sending limit exceeded' }), 'pause');
+  assert.equal(classifySmtpError({ code: 'EAUTH', responseCode: 535, response: '535 Username and Password not accepted' }), 'pause');
   assert.equal(classifySmtpError({ responseCode: 550, response: '550 5.1.1 The email account does not exist' }), 'permanent');
   assert.equal(classifySmtpError({ code: 'ETIMEDOUT', message: 'Connection timeout' }), 'transient');
   assert.equal(classifySmtpError(new Error('boom')), 'transient');
 });
 
-test('sender-level rejections halt instead of failing recipients', () => {
+test('sender-level rejections pause without touching recipients', () => {
   const cases: Array<[number, string]> = [
     [530, '530 5.7.0 Authentication Required'],
     [534, '534 5.7.9 Application-specific password required'],
+    [535, '535 5.7.8 Username and Password not accepted'],
     [550, '550 5.7.1 Message blocked, sender not allowed'],
-    [552, '552 5.3.4 Message size exceeds fixed limit'],
     [554, '554 5.7.1 Message rejected as spam'],
+    [421, '421 4.7.0 Try again later, closing connection'],
   ];
   for (const [responseCode, response] of cases) {
-    assert.equal(classifySmtpError({ responseCode, response }), 'halt', response);
+    assert.equal(classifySmtpError({ responseCode, response }), 'pause', response);
   }
-  assert.equal(classifySmtpError({ code: 'EENVELOPE', response: '530 Authentication required' }), 'halt');
-  assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.7.1 Try again later' }), 'halt');
+  assert.equal(classifySmtpError({ code: 'EAUTH', message: 'Invalid login' }), 'pause');
+  assert.equal(classifySmtpError({ code: 'EENVELOPE', response: '530 Authentication required' }), 'pause');
+  assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.7.1 Try again later' }), 'pause');
+  assert.equal(classifySmtpError({ responseCode: 452, response: '452 Too many recipients' }), 'pause');
+});
+
+test('other non-recipient 5xx rejections halt', () => {
+  assert.equal(classifySmtpError({ responseCode: 552, response: '552 5.3.4 Message size exceeds fixed limit' }), 'halt');
+  assert.equal(classifySmtpError({ responseCode: 554, response: '554 5.6.0 Message content rejected' }), 'halt');
+  assert.equal(classifySmtpError({ responseCode: 550, response: '550 5.1.1 The email account does not exist' }), 'permanent');
   assert.equal(classifySmtpError({ responseCode: 553, response: '553 invalid recipient address' }), 'permanent');
 });
 
@@ -72,16 +81,16 @@ test('wraps SMTP errors with their kind and never leaks the recipient', async ()
   });
   await assert.rejects(new GmailNewsletterSender().send(message), (error: unknown) => {
     assert.ok(error instanceof NewsletterSendError);
-    assert.equal(error.kind, 'halt');
+    assert.equal(error.kind, 'pause');
     assert.doesNotMatch(error.message, /person@example\.test/);
     return true;
   });
 });
 
-test('missing mail configuration halts instead of failing recipients', async () => {
+test('missing mail configuration pauses instead of failing recipients', async () => {
   setNewsletterMailTransportForTests(undefined);
   process.env.NEWSLETTER_FROM = 'Tuğba <newsletter@example.test>';
   delete process.env.NEWSLETTER_SMTP_USER;
   await assert.rejects(new GmailNewsletterSender().send(message),
-    (error: unknown) => error instanceof NewsletterSendError && error.kind === 'halt');
+    (error: unknown) => error instanceof NewsletterSendError && error.kind === 'pause');
 });

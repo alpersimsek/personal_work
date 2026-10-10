@@ -21,6 +21,7 @@ import { db } from '../db/knex.js';
 import { findById as findUserById } from '../repositories/usersRepo.js';
 import {
   cancelPendingDeliveries,
+  countRetryableFailed,
   deliveryCounts,
   requeueFailedDeliveries,
 } from '../repositories/newsletterDeliveriesRepo.js';
@@ -122,6 +123,7 @@ async function newsletterStatus(id: number) {
     scheduledAt: post.newsletter_scheduled_at,
     sentAt: post.newsletter_sent_at,
     counts: await deliveryCounts(id),
+    retryableFailed: await countRetryableFailed(id),
   };
 }
 

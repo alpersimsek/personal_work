@@ -64,6 +64,8 @@ export interface NewsletterStatusData {
   scheduledAt: string | null;
   sentAt: string | null;
   counts: Record<'pending' | 'sending' | 'sent' | 'failed' | 'skipped', number>;
+  /** Failed deliveries that retry-failed will re-queue (excludes interrupted ones). */
+  retryableFailed: number;
 }
 
 export const blogService = {
