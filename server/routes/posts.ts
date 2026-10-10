@@ -17,6 +17,16 @@ import { requireAuth } from '../middleware/requireAuth.js';
 import { HttpError } from '../middleware/errorHandler.js';
 import { uniqueSlug } from '../utils/slug.js';
 import { syncNewsletterSchedule } from '../services/newsletterSchedule.js';
+import { db } from '../db/knex.js';
+import { findById as findUserById } from '../repositories/usersRepo.js';
+import {
+  cancelPendingDeliveries,
+  deliveryCounts,
+  requeueFailedDeliveries,
+} from '../repositories/newsletterDeliveriesRepo.js';
+import { GmailNewsletterSender } from '../services/newsletterSender.js';
+import { renderBroadcast } from '../services/newsletterBroadcastMail.js';
+import { publicOrigin } from '../services/newsletterMail.js';
 
 export const postsRouter = Router();
 export const adminPostsRouter = Router();
@@ -102,4 +112,56 @@ adminPostsRouter.patch('/:id/publish', async (req, res) => {
   }
   const updated = await setPublished(id, !current.published);
   res.json(updated && (await syncNewsletterSchedule(updated)));
+});
+
+async function newsletterStatus(id: number) {
+  const post = await findById(id);
+  if (!post) throw new HttpError(404, 'Yazı bulunamadı.');
+  return {
+    enabled: post.newsletter_enabled,
+    scheduledAt: post.newsletter_scheduled_at,
+    sentAt: post.newsletter_sent_at,
+    counts: await deliveryCounts(id),
+  };
+}
+
+adminPostsRouter.get('/:id/newsletter', async (req, res) => {
+  res.json(await newsletterStatus(positiveInteger(req.params.id)));
+});
+
+adminPostsRouter.post('/:id/newsletter/cancel', async (req, res) => {
+  const id = positiveInteger(req.params.id);
+  await newsletterStatus(id);
+  await db('blog_posts').where({ id }).update({ newsletter_enabled: false, newsletter_scheduled_at: null });
+  await cancelPendingDeliveries(id);
+  res.json(await newsletterStatus(id));
+});
+
+adminPostsRouter.post('/:id/newsletter/retry-failed', async (req, res) => {
+  const id = positiveInteger(req.params.id);
+  await newsletterStatus(id);
+  await requeueFailedDeliveries(id);
+  res.json(await newsletterStatus(id));
+});
+
+// Sends only to the signed-in admin's own address and never touches the queue.
+// The cause of a failure is deliberately neither logged nor returned: it can
+// contain SMTP responses and recipient addresses.
+adminPostsRouter.post('/:id/newsletter/test', async (req, res) => {
+  const post = await findById(positiveInteger(req.params.id));
+  if (!post) throw new HttpError(404, 'Yazı bulunamadı.');
+  const admin = req.user ? await findUserById(req.user.userId) : undefined;
+  if (!admin?.email) throw new HttpError(400, 'Hesabınızda e-posta adresi tanımlı değil.');
+  try {
+    const origin = publicOrigin();
+    const mail = renderBroadcast({
+      post: { slug: post.slug, title: post.title, summary: post.summary, coverImage: post.cover_image },
+      origin,
+      unsubscribeUrl: origin,
+    });
+    await new GmailNewsletterSender().send({ to: admin.email, ...mail, unsubscribeUrl: origin });
+  } catch {
+    throw new HttpError(503, 'Test e-postası gönderilemedi.');
+  }
+  res.json({ success: true });
 });

@@ -11,6 +11,7 @@ import {
   markFailed,
   markRetry,
   reclaimStaleDeliveries,
+  requeueFailedDeliveries,
 } from '../repositories/newsletterDeliveriesRepo.js';
 
 const prefix = `deliv-${process.pid}`;
@@ -144,4 +145,19 @@ test('a stale sending delivery is failed as interrupted, never re-queued', async
   assert.equal(stale.last_error, 'interrupted');
   assert.equal(stale.attempts, 1);
   assert.equal((await db('newsletter_deliveries').where({ id: freshId }).first()).status, 'sending');
+});
+
+test('requeueFailedDeliveries skips interrupted deliveries that may already be sent', async () => {
+  const postId = await makePost();
+  const [plain, interrupted] = [await makeSubscriber(), await makeSubscriber()];
+  await db('newsletter_deliveries').insert([
+    { post_id: postId, subscriber_id: plain, status: 'failed', last_error: 'permanent (smtp 550)', attempts: 2 },
+    { post_id: postId, subscriber_id: interrupted, status: 'failed', last_error: 'interrupted' },
+  ]);
+
+  assert.equal(await requeueFailedDeliveries(postId), 1);
+  const rows = await db('newsletter_deliveries').where({ post_id: postId }).orderBy('id');
+  assert.deepEqual(rows.map(row => row.status), ['pending', 'failed']);
+  assert.equal(rows[0].attempts, 0);
+  assert.equal(rows[1].last_error, 'interrupted');
 });

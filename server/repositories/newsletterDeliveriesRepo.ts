@@ -117,7 +117,7 @@ export const deferDelivery = (id: number): Promise<number> =>
  * A crash (or a failed write) between claim and result leaves a row `sending`
  * and we cannot know whether its email went out. Delivery is at-most-once: a
  * stale `sending` row is marked failed as `interrupted`, never re-sent
- * automatically; an admin can re-queue it with retry-failed.
+ * automatically, and retry-failed deliberately skips it to avoid a duplicate.
  */
 export async function reclaimStaleDeliveries(): Promise<void> {
   await db('newsletter_deliveries')
@@ -143,7 +143,12 @@ export async function deliveryCounts(postId: number): Promise<Record<DeliverySta
   return counts;
 }
 
+/**
+ * `interrupted` deliveries are left alone: their email may already have gone
+ * out, so re-queueing them could send a duplicate.
+ */
 export function requeueFailedDeliveries(postId: number): Promise<number> {
   return db('newsletter_deliveries').where({ post_id: postId, status: 'failed' })
+    .where(builder => builder.whereNull('last_error').orWhereNot('last_error', 'interrupted'))
     .update({ status: 'pending', attempts: 0, last_error: null, updated_at: db.fn.now() });
 }
