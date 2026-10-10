@@ -31,10 +31,13 @@ export async function fanOutDeliveries(postId: number): Promise<boolean> {
     const post = await trx('blog_posts').where({ id: postId }).forUpdate()
       .first('id', 'published', 'newsletter_enabled', 'newsletter_sent_at');
     if (!post || post.newsletter_sent_at || !post.published || !post.newsletter_enabled) return false;
+    // Only a duplicate (post, subscriber) is ignored; INSERT IGNORE would also
+    // swallow foreign-key and data errors.
     await trx.raw(
-      `INSERT IGNORE INTO newsletter_deliveries (post_id, subscriber_id, status)
-       SELECT ?, id, 'pending' FROM subscribers
-       WHERE email_verified_at IS NOT NULL AND unsubscribed_at IS NULL`,
+      `INSERT INTO newsletter_deliveries (post_id, subscriber_id, status)
+       SELECT ?, s.id, 'pending' FROM subscribers s
+       WHERE s.email_verified_at IS NOT NULL AND s.unsubscribed_at IS NULL
+       ON DUPLICATE KEY UPDATE newsletter_deliveries.id = newsletter_deliveries.id`,
       [postId],
     );
     await trx('blog_posts').where({ id: postId }).update({ newsletter_sent_at: trx.fn.now() });
@@ -75,6 +78,10 @@ export async function claimNextDelivery(onlyPostId?: number, excludeIds: number[
   return null;
 }
 
+/**
+ * Unguarded on purpose: once the email has gone out it must be recorded as
+ * sent, even if the delivery was cancelled while in flight.
+ */
 export const markSent = (id: number) =>
   db('newsletter_deliveries').where({ id })
     .update({ status: 'sent', sent_at: db.fn.now(), last_error: null, updated_at: db.fn.now() });
@@ -83,24 +90,23 @@ export const markSkipped = (id: number, reason: string) =>
   db('newsletter_deliveries').where({ id })
     .update({ status: 'skipped', last_error: reason.slice(0, 255), updated_at: db.fn.now() });
 
-export const markRetry = (id: number, reason: string) =>
-  db('newsletter_deliveries').where({ id })
+// The results below only apply to a delivery that is still `sending`, so a
+// delivery cancelled while in flight stays skipped instead of being revived.
+
+export const markRetry = (id: number, reason: string): Promise<number> =>
+  db('newsletter_deliveries').where({ id, status: 'sending' })
     .update({ status: 'pending', attempts: db.raw('attempts + 1'), last_error: reason.slice(0, 255), updated_at: db.fn.now() });
 
-export const markFailed = (id: number, reason: string) =>
-  db('newsletter_deliveries').where({ id })
+export const markFailed = (id: number, reason: string): Promise<number> =>
+  db('newsletter_deliveries').where({ id, status: 'sending' })
     .update({ status: 'failed', attempts: db.raw('attempts + 1'), last_error: reason.slice(0, 255), updated_at: db.fn.now() });
-
-/** Puts a claimed delivery back without counting an attempt (used when sending halts). */
-export const releaseDelivery = (id: number) =>
-  db('newsletter_deliveries').where({ id }).update({ status: 'pending', updated_at: db.fn.now() });
 
 /**
  * Puts a claimed delivery back and counts an attempt, so that when sending
  * halts repeatedly on the same recipient it sinks behind fresher deliveries.
  */
 export const deferDelivery = (id: number): Promise<number> =>
-  db('newsletter_deliveries').where({ id }).update({
+  db('newsletter_deliveries').where({ id, status: 'sending' }).update({
     status: 'pending',
     attempts: db.raw('attempts + 1'),
     last_error: 'paused',

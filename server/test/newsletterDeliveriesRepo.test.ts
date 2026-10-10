@@ -3,10 +3,13 @@ import { test, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { db } from '../db/knex.js';
 import {
+  cancelPendingDeliveries,
   claimNextDelivery,
   deferDelivery,
   fanOutDeliveries,
   listDuePostIds,
+  markFailed,
+  markRetry,
 } from '../repositories/newsletterDeliveriesRepo.js';
 
 const prefix = `deliv-${process.pid}`;
@@ -91,4 +94,35 @@ test('a post scheduled in the past is due; one in the future is not', async () =
   });
   assert.deepEqual(await listDuePostIds(due), [due]);
   assert.deepEqual(await listDuePostIds(future), []);
+});
+
+test('a delivery cancelled while sending is not revived by a late result', async () => {
+  const postId = await makePost();
+  const subscriberId = await makeSubscriber();
+  await db('newsletter_deliveries')
+    .insert({ post_id: postId, subscriber_id: subscriberId, status: 'pending' });
+  const claimed = await claimNextDelivery(postId);
+  assert.ok(claimed);
+  assert.equal(await cancelPendingDeliveries(postId), 1);
+
+  assert.equal(await markRetry(claimed.id, 'transient'), 0);
+  assert.equal(await deferDelivery(claimed.id), 0);
+  assert.equal(await markFailed(claimed.id, 'permanent'), 0);
+  const row = await db('newsletter_deliveries').where({ id: claimed.id }).first();
+  assert.equal(row.status, 'skipped');
+  assert.equal(row.attempts, 0);
+  assert.equal(row.last_error, 'cancelled');
+});
+
+test('fan-out tolerates an existing delivery without duplicating it', async () => {
+  const postId = await makePost({ newsletter_enabled: true });
+  const existing = await makeSubscriber();
+  const fresh = await makeSubscriber();
+  await db('newsletter_deliveries')
+    .insert({ post_id: postId, subscriber_id: existing, status: 'sent' });
+
+  assert.equal(await fanOutDeliveries(postId), true);
+  const rows = await db('newsletter_deliveries').where({ post_id: postId })
+    .whereIn('subscriber_id', [existing, fresh]).orderBy('subscriber_id');
+  assert.deepEqual(rows.map(r => [r.subscriber_id, r.status]), [[existing, 'sent'], [fresh, 'pending']]);
 });
