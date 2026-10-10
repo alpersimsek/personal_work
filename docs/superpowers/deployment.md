@@ -154,3 +154,28 @@ After setting the variables, restart the app and submit one signup using an owne
 - Redirect the bare domain (`tugbasimsek.com.tr`) to `www` at the host or DNS level, so there is a single canonical address.
 - Page addresses the server knows: `/`, `/blog`, `/blog/<slug>`, `/hakkimda`, `/programlar`, `/programlar/<slug>`, `/kvkk`, `/admin`. Anything else answers 404. A new page needs an entry in `server/seo/pages.ts`, the sitemap in `server/routes/seo.ts` and `src/routes.ts`.
 - The coaching areas and the FAQ live in `server/content/` and are read by both the site and the server, so the page and what crawlers see cannot drift.
+
+## Newsletter broadcast
+
+When a blog post is published, verified and not-unsubscribed subscribers receive an email about it after a short delay (during which unpublishing cancels the send). Sending is per post, once only, and can be turned off per post in the blog admin.
+
+Settings (all optional; the defaults are shown):
+
+```text
+NEWSLETTER_WORKER_ENABLED=<true in production, false elsewhere>
+NEWSLETTER_DELAY_MINUTES=10
+NEWSLETTER_BATCH_SIZE=20
+NEWSLETTER_DAILY_CAP=400
+NEWSLETTER_UNSUBSCRIBE_TTL_DAYS=30
+```
+
+- `NEWSLETTER_WORKER_ENABLED` defaults to on only when `NODE_ENV=production` and to off everywhere else, so a development server never mails real subscribers. Set it to `true` to test sending locally, `false` to stop it in production.
+- `NEWSLETTER_DAILY_CAP` is a rolling 24 hours, not a calendar day, and Gmail allows about 500. `NEWSLETTER_BATCH_SIZE` is the number of messages per one-minute tick.
+- The worker runs inside the API process, so the Node.js app must stay running; there is no separate worker or cron job. If the app is stopped, queued mail waits and is sent when it starts again.
+- `PUBLIC_SITE_URL` and the Gmail app password (`NEWSLETTER_SMTP_APP_PASSWORD`, see above) are required to send. Without them the worker halts sending and the admin test send answers 503.
+- Run `npm run db:migrate` (`npm run db:migrate:prod` on the host) before deploying. The feature needs migrations `20261011000007` and `20261011000008`.
+- On a Gmail quota, authentication or configuration error, sending pauses for an hour and resumes by itself. Fix the cause (app password, quota) in the meantime; no manual restart is needed.
+- Sends are at-most-once. A delivery interrupted by a crash or restart while it was being sent is marked `interrupted` and is never re-sent automatically, because the message may already have gone out (a possible duplicate). The admin "retry failed" action skips interrupted deliveries on purpose.
+- To move to a mail relay later, add one class implementing `NewsletterSender` (`server/services/newsletterSender.ts`) and use it where `GmailNewsletterSender` is constructed; the queue, worker and templates stay as they are.
+- Timezones: the broadcast code compares times with the database clock (`NOW()` and the database session timezone). The older newsletter verification-token expiry still uses the application clock. If the host's timezone and the database's timezone differ, those two can disagree by the offset; keep both on the same timezone (UTC is simplest).
+- Send one test email from the blog admin with an owner-controlled admin address before the first real publish. Test sends go only to the signed-in admin's own address and never touch the queue.
