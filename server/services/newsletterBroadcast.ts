@@ -111,7 +111,7 @@ async function prepareMessage(
   const token = await issueToken(subscriber.email, unsubscribeTtlDays * 24 * 60 * 60 * 1000);
   const unsubscribeUrl = unsubscribeUrlFor(origin, token);
   const mail = renderBroadcast({
-    post: { slug: post.slug, title: post.title, summary: post.summary, coverImage: post.cover_image },
+    post: { slug: post.slug, title: post.title, readTime: post.read_time },
     origin,
     unsubscribeUrl,
   });

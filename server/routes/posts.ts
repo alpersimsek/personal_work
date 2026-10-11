@@ -161,7 +161,7 @@ adminPostsRouter.post('/:id/newsletter/test', async (req, res) => {
   try {
     const origin = publicOrigin();
     const mail = renderBroadcast({
-      post: { slug: post.slug, title: post.title, summary: post.summary, coverImage: post.cover_image },
+      post: { slug: post.slug, title: post.title, readTime: post.read_time },
       origin,
       unsubscribeUrl: origin,
     });

@@ -9,63 +9,56 @@ test('builds the unsubscribe url from the origin and an encoded token', () => {
   assert.equal(unsubscribeUrl, 'https://www.example.test/api/subscribe/unsubscribe/confirm?token=tok_en-123');
 });
 
-test('renders title, summary and a post link, with an unsubscribe footer', () => {
+test('subject, announcement with reading time, post button and unsubscribe footer', () => {
   const mail = renderBroadcast({
-    post: { slug: 'yeni-yazi', title: 'Yeni Yazı', summary: 'Kısa özet', coverImage: null },
+    post: { slug: 'yeni-yazi', title: 'Yeni Yazı', readTime: '4 dk okuma' },
     origin, unsubscribeUrl,
   });
-  assert.equal(mail.subject, 'Yeni Yazı');
-  assert.match(mail.text, /Kısa özet/);
+  assert.equal(mail.subject, 'Yeni Blog Yazım Yeni Yazı yayında');
+  assert.match(mail.text, /Yeni blog yazım “Yeni Yazı” yayında, 4 dakika müsaitliğin var ise linki aşağıda\./);
   assert.match(mail.text, /https:\/\/www\.example\.test\/blog\/yeni-yazi/);
   assert.match(mail.text, /unsubscribe\/confirm\?token=tok_en-123/);
-  assert.match(mail.html, /href="https:\/\/www\.example\.test\/blog\/yeni-yazi"/);
+  assert.match(mail.html, /Yeni blog yazım “Yeni Yazı” yayında, 4 dakika müsaitliğin var ise linki aşağıda\./);
+  assert.match(mail.html, /href="https:\/\/www\.example\.test\/blog\/yeni-yazi"[^>]*>Okumak için tıklayın</);
   assert.match(mail.html, /unsubscribe\/confirm\?token=tok_en-123/);
 });
 
-test('a title with line breaks or markup cannot break the header or inject HTML', () => {
+test('without a usable read time the reading-time phrase is left out', () => {
+  for (const readTime of [null, '', 'kısa', '0 dk okuma']) {
+    const mail = renderBroadcast({ post: { slug: 's', title: 'T', readTime }, origin, unsubscribeUrl });
+    assert.match(mail.text, /Yeni blog yazım “T” yayında, linki aşağıda\./);
+    assert.doesNotMatch(mail.text, /dakika/);
+  }
+});
+
+test('a title with line breaks cannot break the header', () => {
   const mail = renderBroadcast({
-    post: { slug: 's', title: 'Merhaba\r\nBcc: attacker@example.test <script>alert(1)</script>', summary: '<img src=x onerror=alert(1)>', coverImage: null },
+    post: { slug: 's', title: 'Merhaba\r\nBcc: attacker@example.test', readTime: null },
     origin, unsubscribeUrl,
   });
   assert.doesNotMatch(mail.subject, /[\r\n]/);
-  assert.doesNotMatch(mail.html, /<script>/);
-  assert.doesNotMatch(mail.html, /<img src=x/);
-  assert.match(mail.html, /&lt;script&gt;/);
+  assert.equal(mail.subject, 'Yeni Blog Yazım Merhaba Bcc: attacker@example.test yayında');
 });
 
-test('only an uploaded or http(s) cover image is embedded, never a data URL', () => {
-  const base = { slug: 's', title: 'T', summary: 'S' };
-  const uploaded = renderBroadcast({ post: { ...base, coverImage: '/uploads/a.jpg' }, origin, unsubscribeUrl });
-  assert.match(uploaded.html, /src="https:\/\/www\.example\.test\/uploads\/a\.jpg"/);
-  const remote = renderBroadcast({ post: { ...base, coverImage: 'https://cdn.example.test/a.jpg' }, origin, unsubscribeUrl });
-  assert.match(remote.html, /src="https:\/\/cdn\.example\.test\/a\.jpg"/);
-  const inline = renderBroadcast({ post: { ...base, coverImage: 'data:image/png;base64,AAAA' }, origin, unsubscribeUrl });
-  assert.doesNotMatch(inline.html, /data:image/);
-  const script = renderBroadcast({ post: { ...base, coverImage: 'javascript:alert(1)' }, origin, unsubscribeUrl });
-  assert.doesNotMatch(script.html, /javascript:/);
-});
-
-test('quotes and angle brackets in title, summary and cover cannot escape an attribute or inject markup', () => {
+test('a hostile title and read time cannot inject markup into the body', () => {
   const hostile = '"><script>alert(1)</script>&<b onmouseover="x">';
   const mail = renderBroadcast({
-    post: { slug: 's', title: hostile, summary: hostile, coverImage: 'https://cdn.example.test/a.jpg"><script>alert(2)</script>' },
+    post: { slug: 's', title: hostile, readTime: `<script>alert()</script> 3 dk` },
     origin, unsubscribeUrl,
   });
   assert.doesNotMatch(mail.html, /<script/i);
   assert.doesNotMatch(mail.html, /<b onmouseover/);
-  assert.doesNotMatch(mail.html, /"><script/);
-  assert.match(mail.html, /&quot;&gt;&lt;script&gt;alert\(1\)&lt;\/script&gt;&amp;&lt;b onmouseover=&quot;x&quot;&gt;/);
-  assert.match(mail.html, /src="https:\/\/cdn\.example\.test\/a\.jpg&quot;&gt;&lt;script&gt;/);
+  assert.match(mail.text, /3 dakika müsaitliğin var ise/);
   const tags = (mail.html.match(/<[^>]+>/g) ?? []).filter((tag) => !/^<!doctype/i.test(tag));
   assert.deepEqual(
     [...new Set(tags.map((tag) => tag.match(/^<\/?([a-z0-9]+)/i)?.[1]))].sort(),
-    ['a', 'body', 'div', 'h1', 'html', 'img', 'p'],
+    ['a', 'body', 'div', 'html', 'img', 'p'],
   );
 });
 
 test('a slug with quotes or spaces is percent-encoded in the post url', () => {
   const mail = renderBroadcast({
-    post: { slug: 'a"b c<d>', title: 'T', summary: null, coverImage: null },
+    post: { slug: 'a"b c<d>', title: 'T', readTime: null },
     origin, unsubscribeUrl,
   });
   const expected = 'https://www.example.test/blog/a%22b%20c%3Cd%3E';
