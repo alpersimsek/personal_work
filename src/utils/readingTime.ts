@@ -1,5 +1,5 @@
 /** Silent-reading pace used for the estimate, in words per minute (Turkish prose). */
-export const WORDS_PER_MINUTE = 200;
+export const WORDS_PER_MINUTE = 100;
 
 const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
 
