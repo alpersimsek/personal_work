@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { logError } from '../logging/errorLog.js';
 
 export class HttpError extends Error {
   status: number;
@@ -30,6 +31,6 @@ export function errorHandler(
   const category = typeof code === 'string' &&
     ['ER_DUP_ENTRY', 'ER_DATA_TOO_LONG', 'ER_LOCK_DEADLOCK', 'ECONNREFUSED', 'ETIMEDOUT', 'ENOENT', 'EACCES', 'ENOSPC'].includes(code)
     ? code : 'INTERNAL_ERROR';
-  console.error({ event: 'request_failed', status: 500, category });
+  logError('request_failed', { status: 500, category });
   res.status(500).json({ error: 'Internal server error' });
 }

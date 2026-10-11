@@ -1,8 +1,9 @@
 import { newsletterBroadcastConfig } from '../config/newsletterBroadcast.js';
 import {
-  describeErrorSafely, runBroadcastTick, type HaltReason, type TickResult,
+  errorLogFields, runBroadcastTick, type HaltReason, type TickResult,
 } from '../services/newsletterBroadcast.js';
 import { GmailNewsletterSender, type NewsletterSender } from '../services/newsletterSender.js';
+import { logError } from '../logging/errorLog.js';
 
 const TICK_MS = 60_000;
 const HALT_PAUSE_MS = 60 * 60_000;
@@ -40,10 +41,10 @@ export function createNewsletterTick(
       }
       if (result.halted) {
         pausedUntil = Date.now() + HALT_PAUSE_MS;
-        console.error('Newsletter sending paused for one hour.');
+        logError('newsletter_sending_paused', { reason: HALT_LABELS[result.haltReason ?? 'send'] });
       }
     } catch (error) {
-      console.error(`Newsletter tick failed: ${describeErrorSafely(error)}`);
+      logError('newsletter_tick_failed', errorLogFields(error));
     } finally {
       running = false;
     }

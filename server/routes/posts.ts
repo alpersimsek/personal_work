@@ -28,6 +28,7 @@ import {
 import { GmailNewsletterSender, NewsletterSendError } from '../services/newsletterSender.js';
 import { renderBroadcast } from '../services/newsletterBroadcastMail.js';
 import { publicOrigin } from '../services/newsletterMail.js';
+import { logError } from '../logging/errorLog.js';
 
 export const postsRouter = Router();
 export const adminPostsRouter = Router();
@@ -169,7 +170,7 @@ adminPostsRouter.post('/:id/newsletter/test', async (req, res) => {
     // Class name only: lets a configuration bug be told apart from an SMTP
     // outage without the message or cause, which may hold addresses.
     if (!(error instanceof NewsletterSendError)) {
-      console.error({ event: 'newsletter_test_failed', errorClass: error instanceof Error ? error.name : typeof error });
+      logError('newsletter_test_failed', { errorClass: error instanceof Error ? error.name : typeof error });
     }
     throw new HttpError(503, 'Test e-postası gönderilemedi.');
   }

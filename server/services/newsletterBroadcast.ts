@@ -10,6 +10,7 @@ import { issueBroadcastUnsubscribeToken, purgeExpiredNewsletterTokens } from './
 import { publicOrigin } from './newsletterMail.js';
 import { renderBroadcast, unsubscribeUrlFor } from './newsletterBroadcastMail.js';
 import { NewsletterSendError, type BroadcastMessage, type NewsletterSender } from './newsletterSender.js';
+import { logError } from '../logging/errorLog.js';
 
 const MAX_ATTEMPTS = 3;
 /** A delivery that halted this many times is likely a rejection specific to its recipient. */
@@ -45,15 +46,16 @@ interface DeliveryResult {
 }
 
 /**
- * A log-safe description of an error: its name and code only. Messages are
- * never logged because knex puts bound values (recipient addresses) in query
- * error messages, and an SMTP cause can quote the recipient too.
+ * Log-safe fields for an error: its name and code only. Messages are never
+ * logged because knex puts bound values (recipient addresses) in query error
+ * messages, and an SMTP cause can quote the recipient too.
  */
-export function describeErrorSafely(error: unknown): string {
-  if (!(error instanceof Error)) return 'unknown error';
+export function errorLogFields(error: unknown): { errorClass: string; errorCode?: string | number } {
+  if (!(error instanceof Error)) return { errorClass: 'unknown' };
   const code = (error as { code?: unknown }).code;
-  const safeCode = typeof code === 'string' || typeof code === 'number' ? ` (${code})` : '';
-  return `${error.name}${safeCode}`;
+  return typeof code === 'string' || typeof code === 'number'
+    ? { errorClass: error.name, errorCode: code }
+    : { errorClass: error.name };
 }
 
 /** Records a failed send, storing only `failure.message`, never `cause`. */
@@ -84,7 +86,7 @@ async function recordSendFailure(delivery: DeliveryRow, failure: NewsletterSendE
 }
 
 async function recordProcessingError(delivery: DeliveryRow, error: unknown): Promise<DeliveryResult> {
-  console.error(`Newsletter delivery ${delivery.id} could not be prepared: ${describeErrorSafely(error)}`);
+  logError('newsletter_delivery_prepare_failed', { deliveryId: delivery.id, ...errorLogFields(error) });
   if (delivery.attempts + 1 >= MAX_ATTEMPTS) {
     await markFailed(delivery.id, 'processing-error');
     return { outcome: 'failed', transientSendFailure: false };

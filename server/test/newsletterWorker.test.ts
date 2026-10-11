@@ -57,7 +57,7 @@ test('when enabled outside tests the worker starts a timer that stop clears', as
   }
 });
 
-test('a failed tick logs the error name and code but never its message', async () => {
+test('a failed tick logs the error class and code but never its message', async () => {
   const errorLog = mock.method(console, 'error', () => {});
   try {
     const tick = createNewsletterTick(new FakeSender(), async () => {
@@ -67,7 +67,8 @@ test('a failed tick logs the error name and code but never its message', async (
     });
     await tick();
     const logged = errorLog.mock.calls.map(call => call.arguments.map(String).join(' ')).join('\n');
-    assert.match(logged, /Error \(ER_DUP_ENTRY\)/);
+    assert.match(logged, /"errorClass":"Error"/);
+    assert.match(logged, /"errorCode":"ER_DUP_ENTRY"/);
     assert.ok(!logged.includes('someone@example.test'));
     assert.ok(!logged.includes('insert into'));
   } finally {

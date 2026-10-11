@@ -183,3 +183,14 @@ NEWSLETTER_UNSUBSCRIBE_TTL_DAYS=365
 - To move to a mail relay later, add one class implementing `NewsletterSender` (`server/services/newsletterSender.ts`) and use it where `GmailNewsletterSender` is constructed; the queue, worker and templates stay as they are.
 - Timezones: the broadcast code compares times with the database clock (`NOW()` and the database session timezone). The older newsletter verification-token expiry still uses the application clock. If the host's timezone and the database's timezone differ, those two can disagree by the offset; keep both on the same timezone (UTC is simplest).
 - Send one test email from the blog admin with an owner-controlled admin address before the first real publish. Test sends go only to the signed-in admin's own address and never touch the queue.
+
+## Error log
+
+The API writes ERROR events only (failed requests, a failed newsletter tick or delivery, uncaught exceptions) to rotating files. Nothing else is logged to disk.
+
+- Format: one JSON object per line, `{"ts":"<ISO time>","event":"request_failed","status":500,"category":"ER_DUP_ENTRY","count":1}`. Only an event name and short primitive values are stored; never messages, e-mail addresses, SQL, stack traces or error causes (values containing `@` or a line break are replaced with `[redacted]`, text is cut at 120 characters).
+- Identical events repeating within 60 seconds are written as one line with a `count`; the first timestamp is kept.
+- Files are named `log_DD_MM_HH_SS.log` (day, month, hour, seconds; server local time). If the name exists, `_2`, `_3`, ... is added.
+- Each file is at most 3 MB. At most 20 files are kept: they accumulate during the first 7 days, and once the oldest file is 7 days old (by last-modified time) or 20 files exist, the oldest one is overwritten by the new file.
+- Location: `ERROR_LOG_DIR`, default `logs/` under the directory the server is started from. The directory is created with mode 0700 and files with 0600. It must be writable by the server user and must not be inside `dist/`, `public/` or the uploads directory; the app never serves it, and the logger turns itself off if `ERROR_LOG_DIR` points inside one of them.
+- If the disk is full or the directory is not writable the app keeps running and prints one `error log write failed: <code>` line until writing works again.
