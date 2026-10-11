@@ -7,7 +7,8 @@ import { AdminLoginModal } from '../components/AdminLoginModal';
 import { AdminNavBar } from '../components/AdminNavBar';
 import { AdminPostPreview } from '../components/AdminPostPreview';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
-import { WORDS_PER_MINUTE, countWords, estimateReadingMinutes, formatReadingTime, readingTimeLabel } from '../utils/readingTime';
+import { AdminMessageDialog } from '../components/AdminMessageDialog';
+import { WORDS_PER_MINUTE, countWords, estimateReadingMinutes, formatReadingTime } from '../utils/readingTime';
 import { PostCover } from '../components/PostCover';
 import { NewsletterStatus } from '../components/NewsletterStatus';
 
@@ -56,6 +57,7 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
   const [featured, setFeatured] = useState(false);
   const [newsletterEnabled, setNewsletterEnabled] = useState(true);
   const [statusNotice, setStatusNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [deleteRequest, setDeleteRequest] = useState<{ id: string; title: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,8 +125,8 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setSummary(post.summary);
     setContent(post.content);
     setReadTime(post.readTime);
-    // Keep a hand-written value as it was; only follow the text if it already matched it.
-    setReadTimeAuto(post.readTime === readingTimeLabel(post.content));
+    // Always follow the text on open; switching Otomatik off keeps a hand-written value.
+    setReadTimeAuto(true);
     setCoverImage(post.coverImage);
     setShowUrlInput(false);
     setTagsInput(post.tags ? post.tags.join(', ') : '');
@@ -217,8 +219,12 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
     setPreview({ post: saved, unsaved: false });
   };
 
-  const handleDelete = async (id: string, postTitle: string) => {
-    if (!window.confirm(`"${postTitle}" başlıklı makaleyi silmek istediğinize emin misiniz?`)) return;
+  const handleDelete = (id: string, postTitle: string) => setDeleteRequest({ id, title: postTitle });
+
+  const confirmDelete = async () => {
+    if (!deleteRequest) return;
+    const { id } = deleteRequest;
+    setDeleteRequest(null);
     try {
       if (!await blogService.deletePost(id)) throw new Error('Makale bulunamadı.');
       await refreshPosts();
@@ -256,7 +262,6 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
 
   return (
     <div className="admin-scope bg-[#FAF9F5] text-neutral-900 min-h-screen flex flex-col w-full selection:bg-neutral-900 selection:text-white font-sans">
-      {statusNotice && (activeTab === 'list' || statusNotice.type === 'error') && <p role={statusNotice.type === 'error' ? 'alert' : 'status'} className="p-4">{statusNotice.text}</p>}
       <AdminNavBar
         activeTab={activeTab}
         onChangeTab={setActiveTab}
@@ -360,18 +365,6 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         ) : (
           /* Pristine Paper-Style Luxury Article Editor */
           <form onSubmit={handleSubmit} className="space-y-6 bg-white border border-neutral-200 rounded-3xl p-6 sm:p-10 shadow-sm">
-            {statusNotice && (
-              <div
-                className={`p-4 rounded-xl text-xs text-center border font-semibold ${
-                  statusNotice.type === 'success'
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                    : 'bg-rose-50 border-rose-200 text-rose-800'
-                }`}
-              >
-                {statusNotice.text}
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="md:col-span-2">
                 <label className="block text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wider">
@@ -702,10 +695,29 @@ export const BlogAdminPage: React.FC<BlogAdminPageProps> = ({
         )}
       </main>
 
+      {deleteRequest && (
+        <AdminMessageDialog
+          kind="confirm"
+          title="Yazıyı sil"
+          message={`“${deleteRequest.title}” başlıklı yazıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
+          confirmLabel="Sil"
+          onConfirm={() => void confirmDelete()}
+          onClose={() => setDeleteRequest(null)}
+        />
+      )}
+      {statusNotice && !deleteRequest && (
+        <AdminMessageDialog
+          kind={statusNotice.type}
+          message={statusNotice.text}
+          onClose={() => setStatusNotice(null)}
+        />
+      )}
+
       <ChangePasswordModal
         isOpen={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}
-        onChanged={() => setStatusNotice({ type: 'success', text: 'Şifren değiştirildi. Diğer cihazlardaki oturumlar kapatıldı.' })}
+        // The window confirms the change itself; a second message box would double it.
+        onChanged={() => undefined}
       />
 
       {preview && (
