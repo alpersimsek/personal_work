@@ -51,9 +51,13 @@ export async function issueNewsletterToken(input: NewsletterTokenInput): Promise
       email: input.email,
       name: input.name ?? null,
       consent_version: input.consentVersion ?? null,
-      expires_at: new Date(Date.now() + TOKEN_TTL_MS),
+      // Database clock, matching the NOW() comparisons below; a JS Date skews by
+      // any host/session timezone difference.
+      expires_at: trx.raw('DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? SECOND)', [TOKEN_TTL_MS / 1000]),
     });
-    await trx('newsletter_verification_tokens').where('expires_at', '<', new Date(Date.now() - 24 * 60 * 60 * 1000)).delete();
+    await trx('newsletter_verification_tokens')
+      .whereRaw('expires_at < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)')
+      .delete();
     return token;
   });
 }
