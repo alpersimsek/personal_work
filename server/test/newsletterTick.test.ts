@@ -193,14 +193,29 @@ test('a pause repeated for many ticks never counts an attempt or fails anyone', 
   assert.ok(rows.every(row => row.status === 'pending' && row.attempts === 0));
 });
 
+test('a recipient that keeps pausing does not starve one that was already retried', async () => {
+  const stuck = await makeSubscriber('a');
+  const retried = await makeSubscriber('b');
+  const postId = await makeHermeticDuePost();
+  await db('newsletter_deliveries').where({ id: (await deliveryOf(postId, retried.email)).id })
+    .update({ attempts: 1, last_error: 'transient' });
+  const sender = new FakeSender();
+  sender.failures.set(stuck.email, new NewsletterSendError('pause', 'pause (smtp 554)'));
+
+  // The first tick pauses on the stuck row; it must not be claimed first again.
+  for (let round = 0; round < 3; round++) await runBroadcastTick({ sender, postId });
+  assert.deepEqual(sender.mine.map(m => m.to), [retried.email]);
+  assert.equal(await statusOf(postId, retried.email), 'sent');
+  const stuckRow = await deliveryOf(postId, stuck.email);
+  assert.equal(stuckRow.status, 'pending');
+  assert.equal(stuckRow.attempts, 0);
+});
+
 test('a recipient that keeps pausing does not block the recipients behind it', async () => {
   const stuck = await makeSubscriber('a');
   const second = await makeSubscriber('b');
   const third = await makeSubscriber('c');
   const postId = await makeHermeticDuePost();
-  // Fan-out happened a while ago, as it would before an hourly worker pause.
-  await db('newsletter_deliveries').where({ post_id: postId })
-    .update({ updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 1 HOUR)') });
   const sender = new FakeSender();
   sender.failures.set(stuck.email, new NewsletterSendError('pause', 'pause (smtp 554)'));
 

@@ -14,6 +14,12 @@ export interface DeliveryRow {
 
 const STALE_SENDING_MINUTES = 10;
 
+/**
+ * `updated_at` has one-second precision. A row put back in the same second it
+ * was claimed would tie with untried rows; this keeps it strictly later.
+ */
+const bumpedUpdatedAt = () => db.raw('GREATEST(NOW(), updated_at + INTERVAL 1 SECOND)');
+
 export function cancelPendingDeliveries(postId: number): Promise<number> {
   return db('newsletter_deliveries')
     .where({ post_id: postId })
@@ -56,20 +62,19 @@ export async function listDuePostIds(onlyPostId?: number): Promise<number[]> {
 }
 
 /**
- * Takes the least-attempted, least recently tried pending delivery. Ordering by
- * attempts first lets a recipient that keeps halting sink behind fresh ones;
- * ordering by `updated_at` next lets a paused (released) row, whose attempts
- * do not change, sink behind rows not tried since, so it cannot block the
- * queue. The conditional update is the claim: if another tick got there first
- * it affects no row and we try the next one.
+ * Takes the least recently tried pending delivery (then fewest attempts, then
+ * oldest). Release, defer and retry all move `updated_at` strictly later, so a
+ * row that was just tried, whatever its attempts, sinks behind every other one
+ * and cannot block the queue. The conditional update is the claim: if another
+ * tick got there first it affects no row and we try the next one.
  */
 export async function claimNextDelivery(onlyPostId?: number, excludeIds: number[] = []): Promise<DeliveryRow | null> {
   for (let attempt = 0; attempt < 5; attempt++) {
     const query = db<DeliveryRow>('newsletter_deliveries')
       .where({ status: 'pending' })
       .orderBy([
-        { column: 'attempts', order: 'asc' },
         { column: 'updated_at', order: 'asc' },
+        { column: 'attempts', order: 'asc' },
         { column: 'id', order: 'asc' },
       ]);
     if (onlyPostId !== undefined) query.where({ post_id: onlyPostId });
@@ -101,7 +106,7 @@ export const markSkipped = (id: number, reason: string) =>
 
 export const markRetry = (id: number, reason: string): Promise<number> =>
   db('newsletter_deliveries').where({ id, status: 'sending' })
-    .update({ status: 'pending', attempts: db.raw('attempts + 1'), last_error: reason.slice(0, 255), updated_at: db.fn.now() });
+    .update({ status: 'pending', attempts: db.raw('attempts + 1'), last_error: reason.slice(0, 255), updated_at: bumpedUpdatedAt() });
 
 export const markFailed = (id: number, reason: string): Promise<number> =>
   db('newsletter_deliveries').where({ id, status: 'sending' })
@@ -114,7 +119,7 @@ export const markFailed = (id: number, reason: string): Promise<number> =>
  */
 export const releaseDelivery = (id: number): Promise<number> =>
   db('newsletter_deliveries').where({ id, status: 'sending' })
-    .update({ status: 'pending', updated_at: db.fn.now() });
+    .update({ status: 'pending', updated_at: bumpedUpdatedAt() });
 
 /**
  * Puts a claimed delivery back and counts an attempt, so that when sending
@@ -125,7 +130,7 @@ export const deferDelivery = (id: number): Promise<number> =>
     status: 'pending',
     attempts: db.raw('attempts + 1'),
     last_error: 'paused',
-    updated_at: db.fn.now(),
+    updated_at: bumpedUpdatedAt(),
   });
 
 /**

@@ -45,13 +45,15 @@ async function cleanup() {
 beforeEach(cleanup);
 after(async () => { await cleanup(); await db.destroy(); });
 
-test('a delivery that has been deferred is claimed after fresh ones', async () => {
+test('with equal updated_at, a delivery with fewer attempts is claimed first', async () => {
   const postId = await makePost();
   const [older, newer] = [await makeSubscriber(), await makeSubscriber()];
+  // A fixed literal (not a JS Date), so both rows share one timestamp exactly.
+  const sameTime = '2026-01-01 00:00:00';
   const [oldId] = await db('newsletter_deliveries')
-    .insert({ post_id: postId, subscriber_id: older, status: 'pending', attempts: 1 });
+    .insert({ post_id: postId, subscriber_id: older, status: 'pending', attempts: 1, updated_at: sameTime });
   const [freshId] = await db('newsletter_deliveries')
-    .insert({ post_id: postId, subscriber_id: newer, status: 'pending', attempts: 0 });
+    .insert({ post_id: postId, subscriber_id: newer, status: 'pending', attempts: 0, updated_at: sameTime });
   assert.ok(freshId > oldId);
 
   const first = await claimNextDelivery(postId);
@@ -59,6 +61,39 @@ test('a delivery that has been deferred is claimed after fresh ones', async () =
   const second = await claimNextDelivery(postId);
   assert.equal(second?.id, oldId);
   assert.equal(await claimNextDelivery(postId), null);
+});
+
+test('a row tried less recently is claimed first, whatever its attempts', async () => {
+  const postId = await makePost();
+  const [first, second] = [await makeSubscriber(), await makeSubscriber()];
+  const [retriedId] = await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: first, status: 'pending', attempts: 2,
+    updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 2 MINUTE)'),
+  });
+  await db('newsletter_deliveries').insert({
+    post_id: postId, subscriber_id: second, status: 'pending', attempts: 0,
+    updated_at: db.raw('DATE_SUB(NOW(), INTERVAL 1 MINUTE)'),
+  });
+  assert.equal((await claimNextDelivery(postId))?.id, retriedId);
+});
+
+test('release, defer and retry always move updated_at strictly later', async () => {
+  const postId = await makePost();
+  const subscriberId = await makeSubscriber();
+  const [id] = await db('newsletter_deliveries')
+    .insert({ post_id: postId, subscriber_id: subscriberId, status: 'pending' });
+  const updatedAt = async () =>
+    Number((await db('newsletter_deliveries').where({ id }).first(db.raw('UNIX_TIMESTAMP(updated_at) AS t'))).t);
+  for (const put of [releaseDelivery, deferDelivery, (rowId: number) => markRetry(rowId, 'transient')]) {
+    // Two rounds in the same second would tie without the strict bump.
+    for (let round = 0; round < 2; round++) {
+      const claimed = await claimNextDelivery(postId);
+      assert.equal(claimed?.id, id);
+      const before = await updatedAt();
+      assert.equal(await put(id), 1);
+      assert.ok(await updatedAt() > before);
+    }
+  }
 });
 
 test('with equal attempts, a recently released delivery is claimed after untried ones', async () => {

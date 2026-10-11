@@ -36,8 +36,8 @@ const ENHANCED_CODE = /^(\d{3})[ -](\d)\.(\d{1,3})\.(\d{1,3})(?=\s|$)/;
 const REPLY_CODE = /^(\d{3})(?=[\s-]|$)/;
 
 // Free-text fallbacks, used only on sanitised text (see `sanitise`).
-const DAILY_LIMIT_PATTERN = /daily user sending limit/i;
-const SENDER_TEXT_PATTERN = /(sending limit|rate limit|quota|too many|authentication required|app password)/i;
+const DAILY_LIMIT_PATTERN = /\bdaily user sending limit\b/i;
+const SENDER_TEXT_PATTERN = /\b(sending limit|rate limit|quota|too many|authentication required|app password)\b/i;
 const RECIPIENT_PATTERN = /(no such user|user unknown|does not exist|mailbox (unavailable|not found)|invalid (recipient|address))/i;
 
 /**

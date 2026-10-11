@@ -120,3 +120,9 @@ test('structural codes win over free text and follow the documented precedence',
   assert.equal(classifySmtpError({ responseCode: 550, response: '550 5.1.1 quota exceeded for this user' }), 'permanent');
   assert.equal(classifySmtpError({ responseCode: 451, response: '451 4.3.0 Temporary server error' }), 'transient');
 });
+
+test('a word inside an echoed domain is not a sender-level signal', () => {
+  assert.equal(classifySmtpError({ responseCode: 421, response: '421 mx.quotacorp.com Service not available' }), 'transient');
+  assert.equal(classifySmtpError({ code: 'ECONNECTION', message: 'connect ECONNREFUSED mx.quotacorp.com' }), 'transient');
+  assert.equal(classifySmtpError({ message: 'greeting never received from toomanyhats.com' }), 'transient');
+});
