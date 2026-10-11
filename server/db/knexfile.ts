@@ -48,6 +48,9 @@ const connectionFor = (databaseSuffix = ''): Knex.MySql2ConnectionConfig => ({
   user: requireEnv('DB_USER'),
   password: requireEnv('DB_PASSWORD'),
   database: `${requireEnv('DB_NAME')}${databaseSuffix}`,
+  // Stated rather than left to driver defaults, so Turkish letters (ğ ü ş ı ö ç İ)
+  // survive whatever the server's own default character set is.
+  charset: 'UTF8MB4_UNICODE_CI',
 });
 
 const config: Record<string, Knex.Config> = {
