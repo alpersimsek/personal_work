@@ -1,6 +1,6 @@
 import {
-  appendFileSync, chmodSync, existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync,
-  truncateSync, unlinkSync, writeFileSync,
+  chmodSync, closeSync, constants, existsSync, lstatSync, mkdirSync, openSync, readdirSync, realpathSync,
+  renameSync, truncateSync, unlinkSync, writeFileSync, writeSync,
 } from 'node:fs';
 import path from 'node:path';
 import { uploadsDirectory } from '../storage/blogImages.js';
@@ -12,6 +12,7 @@ const EVENT_NAME = /^[a-z0-9_]{1,64}$/;
 const FIELD_NAME = /^[A-Za-z0-9_]+$/;
 const MAX_FIELD_NAME_LENGTH = 64;
 const MAX_FIELDS = 16;
+const MAX_PENDING = 32;
 const LOG_FILE = /^log_\d{2}_\d{2}_\d{2}_\d{2}(_\d+)?\.log$/;
 const RESERVED_FIELDS = new Set(['ts', 'event', 'count']);
 const MAX_VALUE_LENGTH = 120;
@@ -44,7 +45,6 @@ export interface ErrorLog {
 }
 
 interface Pending {
-  key: string;
   event: string;
   fields: ErrorLogFields;
   startedAt: Date;
@@ -93,6 +93,18 @@ function baseName(date: Date): string {
   return `log_${two(date.getDate())}_${two(date.getMonth() + 1)}_${two(date.getHours())}_${two(date.getSeconds())}`;
 }
 
+/** Appends without following a symlink at `file`, creating it with `mode` if needed. */
+function appendWithoutFollowing(file: string, data: string, options: { mode: number }): void {
+  const flags = constants.O_APPEND | constants.O_CREAT | constants.O_WRONLY | (constants.O_NOFOLLOW ?? 0);
+  const descriptor = openSync(file, flags, options.mode);
+  try {
+    const buffer = Buffer.from(data);
+    for (let written = 0; written < buffer.length;) written += writeSync(descriptor, buffer, written);
+  } finally {
+    closeSync(descriptor);
+  }
+}
+
 function errorCode(error: unknown): string {
   const code = (error as { code?: unknown } | null)?.code;
   return typeof code === 'string' ? code : 'UNKNOWN';
@@ -110,15 +122,21 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
   const windowMs = options.aggregateWindowMs ?? 60_000;
   const echo = options.echo ?? true;
   const enabled = options.enabled ?? true;
-  const append = options.appendFile ?? ((file, data, mode) => appendFileSync(file, data, mode));
+  const append = options.appendFile ?? appendWithoutFollowing;
 
-  let pending: Pending | null = null;
+  const pending = new Map<string, Pending>();
   let timer: NodeJS.Timeout | null = null;
   let activeFile: string | null = null;
   let activeSize = 0;
   let failing = false;
-  let dirty = false;
+  let needsNewline = false;
   let directoryReady = false;
+  let disabled = !enabled;
+
+  function disable(reason: string): void {
+    disabled = true;
+    try { console.error(`error log disabled: ${reason}`); } catch { /* nothing more to do */ }
+  }
 
   function entryNames(): string[] {
     try { return readdirSync(options.dir); } catch { return []; }
@@ -139,8 +157,18 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
   function prepareDirectory(): void {
     mkdirSync(options.dir, { recursive: true, mode: 0o700 });
     if (directoryReady) return;
-    try { chmodSync(options.dir, 0o700); } catch { /* not the owner: keep going */ }
     directoryReady = true;
+    const stats = lstatSync(options.dir);
+    const foreign = typeof process.getuid === 'function' && stats.uid !== process.getuid();
+    if (!stats.isDirectory() || foreign || (stats.mode & 0o022) !== 0) {
+      disable('log directory must be owned by the service user and not group or other writable');
+      return;
+    }
+    try { chmodSync(options.dir, 0o700); } catch { /* keep going */ }
+  }
+
+  function activeIsRegularFile(): boolean {
+    try { return lstatSync(activeFile!).isFile(); } catch { return false; }
   }
 
   function uniqueName(taken: Set<string>): string {
@@ -155,6 +183,8 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
    * when the cap is reached or it is old enough; the file being written never is.
    */
   function roll(): void {
+    // An empty active file is already a fresh start; never burn another one.
+    if (activeFile && activeSize === 0 && activeIsRegularFile()) return;
     const names = entryNames();
     const files = listFiles(names);
     const activeName = activeFile ? path.basename(activeFile) : null;
@@ -177,7 +207,6 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
     }
     activeFile = target;
     activeSize = 0;
-    dirty = false;
   }
 
   /** Picks the newest file if it still has room, otherwise rolls. */
@@ -192,20 +221,24 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
   }
 
   function write(line: string): void {
-    if (!enabled) return;
+    if (disabled) return;
     try {
       prepareDirectory();
-      const bytes = Buffer.byteLength(line);
+      if (disabled) return;
+      if (activeFile && !activeIsRegularFile()) activeFile = null;
+      if (!activeFile) selectActive();
+      const lead = needsNewline ? '\n' : '';
+      const bytes = Buffer.byteLength(lead + line);
       if (bytes > maxBytes) return;
-      if (dirty) roll();
-      else if (!activeFile) selectActive();
-      if (activeSize > 0 && activeSize + bytes > maxBytes) roll();
+      if (activeSize + bytes > maxBytes) { roll(); }
       try {
-        append(activeFile!, line, { mode: 0o600 });
+        append(activeFile!, lead + line, { mode: 0o600 });
       } catch (error) {
-        dirty = true;
+        // A partial line may be on disk: start the next write on a new line.
+        needsNewline = true;
         throw error;
       }
+      needsNewline = false;
       activeSize += bytes;
       failing = false;
     } catch (error) {
@@ -216,36 +249,53 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
     }
   }
 
-  function flush(): void {
-    if (timer) { clearTimeout(timer); timer = null; }
-    const entry = pending;
-    pending = null;
-    if (!entry) return;
+  function writeEntry(entry: Pending): void {
     try {
       const ts = entry.startedAt.toISOString();
       let line = `${JSON.stringify({ ts, event: entry.event, ...entry.fields, count: entry.count })}\n`;
       if (Buffer.byteLength(line) > maxBytes) {
         line = `${JSON.stringify({ ts, event: entry.event, truncated: true })}\n`;
       }
+      if (echo && entry.count > 1) {
+        console.error(JSON.stringify({ event: entry.event, ...entry.fields, count: entry.count }));
+      }
       write(line);
     } catch { /* the logger must never throw */ }
+  }
+
+  function flush(): void {
+    if (timer) { clearTimeout(timer); timer = null; }
+    const entries = [...pending.values()];
+    pending.clear();
+    for (const entry of entries) writeEntry(entry);
+  }
+
+  function flushOldest(): void {
+    const [key, entry] = pending.entries().next().value!;
+    pending.delete(key);
+    writeEntry(entry);
   }
 
   function logError(event: string, fields?: ErrorLogFields): void {
     try {
       const name = sanitizeEvent(event);
       const clean = sanitizeFields(fields);
-      if (echo) console.error(JSON.stringify({ event: name, ...clean }));
       const key = JSON.stringify([name, Object.entries(clean).sort(([a], [b]) => a.localeCompare(b))]);
       const current = now();
-      if (pending && pending.key === key && current.getTime() - pending.startedAt.getTime() < windowMs) {
-        pending.count += 1;
+      const oldest = pending.values().next().value;
+      if (oldest && current.getTime() - oldest.startedAt.getTime() >= windowMs) flush();
+      const existing = pending.get(key);
+      if (existing) {
+        existing.count += 1;
         return;
       }
-      flush();
-      pending = { key, event: name, fields: clean, startedAt: current, count: 1 };
-      timer = setTimeout(flush, windowMs);
-      timer.unref();
+      if (echo) console.error(JSON.stringify({ event: name, ...clean }));
+      if (pending.size >= MAX_PENDING) flushOldest();
+      pending.set(key, { event: name, fields: clean, startedAt: current, count: 1 });
+      if (!timer) {
+        timer = setTimeout(flush, windowMs);
+        timer.unref();
+      }
     } catch { /* the logger must never throw */ }
   }
 
@@ -313,7 +363,9 @@ function sharedLog(): ErrorLog {
   const underTest = process.env.NODE_ENV === 'test';
   const dir = underTest ? testDirectory ?? '' : defaultErrorLogDirectory();
   let enabled = dir !== '';
-  if (enabled && isInsideWebRoot(dir)) {
+  if (!enabled && !process.env.NODE_TEST_CONTEXT) {
+    console.error('error log disabled: NODE_ENV=test outside a test runner');
+  } else if (enabled && isInsideWebRoot(dir)) {
     enabled = false;
     console.error('error log disabled: log directory is inside a web-served directory');
   }
@@ -323,6 +375,11 @@ function sharedLog(): ErrorLog {
     process.once('exit', () => shared?.flush());
   }
   return shared;
+}
+
+/** Creates the shared log now so a disabled log is reported at startup, not at the first error. */
+export function initErrorLog(): void {
+  try { sharedLog(); } catch { /* never throw */ }
 }
 
 /** Records an error event in the shared log; see {@link createErrorLog}. */

@@ -9,9 +9,10 @@ import {
 import os from 'node:os';
 import path from 'node:path';
 import {
-  createErrorLog, defaultErrorLogDirectory, flushErrorLog, isInsideWebRoot, logError, setErrorLogDirectoryForTests,
+  createErrorLog, defaultErrorLogDirectory, flushErrorLog, initErrorLog, isInsideWebRoot, logError, setErrorLogDirectoryForTests,
 } from '../logging/errorLog.js';
 import { errorHandler } from '../middleware/errorHandler.js';
+import { chmodSync as chmodDirectory } from 'node:fs';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BYTES = 3 * 1024 * 1024;
@@ -391,35 +392,164 @@ test('the web-root guard resolves symlinks and does not confuse ..names with par
   assert.equal(isInsideWebRoot(path.join(root, 'elsewhere'), [dist, pub]), false);
 });
 
-test('a failed append is never glued to the next line', () => {
+function failingDisk() {
+  const state = { failing: false, tornFragment: '' };
+  const appendFile = (file: string, data: string, options: { mode: number }) => {
+    if (!state.failing) { appendFileSync(file, data, options); return; }
+    if (state.tornFragment) appendFileSync(file, state.tornFragment, options);
+    throw Object.assign(new Error('disk full'), { code: 'ENOSPC' });
+  };
+  return { state, appendFile };
+}
+
+test('a failing disk neither creates files nor touches the others, and recovery starts on a fresh line', () => {
   const dir = path.join(temporaryRoot(), 'logs');
-  let calls = 0;
-  const log = createErrorLog({
-    dir, now: makeClock().now, echo: false,
-    appendFile: (file, data, options) => {
-      calls += 1;
-      if (calls === 2) {
-        appendFileSync(file, data.slice(0, 15), options);
-        throw Object.assign(new Error('disk full'), { code: 'ENOSPC' });
-      }
-      appendFileSync(file, data, options);
-    },
-  });
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const clock = makeClock();
+  const keep = fullFile(dir, 'log_01_10_00_00.log', 4096, new Date(clock.now().getTime() - 2 * DAY));
+  const disk = failingDisk();
+  const log = createErrorLog({ dir, now: clock.now, echo: false, maxBytes: 4096, maxFiles: 2, appendFile: disk.appendFile });
+  log.logError('before_failure');
+  log.flush();
+  const namesBefore = filesIn(dir);
   const spy = mock.method(console, 'error', () => {});
   try {
-    log.logError('first_ok');
-    log.logError('second_torn');
-    log.logError('third_ok');
-    log.flush();
+    disk.state.failing = true;
+    disk.state.tornFragment = '{"ts":"2026-10';
+    for (let index = 0; index < 50; index += 1) {
+      log.logError(`failure_${index}`);
+      log.flush();
+    }
+    assert.deepEqual(filesIn(dir), namesBefore);
+    assert.equal(readFileSync(keep, 'utf8'), 'x'.repeat(4096));
+    assert.equal(spy.mock.callCount(), 1);
   } finally {
     spy.mock.restore();
   }
-  for (const name of filesIn(dir)) {
-    for (const line of readFileSync(path.join(dir, name), 'utf8').split('\n').filter(Boolean)) {
-      if (line.includes('"third_ok"')) assert.doesNotThrow(() => JSON.parse(line));
-    }
+  disk.state.failing = false;
+  log.logError('after_recovery');
+  log.flush();
+  assert.deepEqual(filesIn(dir), namesBefore);
+  const text = readFileSync(path.join(dir, namesBefore.find(name => name !== 'log_01_10_00_00.log')!), 'utf8');
+  const last = text.split('\n').filter(Boolean).at(-1)!;
+  assert.equal(JSON.parse(last).event, 'after_recovery');
+});
+
+test('an active file replaced by a symlink is abandoned and its target is never written', () => {
+  const root = temporaryRoot();
+  const dir = path.join(root, 'logs');
+  const log = createErrorLog({ dir, now: makeClock().now, echo: false });
+  log.logError('first_line');
+  log.flush();
+  const [name] = filesIn(dir);
+  const outside = path.join(root, 'outside.txt');
+  writeFileSync(outside, 'untouched');
+  rmSync(path.join(dir, name));
+  symlinkSync(outside, path.join(dir, name));
+  log.logError('second_line');
+  log.flush();
+  assert.equal(readFileSync(outside, 'utf8'), 'untouched');
+  const regular = filesIn(dir).filter(file => file !== name);
+  assert.equal(regular.length, 1);
+  assert.ok(readFileSync(path.join(dir, regular[0]), 'utf8').includes('"second_line"'));
+});
+
+test('a directory that is group-writable disables file logging loudly', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  mkdirSync(dir, { recursive: true });
+  chmodDirectory(dir, 0o770);
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    const log = createErrorLog({ dir, now: makeClock().now, echo: false });
+    log.logError('should_not_be_written');
+    log.flush();
+    log.logError('still_not');
+    log.flush();
+    assert.equal(spy.mock.callCount(), 1);
+    assert.match(String(spy.mock.calls[0].arguments[0]), /error log disabled/);
+  } finally {
+    spy.mock.restore();
   }
-  assert.equal(filesIn(dir).length, 2);
+  assert.deepEqual(filesIn(dir), []);
+});
+
+test('interleaved events are aggregated per key in first-occurrence order', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  const log = createErrorLog({ dir, now: makeClock().now, echo: false });
+  for (const event of ['aaa', 'bbb', 'aaa', 'bbb', 'aaa']) log.logError(event);
+  log.flush();
+  const lines = linesOf(path.join(dir, filesIn(dir)[0]));
+  assert.deepEqual(lines.map(line => [line.event, line.count]), [['aaa', 3], ['bbb', 2]]);
+});
+
+test('more than 32 distinct pending events flush the oldest one', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  const log = createErrorLog({ dir, now: makeClock().now, echo: false });
+  for (let index = 0; index < 33; index += 1) log.logError(`event_${index}`);
+  assert.equal(linesOf(path.join(dir, filesIn(dir)[0])).length, 1);
+  log.flush();
+  const lines = linesOf(path.join(dir, filesIn(dir)[0]));
+  assert.equal(lines.length, 33);
+  assert.equal(lines[0].event, 'event_0');
+});
+
+test('repeating an event echoes it when it starts and when its counted line is written', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    const log = createErrorLog({ dir, now: makeClock().now });
+    for (let index = 0; index < 5; index += 1) log.logError('noisy', { status: 500 });
+    assert.equal(spy.mock.callCount(), 1);
+    log.flush();
+    assert.deepEqual(spy.mock.calls.map(call => JSON.parse(String(call.arguments[0])).count), [undefined, 5]);
+  } finally {
+    spy.mock.restore();
+  }
+});
+
+test('request parser failures answer 4xx and are not logged as server errors', async () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  setErrorLogDirectoryForTests(dir);
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    const app = express();
+    app.use(express.urlencoded({ extended: false }));
+    app.use(express.json());
+    app.post('/', (_req, res) => { res.json({ ok: true }); });
+    app.use(errorHandler);
+    const charset = await request(app).post('/').set('Content-Type', 'application/x-www-form-urlencoded; charset=koi8-r').send('a=b');
+    const encoding = await request(app).post('/').set('Content-Type', 'application/json').set('Content-Encoding', 'zz').send('{}');
+    assert.ok(charset.status >= 400 && charset.status < 500, `charset ${charset.status}`);
+    assert.ok(encoding.status >= 400 && encoding.status < 500, `encoding ${encoding.status}`);
+    assert.deepEqual(charset.body, { error: 'Geçersiz istek.' });
+    flushErrorLog();
+    assert.equal(spy.mock.callCount(), 0);
+  } finally {
+    spy.mock.restore();
+    setErrorLogDirectoryForTests(null);
+  }
+  assert.equal(readdirSync(path.dirname(dir)).includes('logs'), false);
+});
+
+test('initErrorLog reports a disabled shared log at startup unless a test runner owns the process', () => {
+  const saved = process.env.NODE_TEST_CONTEXT;
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    setErrorLogDirectoryForTests(null);
+    initErrorLog();
+    assert.equal(spy.mock.callCount(), 0);
+    delete process.env.NODE_TEST_CONTEXT;
+    setErrorLogDirectoryForTests(null);
+    initErrorLog();
+    assert.match(String(spy.mock.calls[0].arguments[0]), /error log disabled: NODE_ENV=test/);
+    setErrorLogDirectoryForTests(path.resolve('dist', 'logs'));
+    initErrorLog();
+    assert.match(String(spy.mock.calls[1].arguments[0]), /web-served/);
+  } finally {
+    spy.mock.restore();
+    if (saved !== undefined) process.env.NODE_TEST_CONTEXT = saved;
+    setErrorLogDirectoryForTests(null);
+  }
 });
 
 test('events keep at most 16 fields and oversized lines are cut down to a marker', () => {

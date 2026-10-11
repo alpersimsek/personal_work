@@ -25,6 +25,17 @@ export function errorHandler(
       type === 'entity.too.large' ? 'Dosya boyutu izin verilen sınırı aşıyor.' : 'Geçersiz JSON verisi.' });
     return;
   }
+  // Body-parser and http-errors failures (unsupported charset or encoding,
+  // aborted request, too many parameters) are the client's fault: answer with
+  // their 4xx status and do not log them as server errors.
+  const clientStatus = (err as { status?: unknown; statusCode?: unknown } | null);
+  const status = [clientStatus?.status, clientStatus?.statusCode].find(
+    (value): value is number => typeof value === 'number' && value >= 400 && value <= 499,
+  );
+  if (status !== undefined) {
+    res.status(status).json({ error: 'Geçersiz istek.' });
+    return;
+  }
   // Driver errors can embed full SQL statements, passwords and personal data.
   // Log only a fixed diagnostic category, never the error object or request.
   const code = (err as { code?: unknown } | null)?.code;

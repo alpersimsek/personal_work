@@ -4,6 +4,7 @@ import { assertJwtConfiguration } from './utils/jwt.js';
 import { assertSiteConfiguration } from './seo/site.js';
 import { assertNewsletterMailConfiguration } from './services/newsletterMail.js';
 import { startNewsletterWorker } from './worker/newsletterWorker.js';
+import { initErrorLog } from './logging/errorLog.js';
 import { exitOnListenError, installFatalErrorHandlers, installShutdownHandlers } from './logging/processHandlers.js';
 
 // Fail at startup, not at the first login, if the signing secret is unusable.
@@ -12,6 +13,7 @@ assertSiteConfiguration();
 if (process.env.NODE_ENV === 'production') assertNewsletterMailConfiguration();
 
 // After the assertions, so a configuration failure keeps Node's normal message.
+initErrorLog();
 installFatalErrorHandlers();
 
 const port = Number(process.env.PORT || process.env.API_PORT) || 3001;
