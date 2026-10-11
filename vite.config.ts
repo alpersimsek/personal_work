@@ -20,6 +20,10 @@ export default defineConfig(({ mode }) => {
       watch: {
         usePolling: true
       },
+      // Vite's default deny list plus the error log directory.
+      fs: {
+        deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/logs/**'],
+      },
       proxy: {
         '/uploads': {
           target: `http://127.0.0.1:${process.env.API_PORT || env.API_PORT || '3001'}`,

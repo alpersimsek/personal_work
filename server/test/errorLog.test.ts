@@ -1,22 +1,31 @@
-import { test, mock } from 'node:test';
+import { test, mock, after } from 'node:test';
 import assert from 'node:assert/strict';
 import express from 'express';
 import request from 'supertest';
 import {
-  mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync,
+  appendFileSync, chmodSync, mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync,
+  symlinkSync, utimesSync, writeFileSync,
 } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
-  createErrorLog, defaultErrorLogDirectory, flushErrorLog, isInsideWebRoot,
+  createErrorLog, defaultErrorLogDirectory, flushErrorLog, isInsideWebRoot, logError, setErrorLogDirectoryForTests,
 } from '../logging/errorLog.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 
 const DAY = 24 * 60 * 60 * 1000;
 const MAX_BYTES = 3 * 1024 * 1024;
 
+const temporaryRoots: string[] = [];
+
+after(() => {
+  for (const root of temporaryRoots) rmSync(root, { recursive: true, force: true });
+});
+
 function temporaryRoot(): string {
-  return mkdtempSync(path.join(os.tmpdir(), 'error-log-test-'));
+  const root = mkdtempSync(path.join(os.tmpdir(), 'error-log-test-'));
+  temporaryRoots.push(root);
+  return root;
 }
 
 function makeClock(start = new Date(2026, 9, 11, 13, 45, 7)) {
@@ -324,7 +333,7 @@ test('the default directory is outside dist, public and uploads', () => {
 
 test('a failing request reaches the file through the Express error handler with fixed fields only', async () => {
   const dir = path.join(temporaryRoot(), 'logs');
-  process.env.ERROR_LOG_DIR = dir;
+  setErrorLogDirectoryForTests(dir);
   const spy = mock.method(console, 'error', () => {});
   try {
     const app = express();
@@ -337,7 +346,8 @@ test('a failing request reaches the file through the Express error handler with 
     flushErrorLog();
   } finally {
     spy.mock.restore();
-    delete process.env.ERROR_LOG_DIR;
+    flushErrorLog();
+    setErrorLogDirectoryForTests(null);
   }
   const files = filesIn(dir);
   assert.equal(files.length, 1);
@@ -349,4 +359,157 @@ test('a failing request reaches the file through the Express error handler with 
   assert.equal(lines[0].status, 500);
   assert.equal(lines[0].category, 'ER_DUP_ENTRY');
   assert.ok(!raw.includes('secret') && !raw.includes('@') && !raw.includes('select'));
+});
+
+test('the shared log ignores ERROR_LOG_DIR under NODE_ENV=test', () => {
+  const dir = path.join(temporaryRoot(), 'from-env');
+  const saved = process.env.ERROR_LOG_DIR;
+  process.env.ERROR_LOG_DIR = dir;
+  setErrorLogDirectoryForTests(null);
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    assert.equal(process.env.NODE_ENV, 'test');
+    logError('should_not_be_written');
+    flushErrorLog();
+  } finally {
+    spy.mock.restore();
+    if (saved === undefined) delete process.env.ERROR_LOG_DIR; else process.env.ERROR_LOG_DIR = saved;
+  }
+  assert.equal(readdirSync(path.dirname(dir)).includes('from-env'), false);
+});
+
+test('the web-root guard resolves symlinks and does not confuse ..names with parents', () => {
+  const root = temporaryRoot();
+  const dist = path.join(root, 'dist');
+  const pub = path.join(root, 'public');
+  mkdirSync(dist);
+  mkdirSync(pub);
+  symlinkSync(dist, path.join(root, 'link'));
+  assert.equal(isInsideWebRoot(path.join(root, 'link', 'logs'), [dist]), true);
+  assert.equal(isInsideWebRoot(path.join(pub, '..logs'), [pub]), true);
+  assert.equal(isInsideWebRoot(path.join(root, 'public2', 'logs'), [pub]), false);
+  assert.equal(isInsideWebRoot(path.join(root, 'elsewhere'), [dist, pub]), false);
+});
+
+test('a failed append is never glued to the next line', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  let calls = 0;
+  const log = createErrorLog({
+    dir, now: makeClock().now, echo: false,
+    appendFile: (file, data, options) => {
+      calls += 1;
+      if (calls === 2) {
+        appendFileSync(file, data.slice(0, 15), options);
+        throw Object.assign(new Error('disk full'), { code: 'ENOSPC' });
+      }
+      appendFileSync(file, data, options);
+    },
+  });
+  const spy = mock.method(console, 'error', () => {});
+  try {
+    log.logError('first_ok');
+    log.logError('second_torn');
+    log.logError('third_ok');
+    log.flush();
+  } finally {
+    spy.mock.restore();
+  }
+  for (const name of filesIn(dir)) {
+    for (const line of readFileSync(path.join(dir, name), 'utf8').split('\n').filter(Boolean)) {
+      if (line.includes('"third_ok"')) assert.doesNotThrow(() => JSON.parse(line));
+    }
+  }
+  assert.equal(filesIn(dir).length, 2);
+});
+
+test('events keep at most 16 fields and oversized lines are cut down to a marker', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  const log = createErrorLog({ dir, now: makeClock().now, echo: false });
+  const many: Record<string, number> = {};
+  for (let index = 0; index < 40; index += 1) many[`field_${index}`] = index;
+  log.logError('many_fields', many);
+  log.flush();
+  const [line] = linesOf(path.join(dir, filesIn(dir)[0]));
+  assert.equal(Object.keys(line).filter(key => key.startsWith('field_')).length, 16);
+
+  const small = path.join(temporaryRoot(), 'logs');
+  const tiny = createErrorLog({ dir: small, now: makeClock().now, echo: false, maxBytes: 120 });
+  tiny.logError('too_big', { a: 'x'.repeat(100), b: 'y'.repeat(100) });
+  tiny.flush();
+  const [marker] = linesOf(path.join(small, filesIn(small)[0]));
+  assert.deepEqual(Object.keys(marker), ['ts', 'event', 'truncated']);
+  assert.equal(marker.truncated, true);
+  assert.ok(statSync(path.join(small, filesIn(small)[0])).size <= 120);
+});
+
+test('the file being written is never the one that gets overwritten', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const clock = makeClock();
+  fullFile(dir, 'log_01_01_00_00.log', 100, new Date(2100, 0, 1));
+  fullFile(dir, 'log_02_01_00_00.log', 100, new Date(clock.now().getTime() - 3 * DAY));
+  const log = createErrorLog({ dir, now: clock.now, maxBytes: 100, maxFiles: 2, echo: false });
+  log.logError('one');
+  log.flush();
+  log.logError('two');
+  log.flush();
+  const all = filesIn(dir).map(name => readFileSync(path.join(dir, name), 'utf8')).join('');
+  assert.equal(filesIn(dir).length, 2);
+  assert.ok(all.includes('"one"') && all.includes('"two"'));
+});
+
+test('symlinks and directories that look like log files are ignored and never truncated', () => {
+  const root = temporaryRoot();
+  const dir = path.join(root, 'logs');
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const precious = path.join(root, 'precious.txt');
+  writeFileSync(precious, 'keep me');
+  const longAgo = new Date(2000, 0, 1);
+  symlinkSync(precious, path.join(dir, 'log_01_01_00_00.log'));
+  mkdirSync(path.join(dir, 'log_02_01_00_00.log'));
+  const regular = fullFile(dir, 'log_03_01_00_00.log', 100, new Date(2000, 0, 2));
+  age(regular, longAgo);
+  const log = createErrorLog({ dir, now: makeClock().now, maxBytes: 100, maxFiles: 1, echo: false });
+  log.logError('through_links');
+  log.flush();
+  assert.equal(readFileSync(precious, 'utf8'), 'keep me');
+  assert.ok(readFileSync(path.join(dir, 'log_11_10_13_07.log'), 'utf8').includes('"through_links"'));
+});
+
+test('an existing directory and a reused file are tightened to 0700 and 0600', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  mkdirSync(dir, { recursive: true });
+  chmodSync(dir, 0o755);
+  const old = fullFile(dir, 'log_01_01_00_00.log', 100, new Date(2000, 0, 1));
+  chmodSync(old, 0o644);
+  const log = createErrorLog({ dir, now: makeClock().now, maxBytes: 100, maxFiles: 1, echo: false });
+  log.logError('modes_again');
+  log.flush();
+  assert.equal(statSync(dir).mode & 0o777, 0o700);
+  const [name] = filesIn(dir);
+  assert.equal(name, 'log_11_10_13_07.log');
+  assert.equal(statSync(path.join(dir, name)).mode & 0o777, 0o600);
+});
+
+test('a restart while the newest file is already full starts a new file', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const clock = makeClock();
+  fullFile(dir, 'log_10_10_00_00.log', 100, new Date(clock.now().getTime() - 60_000));
+  const log = createErrorLog({ dir, now: clock.now, maxBytes: 100, echo: false });
+  log.logError('after_restart');
+  log.flush();
+  assert.deepEqual(filesIn(dir), ['log_10_10_00_00.log', 'log_11_10_13_07.log']);
+});
+
+test('reuse at the cap keeps the new name and refreshes the modified time', () => {
+  const dir = path.join(temporaryRoot(), 'logs');
+  mkdirSync(dir, { recursive: true, mode: 0o700 });
+  const old = fullFile(dir, 'log_01_01_00_00.log', 100, new Date(2000, 0, 1));
+  const before = statSync(old).mtimeMs;
+  const log = createErrorLog({ dir, now: makeClock().now, maxBytes: 100, maxFiles: 1, echo: false });
+  log.logError('reused');
+  log.flush();
+  assert.deepEqual(filesIn(dir), ['log_11_10_13_07.log']);
+  assert.ok(statSync(path.join(dir, 'log_11_10_13_07.log')).mtimeMs > before);
 });

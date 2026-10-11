@@ -1,12 +1,17 @@
 import {
-  appendFileSync, mkdirSync, readdirSync, renameSync, statSync, truncateSync, unlinkSync, writeFileSync,
+  appendFileSync, chmodSync, existsSync, lstatSync, mkdirSync, readdirSync, realpathSync, renameSync,
+  truncateSync, unlinkSync, writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
+import { uploadsDirectory } from '../storage/blogImages.js';
+import { defaultStaticDirectory } from '../storage/staticRoot.js';
 
 const MEGABYTE = 1024 * 1024;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const EVENT_NAME = /^[a-z0-9_]{1,64}$/;
-const FIELD_NAME = /^[A-Za-z0-9_]{1,64}$/;
+const FIELD_NAME = /^[A-Za-z0-9_]+$/;
+const MAX_FIELD_NAME_LENGTH = 64;
+const MAX_FIELDS = 16;
 const LOG_FILE = /^log_\d{2}_\d{2}_\d{2}_\d{2}(_\d+)?\.log$/;
 const RESERVED_FIELDS = new Set(['ts', 'event', 'count']);
 const MAX_VALUE_LENGTH = 120;
@@ -27,6 +32,8 @@ export interface ErrorLogOptions {
   echo?: boolean;
   /** When false nothing is written to disk. Defaults to true. */
   enabled?: boolean;
+  /** Replaces `appendFileSync`; lets tests simulate a failing disk. */
+  appendFile?: (file: string, data: string, options: { mode: number }) => void;
 }
 
 export interface ErrorLog {
@@ -66,8 +73,11 @@ function sanitizeValue(value: unknown): ErrorLogValue | undefined {
 function sanitizeFields(fields: unknown): ErrorLogFields {
   const clean: ErrorLogFields = {};
   if (typeof fields !== 'object' || fields === null) return clean;
-  for (const [key, value] of Object.entries(fields)) {
-    if (!FIELD_NAME.test(key) || RESERVED_FIELDS.has(key)) continue;
+  for (const [rawKey, value] of Object.entries(fields)) {
+    if (Object.keys(clean).length >= MAX_FIELDS) break;
+    if (!FIELD_NAME.test(rawKey)) continue;
+    const key = rawKey.slice(0, MAX_FIELD_NAME_LENGTH);
+    if (RESERVED_FIELDS.has(key)) continue;
     const safe = sanitizeValue(value);
     if (safe !== undefined) clean[key] = safe;
   }
@@ -100,24 +110,37 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
   const windowMs = options.aggregateWindowMs ?? 60_000;
   const echo = options.echo ?? true;
   const enabled = options.enabled ?? true;
+  const append = options.appendFile ?? ((file, data, mode) => appendFileSync(file, data, mode));
 
   let pending: Pending | null = null;
   let timer: NodeJS.Timeout | null = null;
   let activeFile: string | null = null;
   let activeSize = 0;
   let failing = false;
+  let dirty = false;
+  let directoryReady = false;
 
-  function listFiles(): LogFile[] {
-    let names: string[];
-    try { names = readdirSync(options.dir).filter(name => LOG_FILE.test(name)); } catch { return []; }
+  function entryNames(): string[] {
+    try { return readdirSync(options.dir); } catch { return []; }
+  }
+
+  /** Regular files only: symlinks and directories are never touched. */
+  function listFiles(names: string[]): LogFile[] {
     const files: LogFile[] = [];
-    for (const name of names) {
+    for (const name of names.filter(entry => LOG_FILE.test(entry))) {
       try {
-        const stats = statSync(path.join(options.dir, name));
+        const stats = lstatSync(path.join(options.dir, name));
         if (stats.isFile()) files.push({ name, size: stats.size, modified: stats.mtimeMs });
       } catch { /* vanished between listing and stat */ }
     }
     return files.sort((a, b) => a.modified - b.modified || a.name.localeCompare(b.name));
+  }
+
+  function prepareDirectory(): void {
+    mkdirSync(options.dir, { recursive: true, mode: 0o700 });
+    if (directoryReady) return;
+    try { chmodSync(options.dir, 0o700); } catch { /* not the owner: keep going */ }
+    directoryReady = true;
   }
 
   function uniqueName(taken: Set<string>): string {
@@ -127,27 +150,39 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
     return name;
   }
 
-  /** Starts a new file, reusing the oldest one when the age or count rule says so. */
+  /**
+   * Starts a new file. The oldest other file is reused (truncated and renamed)
+   * when the cap is reached or it is old enough; the file being written never is.
+   */
   function roll(): void {
-    const files = listFiles();
-    while (files.length > maxFiles) unlinkSync(path.join(options.dir, files.shift()!.name));
-    const taken = new Set(files.map(file => file.name));
-    const target = path.join(options.dir, uniqueName(taken));
-    const oldest = files[0];
-    const reuse = oldest && (files.length >= maxFiles || now().getTime() - oldest.modified >= maxAgeMs);
+    const names = entryNames();
+    const files = listFiles(names);
+    const activeName = activeFile ? path.basename(activeFile) : null;
+    while (files.length > maxFiles) {
+      const extra = files.find(file => file.name !== activeName) ?? files[0];
+      files.splice(files.indexOf(extra), 1);
+      unlinkSync(path.join(options.dir, extra.name));
+    }
+    const candidates = files.filter(file => file.name !== activeName);
+    const oldest = candidates[0] ?? (files.length >= maxFiles ? files[0] : undefined);
+    const reuse = oldest !== undefined &&
+      (files.length >= maxFiles || now().getTime() - oldest.modified >= maxAgeMs);
+    const target = path.join(options.dir, uniqueName(new Set(names)));
     if (reuse) {
       renameSync(path.join(options.dir, oldest.name), target);
       truncateSync(target, 0);
+      try { chmodSync(target, 0o600); } catch { /* not the owner: keep going */ }
     } else {
       writeFileSync(target, '', { mode: 0o600, flag: 'wx' });
     }
     activeFile = target;
     activeSize = 0;
+    dirty = false;
   }
 
   /** Picks the newest file if it still has room, otherwise rolls. */
   function selectActive(): void {
-    const newest = listFiles().at(-1);
+    const newest = listFiles(entryNames()).at(-1);
     if (newest && newest.size < maxBytes) {
       activeFile = path.join(options.dir, newest.name);
       activeSize = newest.size;
@@ -159,15 +194,21 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
   function write(line: string): void {
     if (!enabled) return;
     try {
-      mkdirSync(options.dir, { recursive: true, mode: 0o700 });
+      prepareDirectory();
       const bytes = Buffer.byteLength(line);
-      if (!activeFile) selectActive();
+      if (bytes > maxBytes) return;
+      if (dirty) roll();
+      else if (!activeFile) selectActive();
       if (activeSize > 0 && activeSize + bytes > maxBytes) roll();
-      appendFileSync(activeFile!, line, { mode: 0o600 });
+      try {
+        append(activeFile!, line, { mode: 0o600 });
+      } catch (error) {
+        dirty = true;
+        throw error;
+      }
       activeSize += bytes;
       failing = false;
     } catch (error) {
-      activeFile = null;
       if (!failing) {
         failing = true;
         try { console.error(`error log write failed: ${errorCode(error)}`); } catch { /* nothing more to do */ }
@@ -181,9 +222,12 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
     pending = null;
     if (!entry) return;
     try {
-      write(`${JSON.stringify({
-        ts: entry.startedAt.toISOString(), event: entry.event, ...entry.fields, count: entry.count,
-      })}\n`);
+      const ts = entry.startedAt.toISOString();
+      let line = `${JSON.stringify({ ts, event: entry.event, ...entry.fields, count: entry.count })}\n`;
+      if (Buffer.byteLength(line) > maxBytes) {
+        line = `${JSON.stringify({ ts, event: entry.event, truncated: true })}\n`;
+      }
+      write(line);
     } catch { /* the logger must never throw */ }
   }
 
@@ -210,15 +254,38 @@ export function createErrorLog(options: ErrorLogOptions): ErrorLog {
 
 /** Directories the Express app serves, which must never hold logs. */
 function webRoots(): string[] {
-  return ['dist', 'public', process.env.UPLOADS_DIR || 'uploads'].map(entry => path.resolve(entry));
+  let uploads: string;
+  try { uploads = uploadsDirectory(); } catch { uploads = path.resolve(process.env.UPLOADS_DIR || 'uploads'); }
+  return [defaultStaticDirectory(), uploads, path.resolve('dist'), path.resolve('public')];
 }
 
-/** True when `directory` is, or is inside, a directory served to the web. */
-export function isInsideWebRoot(directory: string): boolean {
-  const resolved = path.resolve(directory);
-  return webRoots().some(root => {
-    const relative = path.relative(root, resolved);
-    return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+/** Real path of `target`, using its nearest existing ancestor when it does not exist yet. */
+function realPathOf(target: string): string {
+  let existing = path.resolve(target);
+  const rest: string[] = [];
+  while (!existsSync(existing)) {
+    const parent = path.dirname(existing);
+    if (parent === existing) break;
+    rest.unshift(path.basename(existing));
+    existing = parent;
+  }
+  let real = existing;
+  try { real = realpathSync(existing); } catch { /* keep the unresolved path */ }
+  return path.join(real, ...rest);
+}
+
+/** Windows and the /mnt/<drive> mounts of WSL ignore letter case in paths. */
+function foldCase(value: string): string {
+  return process.platform === 'win32' || /^\/mnt\/[a-z]\//i.test(value) ? value.toLowerCase() : value;
+}
+
+/** True when `directory` is, or is inside, a directory served to the web (real paths compared). */
+export function isInsideWebRoot(directory: string, roots: string[] = webRoots()): boolean {
+  const resolved = foldCase(realPathOf(directory));
+  return roots.some(root => {
+    const relative = path.relative(foldCase(realPathOf(root)), resolved);
+    return relative === '' ||
+      (relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative));
   });
 }
 
@@ -228,15 +295,33 @@ export function defaultErrorLogDirectory(): string {
 }
 
 let shared: ErrorLog | null = null;
+let exitHookInstalled = false;
+let testDirectory: string | null = null;
+
+/**
+ * Test-only: points the shared log at a directory. Under NODE_ENV=test the
+ * shared log ignores ERROR_LOG_DIR so a developer's .env cannot redirect it.
+ */
+export function setErrorLogDirectoryForTests(directory: string | null): void {
+  shared?.flush();
+  shared = null;
+  testDirectory = directory;
+}
 
 function sharedLog(): ErrorLog {
   if (shared) return shared;
-  const dir = defaultErrorLogDirectory();
-  const insideTests = process.env.NODE_ENV === 'test' && !process.env.ERROR_LOG_DIR;
-  const exposed = isInsideWebRoot(dir);
-  if (exposed) console.error('error log disabled: ERROR_LOG_DIR is inside a web-served directory');
-  shared = createErrorLog({ dir, enabled: !insideTests && !exposed });
-  process.once('exit', () => shared?.flush());
+  const underTest = process.env.NODE_ENV === 'test';
+  const dir = underTest ? testDirectory ?? '' : defaultErrorLogDirectory();
+  let enabled = dir !== '';
+  if (enabled && isInsideWebRoot(dir)) {
+    enabled = false;
+    console.error('error log disabled: log directory is inside a web-served directory');
+  }
+  shared = createErrorLog({ dir, enabled });
+  if (!exitHookInstalled) {
+    exitHookInstalled = true;
+    process.once('exit', () => shared?.flush());
+  }
   return shared;
 }
 

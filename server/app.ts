@@ -1,7 +1,6 @@
 import 'express-async-errors';
 import express from 'express';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -13,8 +12,7 @@ import { authRouter } from './routes/auth.js';
 import { imagesRouter } from './routes/images.js';
 import { createSeoRouter } from './routes/seo.js';
 import { IMAGE_PATH, uploadsDirectory } from './storage/blogImages.js';
-
-const currentDir = path.dirname(fileURLToPath(import.meta.url));
+import { defaultStaticDirectory } from './storage/staticRoot.js';
 
 /** Where the browser may load things from. Google Fonts and the CloudFront videos are the only outside sources. */
 const CONTENT_SECURITY_POLICY = {
@@ -92,7 +90,7 @@ export function createApp(options: { staticDir?: string; serveStatic?: boolean }
   });
 
   if (serving) {
-    const staticDir = options.staticDir ?? path.resolve(currentDir, '../dist');
+    const staticDir = options.staticDir ?? defaultStaticDirectory();
     // index: false so "/" is answered by the SEO router, which fills in each page's head and content.
     app.use(express.static(staticDir, { index: false, setHeaders: cacheHeaders }));
     app.use(createSeoRouter(staticDir));
