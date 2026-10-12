@@ -1,0 +1,59 @@
+name: Deploy production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: veridyen-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run build:hosting
+      - run: test -f public/newsletter-logo.png
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy over SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.VERIDYEN_HOST }}
+          SSH_USER: ${{ secrets.VERIDYEN_USER }}
+          SSH_PORT: ${{ secrets.VERIDYEN_SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.VERIDYEN_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.VERIDYEN_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          : "${SSH_HOST:?Missing VERIDYEN_HOST}"
+          : "${SSH_USER:?Missing VERIDYEN_USER}"
+          : "${SSH_PORT:?Missing VERIDYEN_SSH_PORT}"
+          : "${SSH_PRIVATE_KEY:?Missing VERIDYEN_SSH_PRIVATE_KEY}"
+          : "${SSH_KNOWN_HOSTS:?Missing VERIDYEN_SSH_KNOWN_HOSTS}"
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+          ssh -i "$HOME/.ssh/id_ed25519" -p "$SSH_PORT" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=20 "$SSH_USER@$SSH_HOST" \
+            "bash -s -- $GITHUB_SHA" < scripts/deploy-production.sh

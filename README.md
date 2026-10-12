@@ -4,7 +4,7 @@ React frontend with an Express API, MariaDB blog/subscriber data, server-verifie
 
 ## Hosting from GitHub
 
-Clone the published backend deployment branch on the hosting server. From the repository root, using the app's Node 22 environment:
+Clone the `main` branch on the hosting server. From the repository root, using the app's Node 22 environment:
 
 ```bash
 npm ci --include=dev
@@ -26,9 +26,9 @@ Set `NODE_ENV=production`. In the Node app manager, use the **repository root** 
 
 Express serves the built **`dist` folder**, API and uploaded images under the same domain. Keep uploaded files outside the Git checkout on hosting and include them with database backups. Git transfers code; local images/database data are transferred separately.
 
-For updates, use `git pull --ff-only`, repeat install/build/migration commands and restart. Full instructions, private GitHub deploy keys and acceptance checks: [deployment runbook](docs/superpowers/deployment.md).
+Deploy from `main`. After the one-time Veridyen and GitHub SSH setup, a push to `main` runs the build check and deploys to `/home/tugbasim/tugba-app`. The server then runs database and image migrations, restarts Passenger and checks `/api/health`. The production seed is only for initial setup and is not repeated on every push.
 
-Clone `alpersimsek/personal_work` branch `worktree-backend-implementation` for the `hosting_ready` release. `main` still contains the earlier implementation.
+For GitHub Actions, set the `VERIDYEN_HOST`, `VERIDYEN_USER`, `VERIDYEN_SSH_PORT`, `VERIDYEN_SSH_PRIVATE_KEY` and `VERIDYEN_SSH_KNOWN_HOSTS` secrets. Use a dedicated SSH login key, and verify the server's host key before storing its known-hosts line. A private repository also needs a separate read-only GitHub deploy key on the server so `git fetch origin main` works. Confirm the server's Node 22 activation path, `dist-server/index.js` startup file, and that production DB settings are available to non-interactive SSH commands (exported or in a server-only `.env`). Keep `UPLOADS_DIR` outside the checkout and back up the database and uploads before the first automatic migration. The workflow and server script are in `.github/workflows/deploy-production.yml` and `scripts/deploy-production.sh`; the [deployment runbook](docs/superpowers/deployment.md) covers application configuration and manual recovery.
 
 ## Local testing
 
